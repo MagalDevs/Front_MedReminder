@@ -12,12 +12,57 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@font-face {
+  font-family: 'KantumruyProRegular';
+  src: url('/fonts/KantumruyPro-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'KantumruyProMedium';
+  src: url('/fonts/KantumruyPro-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'KantumruyProLight';
+  src: url('/fonts/KantumruyPro-Light.ttf');
+}
+
+@font-face {
+  font-family: 'KantumruyProBold';
+  src: url('/fonts/KantumruyPro-Bold.ttf');
+}
+
+@font-face {
+  font-family: 'KantumruyProSemiBold';
+  src: url('/fonts/KantumruyPro-SemiBold.ttf');
+}
+
 /* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
 } */
+
+.KantumruyBold {
+  font-family: 'KantumruyProBold';
+}
+
+.KantumruySemiBold {
+  font-family: 'KantumruyProSemiBold';
+}
+
+.KantumruyLight {
+  font-family: 'KantumruyProLight';
+}
+
+.KantumruyMedium {
+  font-family: 'KantumruyProMedium';
+}
+
+.KantumruyRegular {
+  font-family: 'KantumruyProRegular';
+}
 
 body {
   background: var(--background);

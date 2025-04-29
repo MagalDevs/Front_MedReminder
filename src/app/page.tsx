@@ -1,9 +1,11 @@
-import Image from "next/image";
+import Sidebar from "./components/Sidebar/sidebar"
 
 export default function Home() {
   return (
     <>
-      EM DESENVOLVIMENTO...
+      <main className="bg-[#E8E6E6]">
+        <Sidebar />
+      </main>
     </>
-  );
+  )
 }
