@@ -1,14 +1,17 @@
 import Image from 'next/image';
 
-export default function Logo() {
+interface LogoProps {
+  width?: number;
+}
+
+export default function Logo({ width = 160 }: LogoProps) {
   return (
     <div className="flex flex-col items-center">
       <div className="w-40 h-40 relative mb-2 flex items-center justify-center">
         <Image
           src="/assets/LogoMed-removebg-preview.png"
           alt="MedReminder Logo"
-          width={160}
-          height={160}
+          width={width}
           priority
         />
       </div>
