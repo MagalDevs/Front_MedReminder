@@ -1,5 +1,6 @@
 import Sidebar from "./components/Sidebar/sidebar"
 import Cardbusca from "./components/CardBusca/cardBusca"
+import CardCadastrar from "./components/CardCadastrar/cardCadastrar"
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
         <Sidebar />
         <div className="flex-1">
           <Cardbusca />
+          <CardCadastrar />
         </div>
       </div>
     </>
