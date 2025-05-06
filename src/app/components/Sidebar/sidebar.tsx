@@ -20,7 +20,7 @@ export default function Sidebar() {
                 <a className="KantumruyMedium text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] rounded hover:scale-105 px-1 py-1 transition duration-700 ease-in-out" href="">Meus medicamentos</a>
                 <a className="KantumruyMedium text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] rounded hover:scale-105 px-1 py-1 transition duration-700 ease-in-out" href="">Lembrete</a>
                 <a className="KantumruyMedium text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] rounded hover:scale-105 px-1 py-1 transition duration-700 ease-in-out" href="">Histórico</a>
-                <a className="KantumruyMedium text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] rounded hover:scale-105 px-1 py-1 transition duration-700 ease-in-out" href="">Configuraçõess</a>
+                <a className="KantumruyMedium text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] rounded hover:scale-105 px-1 py-1 transition duration-700 ease-in-out" href="">Configurações</a>
             </div>
             
             {/* Seção do usuário */}
