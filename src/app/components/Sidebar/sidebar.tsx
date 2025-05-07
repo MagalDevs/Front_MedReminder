@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+//import { useState } from 'react';
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
+  //const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
