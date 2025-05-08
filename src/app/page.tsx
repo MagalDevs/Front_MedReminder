@@ -8,7 +8,7 @@ export default function Home() {
       {/* Login button at the top right */}
       <div className="absolute top-0 right-0 mt-6 mr-6">
         <Link href="/login">
-          <button className="bg-[#BE185D] text-white px-4 py-2 rounded-md shadow-sm hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold">
+          <button aria-label="Login" className="bg-[#BE185D] text-white px-4 py-2 rounded-md shadow-sm hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold">
             Entrar
           </button>
         </Link>
