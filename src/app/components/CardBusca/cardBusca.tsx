@@ -10,47 +10,26 @@ export default function BuscaMedicamento() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [error, setError] = useState(null);
 
-    // Dados de exemplo para visualização - remova quando conectar à API real
-    const exemploMedicamentos = [
-        { 
-            id: 1, 
-            nome: 'Bupropiona', 
-            dosagem: '300mg', 
-            tipo: 'Anti-depressivo', 
-            formato: 'Comprimido',
-            cor: '#FFC107' 
-        },
-        { 
-            id: 2, 
-            nome: 'Dipirona', 
-            dosagem: '500mg', 
-            tipo: 'Analgésico', 
-            formato: 'Comprimido',
-            cor: '#FF9800' 
-        }
-    ];
+
 
     // Função que será chamada quando o usuário digitar no campo de busca
-    const handleSearch = (term) => {
+    const handleSearch = async (term: string) => {
         setSearchTerm(term);
         setIsDropdownOpen(true);
         
         if (term.length > 2) {
             setIsSearching(true);
             
-            // Simulando um delay de API - remova isso e substitua pelo fetch real
-            setTimeout(() => {
-                // Simulação para mostrar o comportamento visual
-                setIsSearching(false);
-                
-                if (term.toLowerCase().includes('bup') || term.toLowerCase().includes('dip')) {
-                    setMedicamentos(exemploMedicamentos.filter(med => 
-                        med.nome.toLowerCase().includes(term.toLowerCase())
-                    ));
-                } else {
-                    setMedicamentos([]);
-                }
-            }, 1000);
+            try {
+                const resultados = await fetchMedicamentos(term);
+                setMedicamentos(resultados);
+                setError(null)
+            } catch (err) {
+                setMedicamentos([])
+            } finally {
+                setIsSearching(false)
+            }
+
         } else {
             setMedicamentos([]);
             setIsSearching(false);
@@ -58,28 +37,40 @@ export default function BuscaMedicamento() {
     };
     
     // Função para alternar a visibilidade do dropdown
-    const toggleDropdown = () => {
-        setIsDropdownOpen(!isDropdownOpen);
-        if (!isDropdownOpen && !searchTerm) {
-            // Se estiver abrindo o dropdown e não houver termo de busca, mostrar todos os medicamentos
-            setMedicamentos(exemploMedicamentos);
+    const toggleDropdown = async () => {
+        const newDropdownState = !isDropdownOpen;
+        setIsDropdownOpen(newDropdownState)
+        if (newDropdownState && !searchTerm) {
+            setIsSearching(true);
+
+            try {
+                const resultados = await fetchMedicamentos('');
+                setMedicamentos(resultados)
+                setError(null)
+            } catch (err) {
+                setMedicamentos([])
+            } finally {
+                setIsSearching(false)
+            }
         }
     };
 
     // Função real que será usada para buscar medicamentos da API
-    const fetchMedicamentos = async (term) => {
+    const fetchMedicamentos = async (term: string | number | boolean) => {
         try {
-            const response = await fetch(`/api/medicamentos?search=${term}`);
+            // Substitua a URL abaixo pela URL correta da sua API
+            const response = await fetch(`/api/medicamentos?search=${encodeURIComponent(term)}`);
             
             if (!response.ok) {
-                throw new Error('Erro ao buscar medicamentos');
+                throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
             }
             
             const data = await response.json();
             return data;
         } catch (err) {
-            setError(err.message);
-            return [];
+            console.error("Erro na API:", err);
+            setError(error);
+            throw err;
         }
     };
 
