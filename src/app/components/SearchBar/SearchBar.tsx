@@ -1,13 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import Papa, { ParseResult } from 'papaparse';
+import { useEffect, useState } from 'react';
 
 export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [medicamentos, setMedicamentos] = useState<
+    { NOME_PRODUTO: string; DESCRIÇÃO: string }[]
+  >([]);
+  const [filtered, setFiltered] = useState<
+    { NOME_PRODUTO: string; DESCRIÇÃO: string }[]
+  >([]);
+  const [showCadastrar, setShowCadastrar] = useState(false);
+
+  useEffect(() => {
+    fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
+      .then((response) => response.text())
+      .then((csvText) => {
+        Papa.parse<{ NOME_PRODUTO: string; DESCRIÇÃO: string }>(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (
+            results: ParseResult<{ NOME_PRODUTO: string; DESCRIÇÃO: string }>,
+          ) => {
+            setMedicamentos(results.data);
+          },
+        });
+      });
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      setFiltered(
+        medicamentos.filter((med) =>
+          med.NOME_PRODUTO?.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
+      );
+    } else {
+      setFiltered([]);
+    }
+  }, [searchQuery, medicamentos]);
+
+  useEffect(() => {
+    if (
+      filtered.length === 1 &&
+      searchQuery === filtered[0].NOME_PRODUTO.trim()
+    ) {
+      setShowCadastrar(true);
+    } else {
+      setShowCadastrar(false);
+    }
+  }, [filtered, searchQuery]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setIsOpen(true);
+  };
+
+  const handleResultClick = (med: {
+    NOME_PRODUTO: string;
+    DESCRIÇÃO: string;
+  }) => {
+    setSearchQuery(med.NOME_PRODUTO.trim());
+    setIsOpen(true);
+    setFiltered([med]);
   };
 
   return (
@@ -65,12 +122,35 @@ export default function SearchBar() {
       </div>
 
       {isOpen && (
-        <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
-          <div className="py-2">
-            {/* Aqui você pode adicionar resultados da pesquisa quando tiver dados */}
-            <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">
-              {searchQuery ? 'Buscando...' : 'Nenhum resultado encontrado'}
-            </div>
+        <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10 max-h-72 overflow-y-auto">
+          <div className="py-2 flex flex-col gap-1">
+            {searchQuery && filtered.length > 0 ? (
+              filtered.slice(0, 10).map((med, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#F2F2F2] cursor-pointer KantumruyRegular"
+                  onClick={() => handleResultClick(med)}
+                >
+                  <div>
+                    <span className="font-semibold text-[#037F8C]">
+                      {med.NOME_PRODUTO.trim()}
+                    </span>
+                    <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
+                  </div>
+                  {showCadastrar && idx === 0 && (
+                    <button className="ml-4 bg-[#037F8C] text-white px-3 py-1 rounded hover:bg-[#025e6a] transition-colors text-xs">
+                      Cadastrar
+                    </button>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">
+                {searchQuery
+                  ? 'Nenhum resultado encontrado'
+                  : 'Digite para buscar um medicamento'}
+              </div>
+            )}
           </div>
         </div>
       )}
