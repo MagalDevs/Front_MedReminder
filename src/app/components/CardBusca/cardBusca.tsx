@@ -1,155 +1,167 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
+import Papa, { ParseResult } from 'papaparse';
 
-export default function BuscaMedicamento() {
-    // Estados para controlar a busca e resultados
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isSearching, setIsSearching] = useState(false);
-    const [medicamentos, setMedicamentos] = useState([]);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [error, setError] = useState(null);
+type Medicamento = {
+  NOME_PRODUTO: string;
+  DESCRIÇÃO: string;
+};
 
+type Props = {
+    onSelect: (medicamento: Medicamento) => void
+}
 
+export default function BuscaMedicamento({ onSelect }: Props) {
 
-    // Função que será chamada quando o usuário digitar no campo de busca
-    const handleSearch = async (term: string) => {
-        setSearchTerm(term);
-        setIsDropdownOpen(true);
-        
-        if (term.length > 2) {
-            setIsSearching(true);
-            
-            try {
-                const resultados = await fetchMedicamentos(term);
-                setMedicamentos(resultados);
-                setError(null)
-            } catch (err) {
-                setMedicamentos([])
-            } finally {
-                setIsSearching(false)
-            }
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  const [filtered, setFiltered] = useState<Medicamento[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-        } else {
-            setMedicamentos([]);
-            setIsSearching(false);
-        }
-    };
-    
-    // Função para alternar a visibilidade do dropdown
-    const toggleDropdown = async () => {
-        const newDropdownState = !isDropdownOpen;
-        setIsDropdownOpen(newDropdownState)
-        if (newDropdownState && !searchTerm) {
-            setIsSearching(true);
+  const handleResultClick = (med: Medicamento) => {
+    setSearchTerm(med.NOME_PRODUTO.trim());
+    setFiltered([med]);
+    setIsDropdownOpen(true);
+    onSelect({
+      NOME_PRODUTO: med.NOME_PRODUTO.trim(),
+      DESCRIÇÃO: med.DESCRIÇÃO.trim()
+    });
 
-            try {
-                const resultados = await fetchMedicamentos('');
-                setMedicamentos(resultados)
-                setError(null)
-            } catch (err) {
-                setMedicamentos([])
-            } finally {
-                setIsSearching(false)
-            }
-        }
-    };
+  useEffect(() => {
+    fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
+      .then((res) => res.text())
+      .then((csvText) => {
+        Papa.parse<Medicamento>(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results: ParseResult<Medicamento>) => {
+            setMedicamentos(results.data);
+          },
+        });
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar CSV:", err);
+        setError('Erro ao carregar os dados');
+      });
+  }, []);
 
-    // Função real que será usada para buscar medicamentos da API
-    const fetchMedicamentos = async (term: string | number | boolean) => {
-        try {
-            // Substitua a URL abaixo pela URL correta da sua API
-            const response = await fetch(`/api/medicamentos?search=${encodeURIComponent(term)}`);
-            
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar medicamentos: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            return data;
-        } catch (err) {
-            console.error("Erro na API:", err);
-            setError(error);
-            throw err;
-        }
-    };
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      setIsSearching(true);
+      const results = medicamentos.filter((med) =>
+        med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFiltered(results);
+      setIsSearching(false);
+    } else {
+      setFiltered([]);
+    }
+  }, [searchTerm, medicamentos]);
 
-    return (
-        <div className="m-6 p-4 bg-[#D9D9D9] rounded-lg shadow-lg">
-            {/* Campo de Busca */}
-            <div className="bg-white rounded-lg p-4 flex items-center border border-[#0B6E71]">
-                <div className="mr-2">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="#0B6E71"/>
-                    </svg>
-                </div>
-                <input 
-                    type="text" 
-                    placeholder="Buscar medicamento..." 
-                    className="flex-1 outline-none text-[#0B6E71] font-medium"
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                />
-                <div 
-                    className="ml-2 cursor-pointer" 
-                    onClick={toggleDropdown}
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 10L12 15L17 10H7Z" fill="#0B6E71"/>
-                    </svg>
-                </div>
-            </div>
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    setIsDropdownOpen(true);
+  };
 
-            {/* Lista de Resultados */}
-            {isDropdownOpen && (
-                <div className="mt-8 bg-[#0B8E91] rounded-lg overflow-hidden max-h-96 overflow-y-auto">
-                    {isSearching ? (
-                        <div className="p-6 text-center text-white">
-                            <p>Buscando...</p>
-                        </div>
-                    ) : medicamentos.length > 0 ? (
-                        <div>
-                            {medicamentos.map((medicamento) => (
-                                <div 
-                                    key={medicamento.id} 
-                                    className="p-4 border-b border-[#0A7E81] flex items-center text-white cursor-pointer hover:bg-[#0A7E81]"
-                                    onClick={() => {
-                                        setSearchTerm(medicamento.nome);
-                                        setIsDropdownOpen(false);
-                                    }}
-                                >
-                                    <div className="bg-white rounded-md p-1 mr-3">
-                                        <div 
-                                            className="w-8 h-8 rounded-sm" 
-                                            style={{ backgroundColor: medicamento.cor }}
-                                        ></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-medium">{medicamento.nome}</div>
-                                        <div className="text-sm">
-                                            {medicamento.dosagem} - {medicamento.tipo} - {medicamento.formato}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : searchTerm.length > 0 ? (
-                        <div className="p-6 text-center text-white">
-                            <p>Nenhum resultado encontrado</p>
-                        </div>
-                    ) : (
-                        <div className="p-6 text-center text-white">
-                            <p>Digite para buscar medicamentos</p>
-                        </div>
-                    )}
-                </div>
-            )}
-            
-            {error && (
-                <div className="p-4 bg-red-100 text-red-700 mt-2 rounded-lg">
-                    <p>Erro: {error}</p>
-                </div>
-            )}
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+    if (!isDropdownOpen && !searchTerm) {
+      setFiltered(medicamentos);
+    }
+  };
+
+  const handleResultClick = (med: Medicamento) => {
+    setSearchTerm(med.NOME_PRODUTO.trim());
+    setFiltered([med]);
+    setIsDropdownOpen(true);
+  };
+
+  return (
+    <div className="m-6">
+      <div className="relative">
+        <div className="bg-white rounded-lg p-4 flex items-center border border-[#0B6E71]">
+          <span className="text-gray-500 mr-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </span>
+          <input
+            type="text"
+            className="flex-1 outline-none text-gray-700 KantumruyMedium"
+            placeholder="Buscar medicamento..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            onClick={() => setIsDropdownOpen(true)}
+          />
+          <button
+            className="text-[#037F8C] ml-2"
+            onClick={toggleDropdown}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d={
+                  isDropdownOpen
+                    ? 'M4.5 15.75l7.5-7.5 7.5 7.5'
+                    : 'M19.5 8.25l-7.5 7.5-7.5-7.5'
+                }
+              />
+            </svg>
+          </button>
         </div>
-    );
+      </div>
+
+      {isDropdownOpen && (
+        <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10 max-h-72 overflow-y-auto">
+          <div className="py-2 flex flex-col gap-1">
+            {searchTerm && filtered.length > 0 ? (
+              filtered.slice(0, 10).map((med, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#F2F2F2] cursor-pointer KantumruyRegular"
+                  onClick={() => handleResultClick(med)}
+                >
+                  <div>
+                    <span className="font-semibold text-[#037F8C]">
+                      {med.NOME_PRODUTO.trim()}
+                    </span>
+                    <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">
+                {searchTerm
+                  ? 'Nenhum resultado encontrado'
+                  : 'Digite para buscar um medicamento'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 }

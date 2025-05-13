@@ -1,6 +1,6 @@
-import Sidebar from "../Sidebar/sidebar"
-import BuscaMedicamento from "../CardBusca/cardBusca"
-import ConfigurarLembrete from "../CardCadastrar/cardCadastrar"
+import Sidebar from "../components/Sidebar/sidebar"
+import BuscaMedicamento from "../components/CardBusca/cardBusca"
+import ConfigurarLembrete from "../components/CardCadastrar/cardCadastrar"
 
 export default function TelaCadastro() {
   return (
