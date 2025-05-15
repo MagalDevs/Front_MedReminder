@@ -17,6 +17,9 @@ export default function Home() {
       <div className="w-full max-w-md flex flex-col items-center gap-8">
         <Logo width={200} />
         <SearchBar />
+        <Link href="/TelaCadastroRemedio">
+          Veja eu
+        </Link>
       </div>
     </main>
   );
