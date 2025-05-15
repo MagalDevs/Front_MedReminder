@@ -7,6 +7,14 @@ const Cores = [
   "#FFFFFF", "#00FF7F", "#006400", "#000000", "#DA70D6"
 ];
 
+type Props = {
+  medicamentoSelecionado: {
+    nome: string;
+    tipo: string;
+    dosagem?: string;
+  }
+}
+
 export default function ConfigurarLembrete({ medicamentoSelecionado }) {
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || "");
   const [dosagem, setDosagem] = useState(medicamentoSelecionado?.dosagem || "");
@@ -15,6 +23,9 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }) {
   const [horarios, setHorarios] = useState([{ hora: "10:00", dose: "1 comp." }]);
   const [repetir, setRepetir] = useState("");
   const [duracao, setDuracao] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [validade, setValidade] = useState("");
+  const [quantDiaria, setQuantDiaria] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
   const adicionarHorario = () => {
@@ -85,7 +96,11 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }) {
           <option value="Mensalmente">Mensalmente</option>
         </select>
         <input type="text" placeholder="Duração do tratamento" value={duracao} onChange={(e) => setDuracao(e.target.value)} className="p-2 border rounded outline-none" />
+        <input type="text" placeholder="Quantidade do remédio" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} className="p-2 border rounded outline-none" />
+        <input type="text" placeholder="Data de validade" value={validade} onChange={(e) => setValidade(e.target.value)} className="p-2 border rounded outline-none" />
       </div>
+
+      <input type="text" placeholder="Quantidade diária" value={quantDiaria} onChange={(e) => setQuantDiaria(e.target.value)} className="w-full p-2 border rounded outline-none mb-4" />
 
       <textarea
         placeholder="Observações"

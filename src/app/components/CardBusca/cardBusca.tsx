@@ -9,26 +9,16 @@ type Medicamento = {
 };
 
 type Props = {
-    onSelect: (medicamento: Medicamento) => void
-}
+  onSelect: (medicamento: Medicamento) => void;
+};
 
 export default function BuscaMedicamento({ onSelect }: Props) {
-
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [filtered, setFiltered] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleResultClick = (med: Medicamento) => {
-    setSearchTerm(med.NOME_PRODUTO.trim());
-    setFiltered([med]);
-    setIsDropdownOpen(true);
-    onSelect({
-      NOME_PRODUTO: med.NOME_PRODUTO.trim(),
-      DESCRIÇÃO: med.DESCRIÇÃO.trim()
-    });
+  const [selectedMedicamento, setSelectedMedicamento] = useState<Medicamento | null>(null);
 
   useEffect(() => {
     fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
@@ -43,19 +33,17 @@ export default function BuscaMedicamento({ onSelect }: Props) {
         });
       })
       .catch((err) => {
-        console.error("Erro ao carregar CSV:", err);
+        console.error('Erro ao carregar CSV:', err);
         setError('Erro ao carregar os dados');
       });
   }, []);
 
   useEffect(() => {
     if (searchTerm.length > 0) {
-      setIsSearching(true);
       const results = medicamentos.filter((med) =>
         med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFiltered(results);
-      setIsSearching(false);
     } else {
       setFiltered([]);
     }
@@ -64,19 +52,37 @@ export default function BuscaMedicamento({ onSelect }: Props) {
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     setIsDropdownOpen(true);
+    
+    // Se o campo for limpo, também limpa a seleção atual
+    if (term === '') {
+      setSelectedMedicamento(null);
+      onSelect({ NOME_PRODUTO: '', DESCRIÇÃO: '' });
+    }
   };
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
     if (!isDropdownOpen && !searchTerm) {
-      setFiltered(medicamentos);
+      setFiltered(medicamentos.slice(0, 10));
     }
   };
 
   const handleResultClick = (med: Medicamento) => {
+    // Atualiza o campo de busca com novo valor
     setSearchTerm(med.NOME_PRODUTO.trim());
+    
+    // Armazena o medicamento selecionado
+    setSelectedMedicamento(med);
+    
+    // Fecha o dropdown e atualiza os resultados
     setFiltered([med]);
-    setIsDropdownOpen(true);
+    setIsDropdownOpen(false);
+
+    // Garante que sempre chamamos o onSelect com o novo medicamento
+    // Usando setTimeout para garantir que a execução ocorra após o ciclo de renderização atual
+    setTimeout(() => {
+      onSelect(med);
+    }, 0);
   };
 
   return (
@@ -107,10 +113,7 @@ export default function BuscaMedicamento({ onSelect }: Props) {
             onChange={(e) => handleSearch(e.target.value)}
             onClick={() => setIsDropdownOpen(true)}
           />
-          <button
-            className="text-[#037F8C] ml-2"
-            onClick={toggleDropdown}
-          >
+          <button className="text-[#037F8C] ml-2" onClick={toggleDropdown}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -134,12 +137,12 @@ export default function BuscaMedicamento({ onSelect }: Props) {
       </div>
 
       {isDropdownOpen && (
-        <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10 max-h-72 overflow-y-auto">
+        <div className="absolute mt-1 min-w-7/10 max-w-9/10 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
           <div className="py-2 flex flex-col gap-1">
             {searchTerm && filtered.length > 0 ? (
               filtered.slice(0, 10).map((med, idx) => (
                 <div
-                  key={idx}
+                  key={`${med.NOME_PRODUTO}-${idx}`}
                   className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#F2F2F2] cursor-pointer KantumruyRegular"
                   onClick={() => handleResultClick(med)}
                 >
@@ -163,5 +166,4 @@ export default function BuscaMedicamento({ onSelect }: Props) {
       )}
     </div>
   );
-}
 }
