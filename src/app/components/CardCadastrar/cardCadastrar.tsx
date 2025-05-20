@@ -54,7 +54,6 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
   const salvarLembrete = async () => {
   try {
-    const hoje = new Date();
     const horaInicio = new Date();
     horaInicio.setHours(parseInt(horarios[0].hora.split(':')[0]));
     horaInicio.setMinutes(parseInt(horarios[0].hora.split(':')[1]));

@@ -21,9 +21,10 @@ export default function BuscaMedicamento({ onSelect }: Props) {
   const [selectedMedicamento, setSelectedMedicamento] = useState<Medicamento | null>(null);
 
   useEffect(() => {
-    fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
-      .then((res) => res.text())
-      .then((csvText) => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv');
+        const csvText = await res.text();
         Papa.parse<Medicamento>(csvText, {
           header: true,
           skipEmptyLines: true,
@@ -31,11 +32,13 @@ export default function BuscaMedicamento({ onSelect }: Props) {
             setMedicamentos(results.data);
           },
         });
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Erro ao carregar CSV:', err);
         setError('Erro ao carregar os dados');
-      });
+      }
+    };
+    
+    void fetchData();
   }, []);
 
   useEffect(() => {
@@ -47,13 +50,17 @@ export default function BuscaMedicamento({ onSelect }: Props) {
     } else {
       setFiltered([]);
     }
-  }, [searchTerm, medicamentos]);
 
-  const handleSearch = (term: string) => {
+    // Se houver erro, podemos mostrar em algum elemento UI
+    if (error) {
+      console.log(error);
+    }
+  }, [searchTerm, medicamentos, error]);
+
+  const handleSearch = (term: string): void => {
     setSearchTerm(term);
     setIsDropdownOpen(true);
     
-    // Se o campo for limpo, também limpa a seleção atual
     if (term === '') {
       setSelectedMedicamento(null);
       onSelect({ NOME_PRODUTO: '', DESCRIÇÃO: '' });
@@ -135,6 +142,14 @@ export default function BuscaMedicamento({ onSelect }: Props) {
           </button>
         </div>
       </div>
+
+      {selectedMedicamento && !isDropdownOpen && (
+        <div className="mt-2 px-4 py-2 bg-[#F2F2F2] rounded-md">
+          <span className="text-sm text-[#037F8C] font-semibold">
+            Selecionado: {selectedMedicamento.NOME_PRODUTO}
+          </span>
+        </div>
+      )}
 
       {isDropdownOpen && (
         <div className="absolute mt-1 min-w-7/10 max-w-9/10 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">

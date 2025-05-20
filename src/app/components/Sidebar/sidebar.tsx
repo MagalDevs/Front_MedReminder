@@ -1,17 +1,24 @@
 'use client';
 
-import { useState } from "react";
+// import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Sidebar() {
-    const [isOpen, setIsOpen] = useState(false);
+    // const [isOpen, setIsOpen] = useState(false);
 
     return (
         <aside className="min-h-screen w-60 bg-[#D9D9D9] flex flex-col shadow-md">
             {/* Logo */}
             <div className="pb-5 pt-5 flex justify-center items-center">
                 <Link href="/">
-                <img src="/assets/LogoDeitada.png" alt="MedReminder Logo" className="w-40 h-auto pr-5"/>
+                  <Image 
+                    src="/assets/LogoDeitada.png"
+                    alt="MedReminder Logo"
+                    width={160}
+                    height={40}
+                    className="pr-5"
+                  />
                 </Link>
             </div>
             
