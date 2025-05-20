@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 //import { useState } from 'react';
 
 export default function Sidebar() {
@@ -9,9 +10,11 @@ export default function Sidebar() {
     <>
       <aside className="grid grid-rows-[1fr - 2fr - 1fr] max-w-3xs bg-[#D9D9D9]">
         <div className="pb-5 pt-5 justify-center items-center">
-          <img
+          <Image
             src="/assets/LogoDeitada.png"
-            alt=""
+            alt="Logo"
+            width={200}
+            height={50}
             className="w-50 h-auto pl-10"
           />
         </div>
@@ -30,7 +33,7 @@ export default function Sidebar() {
             Histórico
           </a>
           <a className="KantumruyMedium text-[#044D55]" href="">
-            Configuraçõess
+            Configurações
           </a>
         </div>
         <div className="pt-50 pl-10 pb-4">
