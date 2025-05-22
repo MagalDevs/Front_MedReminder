@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar/sidebar"
 import BuscaMedicamento from "../components/CardBusca/cardBusca"
-import ConfigurarLembrete from "../components/CardCadastrar/cardCadastrar"
+import ConfigurarLembrete from "../components/CardCadastrar/cardCadastrar";
 
 type Medicamento = {
   NOME_PRODUTO: string;
