@@ -1,5 +1,7 @@
 'use client';
 
+// alteração para dar o commit
+
 import Papa, { ParseResult } from 'papaparse';
 import { useEffect, useState } from 'react';
 
