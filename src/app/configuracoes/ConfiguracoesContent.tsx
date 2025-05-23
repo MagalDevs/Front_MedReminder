@@ -173,7 +173,7 @@ export default function ConfiguracoesContent() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Digite seu novo nome"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
@@ -210,7 +210,7 @@ export default function ConfiguracoesContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu novo e-mail"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
@@ -236,12 +236,12 @@ export default function ConfiguracoesContent() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Senha Atual
-              </label>
+              </label>{' '}
               <input
                 type="password"
                 value={senhaAtual}
                 onChange={(e) => setSenhaAtual(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
@@ -249,12 +249,12 @@ export default function ConfiguracoesContent() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nova Senha
-              </label>
+              </label>{' '}
               <input
                 type="password"
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
@@ -262,12 +262,12 @@ export default function ConfiguracoesContent() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Confirmar Nova Senha
-              </label>
+              </label>{' '}
               <input
                 type="password"
                 value={confirmarSenha}
                 onChange={(e) => setConfirmarSenha(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>

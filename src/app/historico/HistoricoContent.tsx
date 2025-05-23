@@ -205,9 +205,9 @@ export default function HistoricoContent() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Medicamento
-            </label>
+            </label>{' '}
             <select
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroMedicamento}
               onChange={(e) => setFiltroMedicamento(e.target.value)}
             >
@@ -224,9 +224,9 @@ export default function HistoricoContent() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
-            </label>
+            </label>{' '}
             <select
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroStatus}
               onChange={(e) => setFiltroStatus(e.target.value)}
             >
@@ -241,9 +241,9 @@ export default function HistoricoContent() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Período
-            </label>
+            </label>{' '}
             <select
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroPeriodo}
               onChange={(e) => setFiltroPeriodo(e.target.value)}
             >

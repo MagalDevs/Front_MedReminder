@@ -79,7 +79,7 @@ export default function SearchBar() {
   return (
     <div className="relative w-full">
       <div className="relative">
-        <div className="rounded-md border border-[#037F8C] bg-[#F2F2F2] shadow-sm flex items-center pl-3 pr-4 py-2 w-full">
+        <div className="rounded-md border border-[#037F8C] bg-white shadow-sm flex items-center pl-3 pr-4 py-2 w-full">
           <span className="text-gray-500 mr-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -95,10 +95,10 @@ export default function SearchBar() {
                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
               />
             </svg>
-          </span>
+          </span>{' '}
           <input
             type="text"
-            className="flex-1 outline-none text-gray-700 KantumruyMedium"
+            className="flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
             placeholder="Buscar medicamento..."
             value={searchQuery}
             onChange={handleInputChange}

@@ -116,7 +116,7 @@ export default function BuscaMedicamento({
   return (
     <div className="m-6">
       <div className="relative">
-        <div className="bg-white rounded-lg p-4 flex items-center border border-[#0B6E71]">
+        <div className="bg-white rounded-lg p-4 flex items-center border border-[#037F8C]">
           <span className="text-gray-500 mr-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -132,10 +132,10 @@ export default function BuscaMedicamento({
                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
               />
             </svg>
-          </span>
+          </span>{' '}
           <input
             type="text"
-            className="flex-1 outline-none text-gray-700 KantumruyMedium"
+            className="flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
             placeholder="Buscar medicamento..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
