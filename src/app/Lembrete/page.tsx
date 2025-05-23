@@ -16,10 +16,10 @@ function LembreteContent() {
   const [medicamentoSelecionado, setMedicamentoSelecionado] =
     useState<Medicamento | null>(null);
   const searchParams = useSearchParams();
-  
+
   useEffect(() => {
     const medicamento = searchParams.get('medicamento');
-    
+
     if (medicamento) {
       setMedicamentoSelecionado({
         NOME_PRODUTO: medicamento,
@@ -31,7 +31,7 @@ function LembreteContent() {
   const handleMedicamentoSelecionado = (medicamento: Medicamento) => {
     setMedicamentoSelecionado(medicamento);
   };
-  
+
   return (
     <div className="flex-1">
       <BuscaMedicamento
