@@ -10,7 +10,6 @@ type Medicamento = {
   DESCRIÇÃO: string;
 };
 
-
 export default function TelaCadastro() {
 
   const [medicamentoSelecionado, setMedicamentoSelecionado] = useState<Medicamento | null>(null);
@@ -20,19 +19,19 @@ export default function TelaCadastro() {
   };
 
   return (
-    <>
-      <div className=" flex min-h-screen bg-[#E8E6E6]">
-        <Sidebar />
-        <div className="flex-1">
-          <BuscaMedicamento onSelect={handleMedicamentoSelecionado}/>
-          {medicamentoSelecionado && (
-        <ConfigurarLembrete medicamentoSelecionado={{
-          nome: medicamentoSelecionado.NOME_PRODUTO,
-          tipo: medicamentoSelecionado.DESCRIÇÃO,
-        }} />
-      )}
-        </div>
+    <div className="min-h-screen bg-[#E8E6E6]">
+      <Sidebar />
+      
+      {/* Conteúdo principal - sempre ocupa tela toda */}
+      <div className="p-4 pt-16">
+        <BuscaMedicamento onSelect={handleMedicamentoSelecionado}/>
+        {medicamentoSelecionado && (
+          <ConfigurarLembrete medicamentoSelecionado={{
+            nome: medicamentoSelecionado.NOME_PRODUTO,
+            tipo: medicamentoSelecionado.DESCRIÇÃO,
+          }} />
+        )}
       </div>
-    </>
+    </div>
   )
 }
