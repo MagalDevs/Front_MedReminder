@@ -104,12 +104,12 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nome
-            </label>
+            </label>{' '}
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -117,12 +117,12 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               E-mail
-            </label>
+            </label>{' '}
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -130,13 +130,13 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               CPF
-            </label>
+            </label>{' '}
             <input
               type="text"
               value={cpf}
               onChange={handleCpfChange}
               placeholder="000.000.000-00"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -144,13 +144,13 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               CEP
-            </label>
+            </label>{' '}
             <input
               type="text"
               value={cep}
               onChange={handleCepChange}
               placeholder="00000-000"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -158,12 +158,12 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Data de Nascimento
-            </label>
+            </label>{' '}
             <input
               type="date"
               value={dataNascimento}
               onChange={(e) => setDataNascimento(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -171,12 +171,12 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Senha
-            </label>
+            </label>{' '}
             <input
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -184,12 +184,12 @@ export default function Cadastro() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Confirmar Senha
-            </label>
+            </label>{' '}
             <input
               type="password"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>

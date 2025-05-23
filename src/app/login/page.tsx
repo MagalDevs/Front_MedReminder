@@ -37,13 +37,13 @@ export default function Login() {
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               E-mail
-            </label>
+            </label>{' '}
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
@@ -54,13 +54,13 @@ export default function Login() {
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               Senha
-            </label>
+            </label>{' '}
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
+              className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
               required
             />
           </div>
