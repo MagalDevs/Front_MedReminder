@@ -21,7 +21,7 @@ export default function Home() {
         <Logo width={200} />
         <SearchBar />{' '}
         <Link
-          href="/TelaCadastroRemedio"
+          href="/Lembrete"
           className="flex items-center gap-2 text-[#037F8C] hover:text-[#025e6a] transition-colors KantumruyMedium"
         >
           <svg

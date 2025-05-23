@@ -70,12 +70,9 @@ export default function SearchBar() {
     setIsOpen(true);
     setFiltered([med]);
   };
-
   const handleCadastrarClick = (medicamento: string) => {
     router.push(
-      `/TelaCadastroRemedio?medicamento=${encodeURIComponent(
-        medicamento.trim(),
-      )}`,
+      `/Lembrete?medicamento=${encodeURIComponent(medicamento.trim())}`,
     );
   };
 

@@ -12,7 +12,9 @@
     "next": "^15.3.2",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-datepicker": "^8.3.0",
+    "react-dom": "^19.0.0",
+    "react-input-mask": "^2.0.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -21,6 +23,7 @@
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-input-mask": "^3.0.6",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "tailwindcss": "^4",

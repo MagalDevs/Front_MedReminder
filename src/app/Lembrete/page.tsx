@@ -5,13 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar/sidebar';
 import BuscaMedicamento from '../components/CardBusca/cardBusca';
 import ConfigurarLembrete from '../components/CardCadastrar/cardCadastrar';
-
 type Medicamento = {
   NOME_PRODUTO: string;
   DESCRIÇÃO: string;
 };
 
-export default function TelaCadastro() {
+export default function Lembrete() {
   const [medicamentoSelecionado, setMedicamentoSelecionado] =
     useState<Medicamento | null>(null);
   const searchParams = useSearchParams();
