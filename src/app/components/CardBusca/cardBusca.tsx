@@ -10,15 +10,36 @@ type Medicamento = {
 
 type Props = {
   onSelect: (medicamento: Medicamento) => void;
+  medicamentoInicial?: string; // Nome do medicamento inicial
 };
 
-export default function BuscaMedicamento({ onSelect }: Props) {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function BuscaMedicamento({
+  onSelect,
+  medicamentoInicial,
+}: Props) {
+  const [searchTerm, setSearchTerm] = useState(medicamentoInicial || '');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [filtered, setFiltered] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMedicamento, setSelectedMedicamento] = useState<Medicamento | null>(null);
+  const [selectedMedicamento, setSelectedMedicamento] =
+    useState<Medicamento | null>(null);
+
+  // Efeito para buscar medicamento quando o componente é carregado com medicamentoInicial
+  useEffect(() => {
+    if (medicamentoInicial && medicamentos.length > 0) {
+      const foundMed = medicamentos.find(
+        (med) =>
+          med.NOME_PRODUTO.trim().toLowerCase() ===
+          medicamentoInicial.toLowerCase(),
+      );
+
+      if (foundMed) {
+        setSelectedMedicamento(foundMed);
+        onSelect(foundMed);
+      }
+    }
+  }, [medicamentos, medicamentoInicial, onSelect]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,14 +58,14 @@ export default function BuscaMedicamento({ onSelect }: Props) {
         setError('Erro ao carregar os dados');
       }
     };
-    
+
     void fetchData();
   }, []);
 
   useEffect(() => {
     if (searchTerm.length > 0) {
       const results = medicamentos.filter((med) =>
-        med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase())
+        med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       setFiltered(results);
     } else {
@@ -60,7 +81,7 @@ export default function BuscaMedicamento({ onSelect }: Props) {
   const handleSearch = (term: string): void => {
     setSearchTerm(term);
     setIsDropdownOpen(true);
-    
+
     if (term === '') {
       setSelectedMedicamento(null);
       onSelect({ NOME_PRODUTO: '', DESCRIÇÃO: '' });
@@ -77,10 +98,10 @@ export default function BuscaMedicamento({ onSelect }: Props) {
   const handleResultClick = (med: Medicamento) => {
     // Atualiza o campo de busca com novo valor
     setSearchTerm(med.NOME_PRODUTO.trim());
-    
+
     // Armazena o medicamento selecionado
     setSelectedMedicamento(med);
-    
+
     // Fecha o dropdown e atualiza os resultados
     setFiltered([med]);
     setIsDropdownOpen(false);

@@ -4,8 +4,10 @@
 
 import Papa, { ParseResult } from 'papaparse';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SearchBar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [medicamentos, setMedicamentos] = useState<
@@ -67,6 +69,14 @@ export default function SearchBar() {
     setSearchQuery(med.NOME_PRODUTO.trim());
     setIsOpen(true);
     setFiltered([med]);
+  };
+
+  const handleCadastrarClick = (medicamento: string) => {
+    router.push(
+      `/TelaCadastroRemedio?medicamento=${encodeURIComponent(
+        medicamento.trim(),
+      )}`,
+    );
   };
 
   return (
@@ -140,7 +150,13 @@ export default function SearchBar() {
                     <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
                   </div>
                   {showCadastrar && idx === 0 && (
-                    <button className="ml-4 bg-[#037F8C] text-white px-3 py-1 rounded hover:bg-[#025e6a] transition-colors text-xs">
+                    <button
+                      className="ml-4 bg-[#037F8C] text-white px-3 py-1 rounded hover:bg-[#025e6a] transition-colors text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evita que o clique propague para o item da lista
+                        handleCadastrarClick(med.NOME_PRODUTO);
+                      }}
+                    >
                       Cadastrar
                     </button>
                   )}
