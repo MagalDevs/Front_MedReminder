@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+
 const Cores = [
   "#FF0000", "#4B00FF", "#FFFF00", "#FFA500", "#00CFFF",
   "#FFFFFF", "#00FF7F", "#006400", "#000000", "#DA70D6"
@@ -20,16 +21,18 @@ type Horario = {
   dose: string;
 };
 
+
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || "");
   const [dosagem, setDosagem] = useState(medicamentoSelecionado?.dosagem || "");
   const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || "");
   const [corSelecionada, setCorSelecionada] = useState("#FF0000");
   const [horarios, setHorarios] = useState<Horario[]>([{ hora: "10:00", dose: "1 comp." }]);
-  const [repetir, setRepetir] = useState("");
+  const [motivo, setMotivo] = useState("");
   const [duracao, setDuracao] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [validade, setValidade] = useState("");
+  const [validade, setValidade] = useState<Date | null>(null);
+  const [dataValidade, setDataValidade] = useState("");
   const [quantDiaria, setQuantDiaria] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
@@ -102,10 +105,10 @@ const limparFormulario = () => {
   setTipo("");
   setCorSelecionada("#FF0000");
   setHorarios([{ hora: "10:00", dose: "1 comp." }]);
-  setRepetir("");
+  setMotivo("");
   setDuracao("");
   setQuantidade("");
-  setValidade("");
+  setValidade(null);
   setQuantDiaria("");
   setObservacoes("");
 };
@@ -142,12 +145,14 @@ const limparFormulario = () => {
       <button onClick={adicionarHorario} className="border-dashed border-2 border-[#0B6E71] px-4 py-2 rounded text-[#0B6E71] mb-4">+ Adicionar Horário</button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <select className="p-2 border rounded outline-none" value={repetir} onChange={(e) => setRepetir(e.target.value)}>
-          <option value="">Repetir</option>
-          <option value="Diariamente">Diariamente</option>
-          <option value="Semanalmente">Semanalmente</option>
-          <option value="Mensalmente">Mensalmente</option>
-        </select>
+        <input 
+          type="text" 
+          placeholder="Motivo pelo qual vai tomar o remédio" 
+          value={motivo} 
+          onChange={(e) => setMotivo(e.target.value)} 
+          className="p-2 border rounded outline-none" 
+        /> 
+        
         <input 
           type="number" 
           placeholder="Duração (dias)" 
@@ -162,15 +167,53 @@ const limparFormulario = () => {
           value={quantidade} 
           onChange={(e) => setQuantidade(e.target.value)} 
           className="p-2 border rounded outline-none" 
-        />    
+        />  
 
-        <input 
-          type="date" 
-          placeholder="Data de validade" 
-          value={validade} 
-          onChange={(e) => setValidade(e.target.value)} 
-          className="p-2 border rounded outline-none" 
-        />      
+        <div className="flex flex-col">
+          <label className="text-sm text-[#0B6E71] mb-1">Data de validade</label>
+          <input
+            type="text"
+            maxLength={10}
+            placeholder="DD/MM/AAAA"
+            value={dataValidade}
+            onChange={(e) => {
+              
+              let valor = e.target.value.replace(/[^\d/]/g, '');
+              
+              
+              if (valor.length === 2 && !valor.includes('/') && dataValidade.length !== 3) {
+                valor += '/';
+              }
+              
+              
+              if (valor.length === 5 && valor.split('/').length === 2 && dataValidade.length !== 6) {
+                valor += '/';
+              }
+              
+            
+              if (valor.length <= 10) {
+                setDataValidade(valor);
+                
+                
+                if (valor.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                  const [dia, mes, ano] = valor.split('/');
+                  const dataObj = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+                  
+                  
+                  if (!isNaN(dataObj.getTime())) {
+                    setValidade(dataObj);
+                  } else {
+                    setValidade(null);
+                  }
+                } else {
+                  setValidade(null);
+                }
+              }
+            }}
+            className="p-2 border rounded outline-none w-full"
+          />
+        </div>  
+
       </div>
 
       <input 
