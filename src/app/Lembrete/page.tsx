@@ -31,9 +31,19 @@ function LembreteContent() {
   const handleMedicamentoSelecionado = (medicamento: Medicamento) => {
     setMedicamentoSelecionado(medicamento);
   };
-
   return (
-    <div className="flex-1">
+    <div className="flex-1 p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+            Lembrete
+          </h1>
+          <p className="text-gray-600 KantumruyRegular">
+            Configure lembretes para seus medicamentos
+          </p>
+        </div>
+      </div>
+
       <BuscaMedicamento
         onSelect={handleMedicamentoSelecionado}
         medicamentoInicial={medicamentoSelecionado?.NOME_PRODUTO}
