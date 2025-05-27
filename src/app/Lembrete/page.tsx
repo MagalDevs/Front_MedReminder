@@ -32,7 +32,7 @@ function LembreteContent() {
     setMedicamentoSelecionado(medicamento);
   };
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-6 overflow-y-hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
