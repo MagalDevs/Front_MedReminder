@@ -37,7 +37,6 @@ export default function ConfiguracoesContent() {
       setLoading(false);
     }, 800);
   }, []);
-
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 

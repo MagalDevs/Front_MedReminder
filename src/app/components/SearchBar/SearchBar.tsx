@@ -4,8 +4,10 @@
 
 import Papa, { ParseResult } from 'papaparse';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SearchBar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [medicamentos, setMedicamentos] = useState<
@@ -68,11 +70,16 @@ export default function SearchBar() {
     setIsOpen(true);
     setFiltered([med]);
   };
+  const handleCadastrarClick = (medicamento: string) => {
+    router.push(
+      `/Lembrete?medicamento=${encodeURIComponent(medicamento.trim())}`,
+    );
+  };
 
   return (
     <div className="relative w-full">
       <div className="relative">
-        <div className="rounded-md border border-[#037F8C] bg-[#F2F2F2] shadow-sm flex items-center pl-3 pr-4 py-2 w-full">
+        <div className="rounded-md border border-[#037F8C] bg-white shadow-sm flex items-center pl-3 pr-4 py-2 w-full">
           <span className="text-gray-500 mr-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -88,10 +95,10 @@ export default function SearchBar() {
                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
               />
             </svg>
-          </span>
+          </span>{' '}
           <input
             type="text"
-            className="flex-1 outline-none text-gray-700 KantumruyMedium"
+            className="flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
             placeholder="Buscar medicamento..."
             value={searchQuery}
             onChange={handleInputChange}
@@ -140,7 +147,13 @@ export default function SearchBar() {
                     <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
                   </div>
                   {showCadastrar && idx === 0 && (
-                    <button className="ml-4 bg-[#037F8C] text-white px-3 py-1 rounded hover:bg-[#025e6a] transition-colors text-xs">
+                    <button
+                      className="ml-4 bg-[#037F8C] text-white px-3 py-1 rounded hover:bg-[#025e6a] transition-colors text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evita que o clique propague para o item da lista
+                        handleCadastrarClick(med.NOME_PRODUTO);
+                      }}
+                    >
                       Cadastrar
                     </button>
                   )}
