@@ -61,14 +61,6 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     setDosagem(medicamentoSelecionado?.dosagem || '');
   }, [medicamentoSelecionado]);
 
-  const adicionarHorario = () => {
-    setHorarios([...horarios, { hora: '', dose: '' }]);
-  };
-
-  const removerHorario = (index: number) => {
-    setHorarios(horarios.filter((_, i) => i !== index));
-  };
-
   const atualizarHorario = (
     index: number,
     campo: keyof Horario,

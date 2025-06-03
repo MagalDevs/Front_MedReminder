@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 type Usuario = {
   nome: string;
@@ -311,7 +312,7 @@ export default function ConfiguracoesContent() {
             <div className="flex flex-col items-center gap-4 pt-10">
               <div className="w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
                 {foto ? (
-                  <img 
+                  <Image 
                     src={foto} 
                     alt="Foto de perfil atual" 
                     className="w-full h-full object-cover"
