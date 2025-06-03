@@ -1,6 +1,7 @@
 import SearchBar from './components/SearchBar/SearchBar';
 import Logo from './components/Logo/Logo';
 import Link from 'next/link';
+import { User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -10,9 +11,9 @@ export default function Home() {
         <Link href="/login">
           <button
             aria-label="Login"
-            className="bg-[#BE185D] text-white px-4 py-2 rounded-md shadow-sm hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+            className="bg-[#4A90A4] text-white px-4 py-2 rounded-md shadow-sm hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
           >
-            Entrar
+            <User size={20} />
           </button>
         </Link>
       </div>
@@ -21,7 +22,7 @@ export default function Home() {
         <Logo width={200} />
         <SearchBar />{' '}
         <Link
-          href="/Lembrete"
+          href="/medicamentos"
           className="flex items-center gap-2 text-[#037F8C] hover:text-[#025e6a] transition-colors KantumruyMedium"
         >
           {' '}

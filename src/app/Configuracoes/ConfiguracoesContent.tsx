@@ -149,7 +149,7 @@ export default function ConfiguracoesContent() {
   return (
     <div className="flex-1 p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
           Configurações
         </h1>
         <p className="text-gray-600 KantumruyRegular">
@@ -172,7 +172,7 @@ export default function ConfiguracoesContent() {
       )}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Formulário para alteração de nome */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           {' '}
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar Nome
@@ -200,7 +200,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar Nome'}
               </button>
@@ -209,7 +209,7 @@ export default function ConfiguracoesContent() {
         </div>
 
         {/* Formulário para alteração de email */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           {' '}
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar E-mail
@@ -237,7 +237,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar E-mail'}
               </button>
@@ -246,7 +246,7 @@ export default function ConfiguracoesContent() {
         </div>
 
         {/* Formulário para alteração de senha */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar Senha
           </h2>
@@ -294,7 +294,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar Senha'}
               </button>
@@ -303,7 +303,7 @@ export default function ConfiguracoesContent() {
         </div>
 
         {/* Atualizar foto de perfil */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar foto de perfil
           </h2>
@@ -323,7 +323,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="button"
                 onClick={openFileSelector}
-                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
               >
                 Alterar Foto
               </button>

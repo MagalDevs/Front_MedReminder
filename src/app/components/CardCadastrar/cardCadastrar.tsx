@@ -50,7 +50,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [quantidade, setQuantidade] = useState('');
   const [validade, setValidade] = useState<Date | null>(null);
   const [dataValidade, setDataValidade] = useState('');
-  const [quantDiaria, setQuantDiaria] = useState('');
+  const [Intervalo, setIntervalo] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [erros, setErros] = useState<ErrosForm>({}); // Corrigido o tipo
   const [unidade, setUnidade] = useState('mg');
@@ -112,6 +112,44 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     return Object.keys(novosErros).length === 0;
   };
 
+
+const calcularHorariosMedicamento = (
+  horaInicial: string, // formato "HH:MM"
+  intervaloHoras: number, // intervalo em horas
+  duracaoDias: number // duração do tratamento em dias
+): string => {
+  const horarios: number[] = [];
+  
+  // Converter hora inicial para minutos desde 00:00
+  const [horasIniciais, minutosIniciais] = horaInicial.split(':').map(Number);
+  let horaAtualMinutos = horasIniciais * 60 + minutosIniciais;
+  
+  // Calcular total de doses durante o tratamento
+  const intervaloMinutos = intervaloHoras * 60;
+  const totalMinutosTratamento = duracaoDias * 24 * 60;
+  const totalDoses = Math.ceil(totalMinutosTratamento / intervaloMinutos);
+  
+  // Gerar todos os horários
+  for (let i = 0; i < totalDoses; i++) {
+    // Converter minutos para hora do dia (0-23)
+    const horaAtual = Math.floor((horaAtualMinutos % (24 * 60)) / 60);
+    
+    // Adicionar à lista se ainda não existe
+    if (!horarios.includes(horaAtual)) {
+      horarios.push(horaAtual);
+    }
+    
+    // Avançar para o próximo horário
+    horaAtualMinutos += intervaloMinutos;
+  }
+  
+  // Ordenar horários
+  horarios.sort((a, b) => a - b);
+  
+  // Retornar como string separada por vírgulas
+  return horarios.join(', ');
+};
+
   const salvarLembrete = async () => {
     // Validar formulário antes de enviar
     if (!validarFormulario()) {
@@ -121,26 +159,37 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
     try {
       const horaInicio = new Date();
+      let horaInicialString = '10:00'; // valor padrão
+      
       if (horarios[0]?.hora) {
-        const [horas, minutos] = horarios[0].hora.split(':');
+        horaInicialString = horarios[0].hora;
+        const [horas, minutos] = horaInicialString.split(':');
         horaInicio.setHours(parseInt(horas));
         horaInicio.setMinutes(parseInt(minutos));
       }
-
+  
+      // Calcular os horários que o medicamento deve ser tomado
+      const horariosCalculados = calcularHorariosMedicamento(
+        horaInicialString,
+        parseInt(Intervalo),
+        parseInt(duracao)
+      );
+  
       const dadosLembrete = {
         nome: nome,
         quantidadeCaixa: parseInt(quantidade),
         dataValidade: validade,
-        quantidadeDiaria: parseInt(quantDiaria),
+        quantidadeDiaria: parseInt(Intervalo),
         foto: 'https://example.com/image.jpg',
         classificacao: tipo,
         horaInicio: horaInicio.toISOString(),
         cor: corSelecionada,
-        unidadeMedida: `${dosagem} ${unidade}`, // Combinando dosagem e unidade
-        motivo: motivo || observacoes, // Usando motivo ou observações
+        unidadeMedida: `${dosagem} ${unidade}`,
+        motivo: motivo || observacoes,
         quantidadeDias: parseInt(duracao),
+        horariosParaTomar: horariosCalculados // Nova propriedade com os horários calculados
       };
-
+  
       const response = await fetch(
         'https://medreminder-backend.onrender.com/remedio',
         {
@@ -151,15 +200,16 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           body: JSON.stringify(dadosLembrete),
         },
       );
-
+  
       if (!response.ok) {
         throw new Error('Erro ao salvar o lembrete');
       }
-
+  
       const data = await response.json();
       console.log('Lembrete salvo com sucesso:', data);
+      console.log('Horários calculados:', horariosCalculados);
       alert('Lembrete salvo com sucesso!');
-
+  
       limparFormulario();
     } catch (error) {
       console.error('Erro:', error);
@@ -178,7 +228,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     setQuantidade('');
     setValidade(null);
     setDataValidade('');
-    setQuantDiaria('');
+    setIntervalo('');
     setObservacoes('');
     setErros({});
   };
@@ -259,7 +309,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       </div>
 
       <label className="font-medium text-[#0B6E71] block mt-4">
-        Horários para tomar
+        Qual horário você tomou (vai tomar) o remédio pela 1° vez?
       </label>
       {horarios.map((h, index) => (
         <div key={index} className="flex gap-2 items-center mb-2">
@@ -269,29 +319,19 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             onChange={(e) => atualizarHorario(index, 'hora', e.target.value)}
             className="p-2 rounded border border-[#037F8C] bg-white outline-none text-gray-700 KantumruyMedium w-28"
           />
-          <input
-            type="text"
-            placeholder="Dose"
-            value={h.dose}
-            onChange={(e) => atualizarHorario(index, 'dose', e.target.value)}
-            className="p-2 rounded border border-[#037F8C] bg-white outline-none text-gray-700 KantumruyMedium w-24"
-          />
-          {horarios.length > 1 && (
-            <button
-              onClick={() => removerHorario(index)}
-              className="text-red-600 font-bold hover:text-red-800 px-2"
-            >
-              ✕
-            </button>
-          )}
         </div>
-      ))}
-      <button
-        onClick={adicionarHorario}
-        className="border-dashed border-2 border-[#0B6E71] px-4 py-2 rounded text-[#0B6E71] mb-4 hover:bg-[#0B6E71] hover:text-white transition-colors"
-      >
-        + Adicionar Horário
-      </button>
+          ))}
+        
+
+        <div>
+          <input
+          type="number"
+          placeholder="De quanto em quanto tempo vai ser tomado o remédio? (em horas)"
+          value={Intervalo}
+          onChange={(e) => setIntervalo(e.target.value)}
+          className="w-full p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium mb-4"
+          />
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <input
@@ -302,10 +342,14 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           className="p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium"
         />
 
+        
+
+        
+
         <div>
           <input
             type="number"
-            placeholder="Duração (dias)"
+            placeholder="Duração do tratamento (dias)"
             value={duracao}
             onChange={(e) => setDuracao(e.target.value)}
             className={`p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
@@ -316,6 +360,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             <p className="text-red-500 text-sm mt-1">{erros.duracao}</p>
           )}
         </div>
+
+        
 
         <div>
           <input
@@ -385,14 +431,6 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           />
         </div>
       </div>
-
-      <input
-        type="number"
-        placeholder="Quantidade diária"
-        value={quantDiaria}
-        onChange={(e) => setQuantDiaria(e.target.value)}
-        className="w-full p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium mb-4"
-      />
       
       <textarea
         placeholder="Observações"
@@ -405,14 +443,14 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       <div className="flex gap-4">
         <button
           onClick={salvarLembrete}
-          className="bg-[#0B6E71] text-white py-2 px-6 rounded-lg hover:bg-[#037F8C] transition-colors font-medium"
+          className="bg-[#0B6E71] text-white py-2 px-6 rounded-lg hover:bg-[#044D55] hover:cursor-pointer transition-colors font-medium"
         >
           Salvar lembrete
         </button>
         
         <button
           onClick={limparFormulario}
-          className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors font-medium max-w-[calc(100%-64px)]"
+          className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 hover:cursor-pointer transition-colors font-medium max-w-[calc(100%-64px)]"
         >
           Limpar formulário
         </button>

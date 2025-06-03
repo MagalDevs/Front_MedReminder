@@ -25,9 +25,7 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <Logo width={140} />
           </div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold">
-            Entrar
-          </h1>
+          
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -41,6 +39,7 @@ export default function Login() {
             <input
               id="username"
               type="text"
+              placeholder='Digite seu e-mail'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
@@ -58,6 +57,7 @@ export default function Login() {
             <input
               id="password"
               type="password"
+              placeholder='Digite sua senha'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
@@ -68,7 +68,7 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              className="w-full bg-[#BE185D] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+              className="w-full bg-[#4A90A4] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:bg-[#044D55] hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
             >
               Entrar
             </button>

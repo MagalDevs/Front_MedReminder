@@ -103,8 +103,8 @@ export default function Sidebar() {
             Histórico
           </Link>
           <Link 
-            href="/configuracoes" 
-            className={getLinkStyle('/configuracoes')}
+            href="/Configuracoes" 
+            className={getLinkStyle('/Configuracoes')}
             onClick={() => setIsOpen(false)}
           >
             Configurações

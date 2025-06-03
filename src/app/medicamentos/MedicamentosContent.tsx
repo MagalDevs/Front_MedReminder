@@ -103,7 +103,7 @@ export default function MedicamentosContent() {
     <div className="flex-1 p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
             Meus Medicamentos
           </h1>
           <p className="text-gray-600 KantumruyRegular">
@@ -112,7 +112,7 @@ export default function MedicamentosContent() {
         </div>
         <button
           onClick={() => router.push('/Lembrete')}
-          className="mt-4 md:mt-0 bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#9d1551] transition-colors flex items-center KantumruyMedium"
+          className="mt-4 md:mt-0 bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#044D55] transition-colors flex items-center KantumruyMedium"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
