@@ -110,7 +110,8 @@ const calcularHorariosMedicamento = (
   intervaloHoras: number, // intervalo em horas
   duracaoDias: number // duração do tratamento em dias
 ): string => {
-  const horarios: number[] = [];
+  // Armazenar os horários completos (HH:MM)
+  const horarios: string[] = [];
   
   // Converter hora inicial para minutos desde 00:00
   const [horasIniciais, minutosIniciais] = horaInicial.split(':').map(Number);
@@ -123,22 +124,22 @@ const calcularHorariosMedicamento = (
   
   // Gerar todos os horários
   for (let i = 0; i < totalDoses; i++) {
-    // Converter minutos para hora do dia (0-23)
+    // Calcular hora e minuto atuais
     const horaAtual = Math.floor((horaAtualMinutos % (24 * 60)) / 60);
+    const minutoAtual = horaAtualMinutos % 60;
+    
+    // Formatar o horário como "HH:MM"
+    const horarioFormatado = `${horaAtual.toString().padStart(2, '0')}:${minutoAtual.toString().padStart(2, '0')}`;
     
     // Adicionar à lista se ainda não existe
-    if (!horarios.includes(horaAtual)) {
-      horarios.push(horaAtual);
+    if (!horarios.includes(horarioFormatado)) {
+      horarios.push(horarioFormatado);
     }
     
     // Avançar para o próximo horário
     horaAtualMinutos += intervaloMinutos;
   }
   
-  // Ordenar horários
-  horarios.sort((a, b) => a - b);
-  
-  // Retornar como string separada por vírgulas
   return horarios.join(', ');
 };
 
@@ -181,6 +182,8 @@ const calcularHorariosMedicamento = (
         quantidadeDias: parseInt(duracao),
         horariosParaTomar: horariosCalculados // Nova propriedade com os horários calculados
       };
+
+      console.log('JSON sendo enviado para a API:', JSON.stringify(dadosLembrete, null, 2));
   
       const response = await fetch(
         'https://medreminder-backend.onrender.com/remedio',
