@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 type Usuario = {
   nome: string;
@@ -18,6 +19,9 @@ export default function ConfiguracoesContent() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [foto, setFoto] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     // Simular busca de dados do usuário atual
     // No ambiente real isso seria uma chamada de API
@@ -117,6 +121,21 @@ export default function ConfiguracoesContent() {
     }
   };
 
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFoto(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openFileSelector = () => {
+    fileInputRef.current?.click();
+  };
+
   if (loading && !usuario) {
     return (
       <div className="flex-1 p-6">
@@ -131,7 +150,7 @@ export default function ConfiguracoesContent() {
   return (
     <div className="flex-1 p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
           Configurações
         </h1>
         <p className="text-gray-600 KantumruyRegular">
@@ -154,7 +173,7 @@ export default function ConfiguracoesContent() {
       )}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Formulário para alteração de nome */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           {' '}
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar Nome
@@ -182,7 +201,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#BE185D] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar Nome'}
               </button>
@@ -191,7 +210,7 @@ export default function ConfiguracoesContent() {
         </div>
 
         {/* Formulário para alteração de email */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           {' '}
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar E-mail
@@ -219,7 +238,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#BE185D] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar E-mail'}
               </button>
@@ -228,7 +247,7 @@ export default function ConfiguracoesContent() {
         </div>
 
         {/* Formulário para alteração de senha */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
             Alterar Senha
           </h2>
@@ -276,13 +295,51 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#BE185D] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar Senha'}
               </button>
             </div>
           </form>
         </div>
+
+        {/* Atualizar foto de perfil */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
+            Alterar foto de perfil
+          </h2>
+          <div className="space-y-6">
+            <div className="flex flex-col items-center gap-4 pt-10">
+              <div className="w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
+                {foto ? (
+                  <Image 
+                    src={foto} 
+                    alt="Foto de perfil atual" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-gray-400 text-sm">Sem foto</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={openFileSelector}
+                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+              >
+                Alterar Foto
+              </button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handlePhotoChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
+        </div>
+
       </div>
     </div>
   );

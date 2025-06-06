@@ -32,13 +32,13 @@ function LembreteContent() {
     setMedicamentoSelecionado(medicamento);
   };
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-6 overflow-y-hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
             Lembrete
           </h1>
-          <p className="text-gray-600 KantumruyRegular">
+          <p className="text-gray-600 KantumruyRegular ml-10">
             Configure lembretes para seus medicamentos
           </p>
         </div>
@@ -65,7 +65,9 @@ export default function Lembrete() {
   return (
     <>
       <div className="flex min-h-screen bg-[#E8E6E6]">
-        <Sidebar />
+        <div className='flex-initial'>
+          <Sidebar />
+        </div>
         <Suspense fallback={<div className="flex-1 p-6">Carregando...</div>}>
           <LembreteContent />
         </Suspense>

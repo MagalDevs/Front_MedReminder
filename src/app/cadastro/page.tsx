@@ -86,9 +86,6 @@ export default function Cadastro() {
           <div className="flex justify-center mb-4">
             <Logo width={140} />
           </div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold">
-            Cadastre-se
-          </h1>
         </div>
 
         {erro && (
@@ -213,7 +210,7 @@ export default function Cadastro() {
           <div>
             <button
               type="submit"
-              className="w-full bg-[#BE185D] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+              className="w-full bg-[#0B6E71] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
             >
               Cadastrar
             </button>
