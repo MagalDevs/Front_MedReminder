@@ -24,6 +24,7 @@ type Props = {
 };
 
 type Horario = {
+  data: string;
   hora: string;
   dose: string;
 };
@@ -41,9 +42,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || '');
   const [dosagem, setDosagem] = useState(medicamentoSelecionado?.dosagem || '');
   const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || '');
-  const [corSelecionada, setCorSelecionada] = useState('#FF0000');
-  const [horarios, setHorarios] = useState<Horario[]>([
-    { hora: '10:00', dose: '1 comp.' },
+  const [corSelecionada, setCorSelecionada] = useState('#FF0000');  const [horarios, setHorarios] = useState<Horario[]>([
+    { data: new Date().toISOString().split('T')[0], hora: '10:00', dose: '1 comp.' },
   ]);
   const [motivo, setMotivo] = useState('');
   const [duracao, setDuracao] = useState('');
@@ -108,41 +108,54 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 const calcularHorariosMedicamento = (
   horaInicial: string, // formato "HH:MM"
   intervaloHoras: number, // intervalo em horas
-  duracaoDias: number // duração do tratamento em dias
-): string => {
-  // Armazenar os horários completos (HH:MM)
-  const horarios: string[] = [];
+  duracaoDias: number, // duração do tratamento em dias
+  dataInicial: string = new Date().toISOString().split('T')[0] // data inicial no formato YYYY-MM-DD
+): { data: string, hora: string }[] => {
+  // Armazenar os horários completos (data + hora)
+  const horarios: { data: string, hora: string }[] = [];
   
-  // Converter hora inicial para minutos desde 00:00
+  // Converter hora inicial para horas e minutos
   const [horasIniciais, minutosIniciais] = horaInicial.split(':').map(Number);
-  let horaAtualMinutos = horasIniciais * 60 + minutosIniciais;
   
-  // Calcular total de doses durante o tratamento
-  const intervaloMinutos = intervaloHoras * 60;
-  const totalMinutosTratamento = duracaoDias * 24 * 60;
-  const totalDoses = Math.ceil(totalMinutosTratamento / intervaloMinutos);
+  // Converter data inicial para ano, mês e dia
+  const [anoInicial, mesInicial, diaInicial] = dataInicial.split('-').map(Number);
   
-  // Gerar todos os horários
-  for (let i = 0; i < totalDoses; i++) {
-    // Calcular hora e minuto atuais
-    const horaAtual = Math.floor((horaAtualMinutos % (24 * 60)) / 60);
-    const minutoAtual = horaAtualMinutos % 60;
+  // Data e hora de início
+  const dataHoraInicio = new Date();
+  dataHoraInicio.setFullYear(anoInicial);
+  dataHoraInicio.setMonth(mesInicial - 1); // Mês em JavaScript começa do 0
+  dataHoraInicio.setDate(diaInicial);
+  dataHoraInicio.setHours(horasIniciais, minutosIniciais, 0, 0);
+  
+  // Intervalo em milissegundos
+  const intervaloMs = intervaloHoras * 60 * 60 * 1000;
+  
+  // Calcular data/hora final do tratamento
+  const dataHoraFim = new Date(dataHoraInicio);
+  dataHoraFim.setDate(dataHoraFim.getDate() + duracaoDias);
+  
+  // Gerar todos os horários ao longo do tratamento
+  let dataHoraAtual = new Date(dataHoraInicio);
+  
+  while (dataHoraAtual < dataHoraFim) {
+    // Formatar a data como "YYYY-MM-DD"
+    const dataFormatada = dataHoraAtual.toISOString().split('T')[0];
     
     // Formatar o horário como "HH:MM"
-    const horarioFormatado = `${horaAtual.toString().padStart(2, '0')}:${minutoAtual.toString().padStart(2, '0')}`;
+    const horarioFormatado = `${dataHoraAtual.getHours().toString().padStart(2, '0')}:${dataHoraAtual.getMinutes().toString().padStart(2, '0')}`;
     
-    // Adicionar à lista se ainda não existe
-    if (!horarios.includes(horarioFormatado)) {
-      horarios.push(horarioFormatado);
-    }
+    // Adicionar à lista
+    horarios.push({
+      data: dataFormatada,
+      hora: horarioFormatado
+    });
     
     // Avançar para o próximo horário
-    horaAtualMinutos += intervaloMinutos;
+    dataHoraAtual = new Date(dataHoraAtual.getTime() + intervaloMs);
   }
   
-  return horarios.join(', ');
+  return horarios;
 };
-
   const salvarLembrete = async () => {
     // Validar formulário antes de enviar
     if (!validarFormulario()) {
@@ -153,34 +166,56 @@ const calcularHorariosMedicamento = (
     try {
       const horaInicio = new Date();
       let horaInicialString = '10:00'; // valor padrão
+      let dataInicial = new Date().toISOString().split('T')[0]; // valor padrão para data
       
       if (horarios[0]?.hora) {
         horaInicialString = horarios[0].hora;
-        const [horas, minutos] = horaInicialString.split(':');
-        horaInicio.setHours(parseInt(horas));
-        horaInicio.setMinutes(parseInt(minutos));
-      }
-  
-      // Calcular os horários que o medicamento deve ser tomado
+        dataInicial = horarios[0].data;
+        
+        // Criar um objeto Date com a data e hora fornecidas
+        const [ano, mes, dia] = dataInicial.split('-').map(Number);
+        const [horas, minutos] = horaInicialString.split(':').map(Number);
+          horaInicio.setFullYear(ano);
+        horaInicio.setMonth(mes - 1); // Mês em JavaScript começa do 0
+        horaInicio.setDate(dia);
+        horaInicio.setHours(horas);
+        horaInicio.setMinutes(minutos);
+        horaInicio.setSeconds(0);
+        horaInicio.setMilliseconds(0);
+      }      // Calcular os horários que o medicamento deve ser tomado
       const horariosCalculados = calcularHorariosMedicamento(
         horaInicialString,
         parseInt(Intervalo),
-        parseInt(duracao)
+        parseInt(duracao),
+        dataInicial
       );
-  
-      const dadosLembrete = {
+
+      // Mapeamento de cores para nomes
+      const nomeCores: Record<string, string> = {
+        '#FF0000': 'vermelho',
+        '#4B00FF': 'azul',
+        '#FFFF00': 'amarelo',
+        '#FFA500': 'laranja',
+        '#00CFFF': 'azul claro',
+        '#FFFFFF': 'branco',
+        '#00FF7F': 'verde claro',
+        '#006400': 'verde escuro',
+        '#000000': 'preto',
+        '#DA70D6': 'orquídea'
+      };      const dadosLembrete = {
         nome: nome,
-        quantidadeCaixa: parseInt(quantidade),
-        dataValidade: validade,
-        quantidadeDiaria: parseInt(Intervalo),
-        foto: 'https://example.com/image.jpg',
         classificacao: tipo,
-        horaInicio: horaInicio.toISOString(),
-        cor: corSelecionada,
-        unidadeMedida: `${dosagem} ${unidade}`,
-        motivo: motivo || observacoes,
-        quantidadeDias: parseInt(duracao),
-        horariosParaTomar: horariosCalculados // Nova propriedade com os horários calculados
+        unid_medida: unidade, // Apenas a unidade
+        qnt_dose: parseFloat(dosagem), // Quantidade da dosagem
+        motivo: motivo || '',
+        inicio: horaInicio.toISOString(), // Data e hora formatadas como ISO string
+        qnt_dia: parseInt(duracao),
+        qnt_vz_dia: horariosCalculados, // Array com objetos { data, hora }
+        data_validade: validade ? validade.toISOString() : null,
+        qnt_caixa: parseInt(quantidade),
+        foto: 'https://example.com/image.jpg',
+        cor: nomeCores[corSelecionada] || 'vermelho', // Nome da cor em vez do hexadecimal
+        observacao: observacoes || ''
       };
 
       console.log('JSON sendo enviado para a API:', JSON.stringify(dadosLembrete, null, 2));
@@ -211,13 +246,12 @@ const calcularHorariosMedicamento = (
       alert('Erro ao salvar o lembrete. Tente novamente.');
     }
   };
-
   const limparFormulario = () => {
     setNome('');
     setDosagem('');
     setTipo('');
     setCorSelecionada('#FF0000');
-    setHorarios([{ hora: '10:00', dose: '1 comp.' }]);
+    setHorarios([{ data: new Date().toISOString().split('T')[0], hora: '10:00', dose: '1 comp.' }]);
     setMotivo('');
     setDuracao('');
     setQuantidade('');
@@ -233,14 +267,14 @@ const calcularHorariosMedicamento = (
       <h2 className="text-xl font-bold text-[#0B6E71] mb-4">
         Configurar lembrete
       </h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Nome do medicamento</label>
           <input
             className={`p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
               erros.nome ? 'border-red-500' : 'border-[#037F8C]'
             }`}
-            placeholder="Nome do medicamento"
+            placeholder="Ex: Dipirona"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
           />
@@ -250,13 +284,14 @@ const calcularHorariosMedicamento = (
         </div>
 
         <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Dosagem</label>
           {/* Input de dosagem com select de unidade */}
           <div className={`flex border rounded bg-white overflow-hidden ${
             erros.dosagem ? 'border-red-500' : 'border-[#037F8C]'
           }`}>
             <input
               className="w-full max-w-[calc(100%-64px)] p-2 outline-none text-gray-700 KantumruyMedium"
-              placeholder="Dosagem"
+              placeholder="Ex: 500"
               value={dosagem}
               onChange={(e) => setDosagem(e.target.value)}
               type="number"
@@ -281,12 +316,15 @@ const calcularHorariosMedicamento = (
           )}
         </div>
 
-        <input
-          className="p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium"
-          placeholder="Tipo"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-        />
+        <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Tipo</label>
+          <input
+            className="p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium"
+            placeholder="Ex: Analgésico"
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+          />
+        </div>
       </div>
 
       <label className="font-medium text-[#0B6E71]">Cor identificadora</label>
@@ -301,50 +339,58 @@ const calcularHorariosMedicamento = (
             onClick={() => setCorSelecionada(cor)}
           ></div>
         ))}
-      </div>
-
-      <label className="font-medium text-[#0B6E71] block mt-4">
-        Qual horário você tomou (vai tomar) o remédio pela 1° vez?
+      </div>      <label className="font-light text-[#0B6E71] block mt-4">
+        Primeira dose (dia e horário)
       </label>
       {horarios.map((h, index) => (
         <div key={index} className="flex gap-2 items-center mb-2">
+          <input 
+            type="date" 
+            value={h.data}
+            onChange={(e) => atualizarHorario(index, 'data', e.target.value)}
+            className="p-2 rounded border border-[#037F8C] bg-white outline-none text-gray-700 KantumruyMedium w-40"
+            placeholder="AAAA-MM-DD"
+          />
           <input
             type="time"
             value={h.hora}
             onChange={(e) => atualizarHorario(index, 'hora', e.target.value)}
             className="p-2 rounded border border-[#037F8C] bg-white outline-none text-gray-700 KantumruyMedium w-28"
+            placeholder="HH:MM"
           />
         </div>
-          ))}
+      ))}
         
 
         <div>
+          <label className="font-light text-[#0B6E71] block mt-4">
+            De quanto em quanto tempo vai ser tomado o remédio? (em horas)
+          </label>
           <input
           type="number"
-          placeholder="De quanto em quanto tempo vai ser tomado o remédio? (em horas)"
+          placeholder="Ex: 6 ou 8..."
           value={Intervalo}
           onChange={(e) => setIntervalo(e.target.value)}
           className="w-full p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium mb-4"
-          />
-        </div>
+          />        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Motivo pelo qual vai tomar o remédio"
-          value={motivo}
-          onChange={(e) => setMotivo(e.target.value)}
-          className="p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium"
-        />
-
-        
-
-        
-
         <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Motivo pelo qual vai tomar o remédio</label>
+          <input
+            type="text"
+            placeholder="Ex: Dor de cabeça"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            className="p-2 border border-[#037F8C] rounded bg-white outline-none w-full text-gray-700 KantumruyMedium"
+          />
+        </div>
+         
+        <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Duração do tratamento</label>
           <input
             type="number"
-            placeholder="Duração do tratamento (dias)"
+            placeholder="Ex: 7"
             value={duracao}
             onChange={(e) => setDuracao(e.target.value)}
             className={`p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
@@ -356,15 +402,14 @@ const calcularHorariosMedicamento = (
           )}
         </div>
 
-        
-
         <div>
+          <label className="text-sm text-[#0B6E71] mb-1 block">Quantidade do remédio</label>
           <input
             type="number"
-            placeholder="Quantidade do remédio"
+            placeholder="Ex: 30"
             value={quantidade}
             onChange={(e) => setQuantidade(e.target.value)}
-            className={`p-2 mt-6 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
+            className={`p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
               erros.quantidade ? 'border-red-500' : 'border-[#037F8C]'
             }`}
           />
@@ -424,11 +469,11 @@ const calcularHorariosMedicamento = (
             }}
             className="p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium w-full"
           />
-        </div>
-      </div>
+        </div>      </div>
       
+      <label className="text-sm text-[#0B6E71] mb-1 block">Observações</label>
       <textarea
-        placeholder="Observações"
+        placeholder="Ex: Tomar após as refeições"
         className="w-full p-2 border border-[#037F8C] rounded bg-white outline-none text-gray-700 KantumruyMedium mb-4 resize-none"
         rows={3}
         value={observacoes}
