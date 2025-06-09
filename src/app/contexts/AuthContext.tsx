@@ -82,24 +82,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        // Optional: Validate token with backend
-        // const response = await fetch('https://medreminder-backend.onrender.com/auth/validate', {
-        //   headers: {
-        //     Authorization: `Bearer ${token}`
-        //   }
-        // });
-
-        // if (response.ok) {
-        //   const userData = await response.json();
-        //   setUser(userData);
-        //   setIsAuthenticated(true);
-        // } else {
-        //   // Token is invalid
-        //   localStorage.removeItem('token');
-        //   setIsAuthenticated(false);
-        //   setUser(null);
-        // }
-
         // For now, just assume token presence means authenticated
         setIsAuthenticated(true);
         setLoading(false);

@@ -33,7 +33,7 @@ export default function Cadastro() {
 
     const usuarioParaCadastro = {
       nome,
-      dataNasc: dataNascimento, // Renomeado para dataNasc
+      dataNasc: dataNascimento,
       cpf: cpfSemFormatacao,
       email,
       cep: cepSemFormatacao,
@@ -47,7 +47,6 @@ export default function Cadastro() {
       const response = await fetch(
         'https://medreminder-backend.onrender.com/usuario',
         {
-          // Substitua pela URL da sua API
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -57,15 +56,13 @@ export default function Cadastro() {
       );
 
       if (!response.ok) {
-        // Tratar erros da API, por exemplo, exibindo uma mensagem
         const errorData = await response.json();
         setErro(errorData.message || 'Erro ao cadastrar. Tente novamente.');
         return;
       }
 
-      // Cadastro bem-sucedido
       console.log('Usuário cadastrado com sucesso!');
-      router.push('/login'); // Redireciona para login
+      router.push('/login');
     } catch (error) {
       console.error('Erro na requisição de cadastro:', error);
       setErro('Erro ao conectar com o servidor. Tente novamente mais tarde.');
