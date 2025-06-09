@@ -155,8 +155,7 @@ const calcularHorariosMedicamento = (
   }
   
   return horarios;
-};
-  const salvarLembrete = async () => {
+};  const salvarLembrete = async () => {
     // Validar formulário antes de enviar
     if (!validarFormulario()) {
       alert('Por favor, corrija os erros no formulário');
@@ -175,14 +174,16 @@ const calcularHorariosMedicamento = (
         // Criar um objeto Date com a data e hora fornecidas
         const [ano, mes, dia] = dataInicial.split('-').map(Number);
         const [horas, minutos] = horaInicialString.split(':').map(Number);
-          horaInicio.setFullYear(ano);
+        horaInicio.setFullYear(ano);
         horaInicio.setMonth(mes - 1); // Mês em JavaScript começa do 0
         horaInicio.setDate(dia);
         horaInicio.setHours(horas);
         horaInicio.setMinutes(minutos);
         horaInicio.setSeconds(0);
         horaInicio.setMilliseconds(0);
-      }      // Calcular os horários que o medicamento deve ser tomado
+      }
+      
+      // Calcular os horários que o medicamento deve ser tomado
       const horariosCalculados = calcularHorariosMedicamento(
         horaInicialString,
         parseInt(Intervalo),
@@ -190,36 +191,49 @@ const calcularHorariosMedicamento = (
         dataInicial
       );
 
-      // Mapeamento de cores para nomes
+      // Mapeamento de cores para nomes com primeira letra maiúscula
       const nomeCores: Record<string, string> = {
-        '#FF0000': 'vermelho',
-        '#4B00FF': 'azul',
-        '#FFFF00': 'amarelo',
-        '#FFA500': 'laranja',
-        '#00CFFF': 'azul claro',
-        '#FFFFFF': 'branco',
-        '#00FF7F': 'verde claro',
-        '#006400': 'verde escuro',
-        '#000000': 'preto',
-        '#DA70D6': 'orquídea'
-      };      const dadosLembrete = {
+        '#FF0000': 'Vermelho',
+        '#4B00FF': 'Azul',
+        '#FFFF00': 'Amarelo',
+        '#FFA500': 'Laranja',
+        '#00CFFF': 'Azul claro',
+        '#FFFFFF': 'Branco',
+        '#00FF7F': 'Verde claro',
+        '#006400': 'Verde escuro',
+        '#000000': 'Preto',
+        '#DA70D6': 'Orquídea'
+      };
+      
+      // Formatação da data de validade para YYYY-MM-DD
+      let dataValidadeFormatada = null;
+      if (validade) {
+        dataValidadeFormatada = validade.toISOString().split('T')[0];
+      }
+
+      // Criação do objeto para o lembrete no formato esperado pela API
+      const dadosLembrete = {
         nome: nome,
-        classificacao: tipo,
-        unid_medida: unidade, // Apenas a unidade
-        qnt_dose: parseFloat(dosagem), // Quantidade da dosagem
-        motivo: motivo || '',
-        inicio: horaInicio.toISOString(), // Data e hora formatadas como ISO string
-        qnt_dia: parseInt(duracao),
-        qnt_vz_dia: horariosCalculados, // Array com objetos { data, hora }
-        data_validade: validade ? validade.toISOString() : null,
-        qnt_caixa: parseInt(quantidade),
+        quantidadeCaixa: parseInt(quantidade),
+        dataValidade: dataValidadeFormatada,
+        quantidadeDiaria: parseInt(Intervalo),
         foto: 'https://example.com/image.jpg',
-        cor: nomeCores[corSelecionada] || 'vermelho', // Nome da cor em vez do hexadecimal
+        classificacao: tipo,
+        horaInicio: horaInicio.toISOString(),
+        cor: nomeCores[corSelecionada] || 'Vermelho',
+        unidadeMedida: unidade,
+        motivo: motivo || '',
+        quantidadeDias: parseInt(duracao),
+        quantidadeDose: `${dosagem} ${unidade}`,
+        usuarioId: 1, // Valor temporário, será substituído pelo backend
         observacao: observacoes || ''
       };
 
-      console.log('JSON sendo enviado para a API:', JSON.stringify(dadosLembrete, null, 2));
+      // Log do JSON do medicamento
+      console.log('%c DADOS DO MEDICAMENTO SENDO ENVIADOS PARA A API:', 'background: #222; color: #4CAF50; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify(dadosLembrete, null, 2), 'color: #4CAF50; font-size: 14px;');
   
+      // Requisição para criar o lembrete
       const response = await fetch(
         'https://medreminder-backend.onrender.com/remedio',
         {
@@ -229,21 +243,99 @@ const calcularHorariosMedicamento = (
           },
           body: JSON.stringify(dadosLembrete),
         },
-      );
-  
-      if (!response.ok) {
-        throw new Error('Erro ao salvar o lembrete');
+      );      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('%c ERRO AO SALVAR MEDICAMENTO:', 'background: #f44336; color: white; font-size: 16px; font-weight: bold;');
+        console.error('%c Status: ' + response.status, 'color: #f44336;');
+        console.error('%c Resposta: ' + errorText, 'color: #f44336;');
+        throw new Error(`Erro ao salvar o lembrete: ${response.status} ${errorText}`);
       }
   
       const data = await response.json();
-      console.log('Lembrete salvo com sucesso:', data);
-      console.log('Horários calculados:', horariosCalculados);
-      alert('Lembrete salvo com sucesso!');
-  
-      limparFormulario();
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao salvar o lembrete. Tente novamente.');
+      console.log('%c MEDICAMENTO SALVO COM SUCESSO:', 'background: #4CAF50; color: white; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify(data, null, 2), 'color: #4CAF50; font-size: 14px;');
+        // Obter o ID do remédio criado
+      const remedioId = data.id;
+      
+      // Debug dos horários calculados antes da conversão para ISO
+      console.log('%c HORÁRIOS CALCULADOS (antes da conversão ISO):', 'background: #3f51b5; color: white; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify(horariosCalculados, null, 2), 'color: #3f51b5; font-size: 14px;');
+      
+      // Preparar o array de doses para envio
+      const dosesISO = horariosCalculados.map(horario => {
+        const [ano, mes, dia] = horario.data.split('-').map(Number);
+        const [horas, minutos] = horario.hora.split(':').map(Number);
+        
+        const dataHora = new Date();
+        dataHora.setFullYear(ano);
+        dataHora.setMonth(mes - 1); // Mês em JavaScript começa do 0
+        dataHora.setDate(dia);
+        dataHora.setHours(horas);
+        dataHora.setMinutes(minutos);
+        dataHora.setSeconds(0);
+        dataHora.setMilliseconds(0);
+        
+        // Debug de cada conversão individual
+        console.log(`Convertendo: data=${horario.data}, hora=${horario.hora} => ${dataHora.toISOString()}`);
+        
+        return dataHora.toISOString();
+      });
+        // Dados para a requisição de doses
+      const dadosDoses = {
+        usuarioId: 1, // Valor temporário, será substituído pelo backend
+        remedioId: remedioId,
+        doses: dosesISO
+      };
+        // Log exemplar do formato esperado
+      console.log('%c FORMATO ESPERADO DO JSON DE DOSES:', 'background: #222; color: #bada55; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify({
+        usuarioId: 1,
+        remedioId: "ID retornado do backend",
+        doses: [
+          "2025-06-06T10:00:00.000Z",
+          "2025-06-06T18:00:00.000Z",
+          "2025-06-07T02:00:00.000Z"
+        ]
+      }, null, 2), 'color: #bada55; font-size: 14px;');
+      
+      // Log dos dados reais sendo enviados
+      console.log('%c DADOS REAIS SENDO ENVIADOS PARA A API:', 'background: #222; color: #ff9800; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify(dadosDoses, null, 2), 'color: #ff9800; font-size: 14px;');
+      
+      // Requisição para criar as doses
+      const responseDoses = await fetch(
+        'https://medreminder-backend.onrender.com/dose/doses',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dadosDoses),
+        },
+      );
+        if (!responseDoses.ok) {
+        const errorText = await responseDoses.text();
+        console.error('%c ERRO AO SALVAR DOSES:', 'background: #f44336; color: white; font-size: 16px; font-weight: bold;');
+        console.error('%c Status: ' + responseDoses.status, 'color: #f44336;');
+        console.error('%c Resposta: ' + errorText, 'color: #f44336;');
+        throw new Error(`Erro ao salvar as doses: ${responseDoses.status} ${errorText}`);
+      }
+      
+      const dataDoses = await responseDoses.json();
+      console.log('%c DOSES SALVAS COM SUCESSO:', 'background: #ff9800; color: white; font-size: 16px; font-weight: bold;');
+      console.log('%c' + JSON.stringify(dataDoses, null, 2), 'color: #ff9800; font-size: 14px;');
+      
+      alert('Lembrete e doses salvos com sucesso!');
+      limparFormulario();    } catch (error) {
+      console.error('%c ERRO NA OPERAÇÃO:', 'background: #f44336; color: white; font-size: 16px; font-weight: bold;');
+      console.error('%c', 'color: #f44336; font-size: 14px;', error);
+      
+      let mensagemErro = 'Erro ao salvar o lembrete. Tente novamente.';
+      if (error instanceof Error) {
+        mensagemErro = error.message;
+      }
+      
+      alert(mensagemErro);
     }
   };
   const limparFormulario = () => {
