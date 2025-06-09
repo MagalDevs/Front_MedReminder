@@ -18,7 +18,8 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);    try {
+    setIsLoading(true);
+    try {
       // Using the apiRequest utility with requireAuth=false since we're logging in
       const data = await apiRequest<{
         access_token: string;
@@ -33,21 +34,20 @@ export default function Login() {
         }),
       });
 
-      // Check if the response contains an error message even though it's a "successful" HTTP response
       if (data.message && !data.access_token) {
         // This happens when the server returns a 200 OK but with an error message
         console.error('Error in response:', data.message);
         setError(data.message);
         return;
-      } 
-      
+      }
+
       // If we get here and have an access_token, the login was successful
       if (data.access_token) {
         console.log('Login successful, full response:', data);
-        
+
         // If user data is not in the login response, try to fetch user profile
         let userData = data.user;
-        
+
         if (!userData || !userData.nome) {
           try {
             console.log('Fetching user profile...');
@@ -60,18 +60,18 @@ export default function Login() {
               method: 'GET',
               requireAuth: false,
               headers: {
-                'Authorization': `Bearer ${data.access_token}`
-              }
+                Authorization: `Bearer ${data.access_token}`,
+              },
             });
-            
+
             console.log('User profile data:', profileData);
             userData = profileData;
           } catch (profileError) {
             console.warn('Could not fetch user profile:', profileError);
             // Use email as fallback if profile fetch fails
-            userData = { 
+            userData = {
               email: username,
-              nome: username.split('@')[0] 
+              nome: username.split('@')[0],
             };
           }
         }
