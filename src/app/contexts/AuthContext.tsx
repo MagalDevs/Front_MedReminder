@@ -29,7 +29,9 @@ interface AuthContextType {
 const formatUserDisplayName = (user: User | null): string => {
   if (!user) return 'Usuário';
 
-  console.log('Formatting display name for user:', user);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Formatting display name for user:', user);
+  }
 
   // Check different possible name properties
   if (typeof user.nome === 'string' && user.nome.trim()) {
