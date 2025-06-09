@@ -2,14 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useAuth } from '../contexts/AuthContext';
 
 type Usuario = {
-  nome: string;
-  email: string;
-  id: string;
+  nome?: string;
+  name?: string;
+  email?: string;
+  id?: string | number;
+  [key: string]: unknown;
 };
 
 export default function ConfiguracoesContent() {
+  const { user } = useAuth();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senhaAtual, setSenhaAtual] = useState('');
@@ -23,29 +27,21 @@ export default function ConfiguracoesContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Simular busca de dados do usuário atual
-    // No ambiente real isso seria uma chamada de API
-    setTimeout(() => {
-      const usuarioMock = {
-        nome: '',
-        email: '',
-        id: 'usr123',
-      };
-
-      setNome(usuarioMock.nome);
-      setEmail(usuarioMock.email);
-      setUsuario(usuarioMock);
-      setLoading(false);
-    }, 800);
-  }, []);
+    if (user) {
+      setNome(user.name || '');
+      setEmail(user.email || '');
+      setUsuario(user);
+    }
+    setLoading(false);
+  }, [user]);
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
 
     try {
-      // Simulação de atualização de perfil
-      // Em produção isso seria uma chamada API
+      // Em um ambiente real, você utilizaria uma API para atualizar o perfil
+      // Por enquanto, vamos apenas simular isso
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Atualizar os dados do usuário em memória para simular sucesso
@@ -201,7 +197,7 @@ export default function ConfiguracoesContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Atualizar Nome'}
               </button>
@@ -312,9 +308,9 @@ export default function ConfiguracoesContent() {
             <div className="flex flex-col items-center gap-4 pt-10">
               <div className="w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
                 {foto ? (
-                  <Image 
-                    src={foto} 
-                    alt="Foto de perfil atual" 
+                  <Image
+                    src={foto}
+                    alt="Foto de perfil atual"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -339,7 +335,6 @@ export default function ConfiguracoesContent() {
             />
           </div>
         </div>
-
       </div>
     </div>
   );

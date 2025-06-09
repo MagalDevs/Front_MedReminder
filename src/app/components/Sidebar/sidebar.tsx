@@ -1,32 +1,34 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+import { Menu, X, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Sidebar() {
-
+  const { getUserDisplayName } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-  }
+  };
 
   const pathname = usePathname();
 
   const getLinkStyle = (path: string) => {
-    const baseStyle = "KantumruyMedium px-1 py-1 rounded transition duration-700 ease-in-out";
+    const baseStyle =
+      'KantumruyMedium px-1 py-1 rounded transition duration-700 ease-in-out';
     const isActive = pathname === path;
-    
+
     return `${baseStyle} ${
-      isActive 
-      ? "text-[#E0DDDD] bg-[#037F8C] scale-105" 
-      : "text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] hover:scale-105"
+      isActive
+        ? 'text-[#E0DDDD] bg-[#037F8C] scale-105'
+        : 'text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] hover:scale-105'
     }`;
   };
 
-  
   return (
     <>
       {/* Botão para abrir o sidebar - Só aparece quando fechado */}
@@ -39,8 +41,6 @@ export default function Sidebar() {
         </button>
       )}
 
-      
-
       {/* Overlay com blur para embaçar o fundo */}
       {isOpen && (
         <div
@@ -50,13 +50,14 @@ export default function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         min-h-screen w-60 bg-[#D9D9D9] flex flex-col shadow-md z-[50]
         fixed
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        
+      `}
+      >
         {/* Botão para fechar - Sempre visível */}
         <button
           onClick={toggleSidebar}
@@ -68,53 +69,59 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="pb-5 pt-5 flex justify-center items-center">
           <Link href="/" onClick={() => setIsOpen(false)}>
-            <Image 
-            src="/assets/LogoDeitada.png"
-            alt="MedReminder Logo"
-            width={160}
-            height={40}
-            className="pr-5"
+            <Image
+              src="/assets/LogoDeitada.png"
+              alt="MedReminder Logo"
+              width={160}
+              height={40}
+              className="pr-5"
             />
           </Link>
         </div>
-        
+
         <div className="h-[1px] bg-[#037F8C] w-full"></div>
-        
+
         <div className="flex flex-col gap-8 pl-10 pr-5 pt-7 flex-grow">
-          <Link 
-            href="/medicamentos" 
+          <Link
+            href="/medicamentos"
             className={getLinkStyle('/medicamentos')}
             onClick={() => setIsOpen(false)}
           >
             Meus medicamentos
           </Link>
-          <Link 
-            href="/Lembrete" 
+          <Link
+            href="/Lembrete"
             className={getLinkStyle('/Lembrete')}
             onClick={() => setIsOpen(false)}
           >
             Lembrete
           </Link>
-          <Link 
-            href="/historico" 
+          <Link
+            href="/historico"
             className={getLinkStyle('/historico')}
             onClick={() => setIsOpen(false)}
           >
             Histórico
           </Link>
-          <Link 
-            href="/Configuracoes" 
+          <Link
+            href="/Configuracoes"
             className={getLinkStyle('/Configuracoes')}
             onClick={() => setIsOpen(false)}
           >
             Configurações
           </Link>
         </div>
-        
         <div className="mt-auto pl-10 pr-5 pb-4">
-          <p className="KantumruySemiBold text-[#044D55]">User</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-[#037F8C] p-2 rounded-full">
+              <User size={16} className="text-white" />
+            </div>{' '}
+            <p className="KantumruySemiBold text-[#044D55]">
+              {getUserDisplayName()}
+            </p>
+          </div>
         </div>
       </aside>
     </>
-  )
+  );
 }
