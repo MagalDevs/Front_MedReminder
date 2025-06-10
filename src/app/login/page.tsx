@@ -20,32 +20,28 @@ export default function Login() {
     setError('');
     setIsLoading(true);
     try {
-      // Using the apiRequest utility with requireAuth=false since we're logging in
       const data = await apiRequest<{
         access_token: string;
         user?: Record<string, unknown>;
-        message?: string; // To handle potential error messages in response
+        message?: string;
       }>('auth/login', {
         method: 'POST',
         requireAuth: false,
         body: JSON.stringify({
           email: username,
-          password: password,
+          senha: password,
         }),
       });
 
       if (data.message && !data.access_token) {
-        // This happens when the server returns a 200 OK but with an error message
         console.error('Error in response:', data.message);
         setError(data.message);
         return;
       }
 
-      // If we get here and have an access_token, the login was successful
       if (data.access_token) {
         console.log('Login successful, full response:', data);
 
-        // If user data is not in the login response, try to fetch user profile
         let userData = data.user;
 
         if (!userData || !userData.nome) {
@@ -75,26 +71,18 @@ export default function Login() {
             };
           }
         }
-
-        // Login successful, store token and user data
         console.log('Storing user data:', userData);
         login(data.access_token, userData);
 
-        // Redirect user after successful login
         router.push('/');
       } else {
-        // No token in response
         console.error('No access_token in successful response:', data);
         setError('Erro no servidor: Token de autenticação não encontrado');
       }
     } catch (err) {
       console.error('Login error:', err);
-
-      // Get the exact error message from the API response
       if (err instanceof Error) {
         const errorMessage = err.message;
-
-        // Handle specific error cases
         if (
           errorMessage.includes('401') ||
           errorMessage.toLowerCase().includes('invalid') ||
@@ -120,7 +108,6 @@ export default function Login() {
             'O servidor está demorando para responder. Verifique sua conexão.',
           );
         } else {
-          // Display the exact error message from the API for other cases
           setError(errorMessage);
         }
       } else if (
@@ -129,10 +116,8 @@ export default function Login() {
         'message' in err &&
         typeof err.message === 'string'
       ) {
-        // Handle case where err might be an object with message property
         setError(err.message);
       } else {
-        // Fallback for any other error format
         setError('Ocorreu um erro durante o login');
       }
     } finally {
