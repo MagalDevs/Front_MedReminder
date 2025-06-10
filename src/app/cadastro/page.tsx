@@ -17,7 +17,7 @@ export default function Cadastro() {
   const [erro, setErro] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
 
@@ -27,19 +27,46 @@ export default function Cadastro() {
       return;
     }
 
-    // Aqui você implementaria a lógica de cadastro
-    console.log('Dados de cadastro:', {
-      nome,
-      email,
-      senha,
-      cpf,
-      cep,
-      dataNascimento,
-      cuidador,
-    });
+    // Remover formatação do CPF e CEP
+    const cpfSemFormatacao = cpf.replace(/\D/g, '');
+    const cepSemFormatacao = cep.replace(/\D/g, '');
 
-    // Redireciona para login após cadastro bem-sucedido
-    router.push('/login');
+    const usuarioParaCadastro = {
+      nome,
+      dataNasc: dataNascimento,
+      cpf: cpfSemFormatacao,
+      email,
+      cep: cepSemFormatacao,
+      cuidador,
+      senha,
+    };
+
+    console.log('Dados de cadastro para API:', usuarioParaCadastro);
+
+    try {
+      const response = await fetch(
+        'https://medreminder-backend.onrender.com/usuario',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(usuarioParaCadastro),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setErro(errorData.message || 'Erro ao cadastrar. Tente novamente.');
+        return;
+      }
+
+      console.log('Usuário cadastrado com sucesso!');
+      router.push('/login');
+    } catch (error) {
+      console.error('Erro na requisição de cadastro:', error);
+      setErro('Erro ao conectar com o servidor. Tente novamente mais tarde.');
+    }
   };
 
   // Formatação de CPF: 000.000.000-00
