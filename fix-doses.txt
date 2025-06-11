@@ -1,0 +1,19 @@
+// This is a modification for cardCadastrar.tsx
+// Find the section where dadosDoses is defined (around line 420-430) and replace it with:
+
+      // Dados para a requisição de doses - simplificar a estrutura para atender o formato da API
+      const dadosDoses = {
+        remedioId: typeof remedioId === 'string' ? Number(remedioId) : remedioId,
+        doses: dosesISO
+      };
+
+// Remove the redundant conversion of remedioId in the doses API call section
+// Find this section (around line 450-460):
+
+        // Verificar formato do remedioId - convertendo para número se for string para garantir compatibilidade
+        if (typeof remedioId === 'string' && !isNaN(Number(remedioId))) {
+          dadosDoses.remedioId = Number(remedioId);
+          console.log('Convertendo remedioId de string para número:', dadosDoses.remedioId);
+        }
+
+// And remove it or comment it out since we're already converting the remedioId when creating dadosDoses

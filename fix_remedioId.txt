@@ -1,0 +1,5 @@
+        console.log('ID do remédio usado para criar doses:', remedioId);
+        
+        // remedioId já foi convertido durante a criação do objeto dadosDoses
+        
+        const dataDoses = await apiRequest<any>('dose/doses', {
