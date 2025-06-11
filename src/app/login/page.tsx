@@ -4,18 +4,125 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo/Logo';
+import { useAuth } from '../contexts/AuthContext';
+import { apiRequest } from '../utils/api';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would implement actual authentication logic
-    console.log('Login attempt with:', username, password);
-    // For now, just redirect back to home after "login"
-    router.push('/');
+    setError('');
+    setIsLoading(true);
+    try {
+      const data = await apiRequest<{
+        access_token: string;
+        user?: Record<string, unknown>;
+        message?: string;
+      }>('auth/login', {
+        method: 'POST',
+        requireAuth: false,
+        body: JSON.stringify({
+          email: username,
+          senha: password,
+        }),
+      });
+
+      if (data.message && !data.access_token) {
+        console.error('Error in response:', data.message);
+        setError(data.message);
+        return;
+      }
+
+      if (data.access_token) {
+        console.log('Login successful, full response:', data);
+
+        let userData = data.user;
+
+        if (!userData || !userData.nome) {
+          try {
+            console.log('Fetching user profile...');
+            const profileData = await apiRequest<{
+              id: string;
+              nome: string;
+              email: string;
+              [key: string]: unknown;
+            }>('usuario/perfil', {
+              method: 'GET',
+              requireAuth: false,
+              headers: {
+                Authorization: `Bearer ${data.access_token}`,
+              },
+            });
+
+            console.log('User profile data:', profileData);
+            userData = profileData;
+          } catch (profileError) {
+            console.warn('Could not fetch user profile:', profileError);
+            // Use email as fallback if profile fetch fails
+            userData = {
+              email: username,
+              nome: username.split('@')[0],
+            };
+          }
+        }
+        console.log('Storing user data:', userData);
+        login(data.access_token, userData);
+
+        router.push('/');
+      } else {
+        console.error('No access_token in successful response:', data);
+        setError('Erro no servidor: Token de autenticação não encontrado');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      if (err instanceof Error) {
+        const errorMessage = err.message;
+        if (
+          errorMessage.includes('401') ||
+          errorMessage.toLowerCase().includes('invalid') ||
+          errorMessage.toLowerCase().includes('inválido')
+        ) {
+          setError('E-mail ou senha inválidos');
+        } else if (
+          errorMessage.includes('404') ||
+          errorMessage.includes('not found')
+        ) {
+          setError(
+            'Serviço temporariamente indisponível. Tente novamente mais tarde.',
+          );
+        } else if (errorMessage.includes('429')) {
+          setError(
+            'Muitas tentativas. Aguarde um momento antes de tentar novamente.',
+          );
+        } else if (
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('timed out')
+        ) {
+          setError(
+            'O servidor está demorando para responder. Verifique sua conexão.',
+          );
+        } else {
+          setError(errorMessage);
+        }
+      } else if (
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof err.message === 'string'
+      ) {
+        setError(err.message);
+      } else {
+        setError('Ocorreu um erro durante o login');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -25,8 +132,13 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <Logo width={140} />
           </div>
-          
         </div>
+
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -38,8 +150,8 @@ export default function Login() {
             </label>{' '}
             <input
               id="username"
-              type="text"
-              placeholder='Digite seu e-mail'
+              type="email"
+              placeholder="Digite seu e-mail"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
@@ -57,7 +169,7 @@ export default function Login() {
             <input
               id="password"
               type="password"
-              placeholder='Digite sua senha'
+              placeholder="Digite sua senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:outline-none focus:ring-2 focus:ring-[#037F8C]"
@@ -68,9 +180,10 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              className="w-full bg-[#4A90A4] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:bg-[#044D55] hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+              disabled={isLoading}
+              className="w-full bg-[#4A90A4] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:bg-[#044D55] hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Entrar
+              {isLoading ? 'Processando...' : 'Entrar'}
             </button>
           </div>
         </form>
