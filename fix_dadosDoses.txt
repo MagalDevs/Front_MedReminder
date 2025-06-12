@@ -1,5 +1,0 @@
-      // Dados para a requisição de doses - simplificar a estrutura para atender o formato da API
-      const dadosDoses = {
-        remedioId: typeof remedioId === 'string' ? Number(remedioId) : remedioId,
-        doses: dosesISO
-      };

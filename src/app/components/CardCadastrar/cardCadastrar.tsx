@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { apiRequest, API_URL } from '../../utils/api';
+import { apiRequest } from '../../utils/api';
 
 const Cores = [
   '#FF0000',
@@ -58,13 +58,17 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [observacoes, setObservacoes] = useState('');
   const [erros, setErros] = useState<ErrosForm>({}); // Corrigido o tipo
   const [unidade, setUnidade] = useState('mg');  // Função para obter dados do usuário atual se necessário
-  const obterDadosUsuario = async () => {
+
+  type UsuarioFake = any
+
+  const obterDadosUsuario = 
+  useCallback(async () => {
     try {
       console.log('Tentando obter dados do usuário da API...');
-      const userData = await apiRequest<any>('usuario', {
+      const userData = await apiRequest<UsuarioFake>('usuario', {
         method: 'GET'
       });
-      console.log('Resposta da API de usuário:', userData);
+      // console.log('Resposta da API de usuário:', userData);
       
       // Verificar se temos um usuário logado com ID para fazer a busca
       const loggedInUserId = user?.id;
@@ -73,11 +77,11 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       if (Array.isArray(userData) && userData.length > 0) {
         // Se temos um ID de usuário logado, encontrar o usuário específico no array
         if (loggedInUserId) {
-          console.log('Buscando usuário com ID:', loggedInUserId);
+          // console.log('Buscando usuário com ID:', loggedInUserId);
           const userFound = userData.find(u => u.id === loggedInUserId);
           
           if (userFound) {
-            console.log('Usuário encontrado no array:', userFound);
+            // console.log('Usuário encontrado no array:', userFound);
             return userFound;
           } else {
             console.warn('Usuário com ID', loggedInUserId, 'não encontrado no array. Verificando outros métodos...');
@@ -86,11 +90,11 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         
         // Se não temos um ID ou não encontramos o usuário, verificar se temos um email para comparar
         if (user?.email) {
-          console.log('Buscando usuário com email:', user.email);
+          // ('Buscando usuário com email:', user.email);console.log
           const userByEmail = userData.find(u => u.email === user.email);
           
           if (userByEmail) {
-            console.log('Usuário encontrado por email:', userByEmail);
+            // console.log('Usuário encontrado por email:', userByEmail);
             return userByEmail;
           }
         }
@@ -118,7 +122,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       console.error('Erro ao obter dados do usuário:', error);
       throw error;
     }
-  };
+  }, [])
 
   // Log para debug do estado de autenticação
   useEffect(() => {
@@ -133,7 +137,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     if (localStorage.getItem('access_token') && (!user || !user.id)) {
       console.log('Token encontrado, mas dados de usuário ausentes. Tentando obter dados...');
       obterDadosUsuario().then(userData => {
-        console.log('Dados do usuário recuperados:', userData);
+        // console.log('Dados do usuário recuperados:', userData);
+        void userData
       });
     }
   }, [user]);
@@ -273,7 +278,7 @@ const calcularHorariosMedicamento = (
       try {
         const userData = await obterDadosUsuario();
         if (userData && userData.id) {
-          console.log('Dados do usuário recuperados com sucesso, ID:', userData.id);
+          // console.log('Dados do usuário recuperados com sucesso, ID:', userData.id);
           usuarioId = userData.id;
         } else {
           console.error('Dados do usuário obtidos, mas sem ID:', userData);
@@ -282,7 +287,21 @@ const calcularHorariosMedicamento = (
         }
       } catch (e) {
         console.error('Erro ao recuperar dados do usuário:', e);
-        alert('Você precisa estar logado para salvar um lembrete');
+        
+        // Mensagem de erro mais informativa baseada no tipo de erro
+        let mensagemErro = 'Você precisa estar logado para salvar um lembrete';
+        
+        if (e instanceof Error) {
+          if (e.message.includes('401') || e.message.includes('unauthorized')) {
+            mensagemErro = 'Sua sessão expirou. Por favor, faça login novamente.';
+          } else if (e.message.includes('404')) {
+            mensagemErro = 'Não foi possível encontrar seu perfil. Por favor, verifique seu cadastro.';
+          } else if (e.message.includes('timeout') || e.message.includes('network')) {
+            mensagemErro = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
+          }
+        }
+        
+        alert(mensagemErro);
         return;
       }
     } else {
@@ -295,7 +314,7 @@ const calcularHorariosMedicamento = (
       return;
     }
     
-    console.log('%c USUÁRIO IDENTIFICADO COM ID: ' + usuarioId, 'background: #9C27B0; color: white; font-size: 16px; font-weight: bold;');
+    // console.log('%c USUÁRIO IDENTIFICADO COM ID: ' + usuarioId, 'background: #9C27B0; color: white; font-size: 16px; font-weight: bold;');
     
     try {
       const horaInicio = new Date();
@@ -362,8 +381,8 @@ const calcularHorariosMedicamento = (
       };
 
       // Log do JSON do medicamento
-      console.log('%c DADOS DO MEDICAMENTO SENDO ENVIADOS PARA A API:', 'background: #222; color: #4CAF50; font-size: 16px; font-weight: bold;');
-      console.log('%c' + JSON.stringify(dadosLembrete, null, 2), 'color: #4CAF50; font-size: 14px;');
+      // console.log('%c DADOS DO MEDICAMENTO SENDO ENVIADOS PARA A API:', 'background: #222; color: #4CAF50; font-size: 16px; font-weight: bold;');
+      // console.log('%c' + JSON.stringify(dadosLembrete, null, 2), 'color: #4CAF50; font-size: 14px;');
   
       // Requisição para criar o lembrete usando o apiRequest para lidar com autenticação
       console.log('Enviando requisição para criar medicamento...');
@@ -372,22 +391,22 @@ const calcularHorariosMedicamento = (
       let remedioId: number | string | undefined;
       
       try {
-        data = await apiRequest<any>('remedio', {
+        data = await apiRequest<UsuarioFake>('remedio', {
           method: 'POST',
           body: JSON.stringify(dadosLembrete),
         });
-          console.log('%c MEDICAMENTO SALVO COM SUCESSO:', 'background: #4CAF50; color: white; font-size: 16px; font-weight: bold;');
-        console.log('%c' + JSON.stringify(data, null, 2), 'color: #4CAF50; font-size: 14px;');
+        //   console.log('%c MEDICAMENTO SALVO COM SUCESSO:', 'background: #4CAF50; color: white; font-size: 16px; font-weight: bold;');
+        // console.log('%c' + JSON.stringify(data, null, 2), 'color: #4CAF50; font-size: 14px;');
         
         // Verificar a estrutura da resposta para extrair o ID corretamente
         if (data && data.data && data.data.id) {
           // Formato: { message: '...', data: { id: ... } }
           remedioId = data.data.id;
-          console.log('ID do remédio extraído do campo data.data.id:', remedioId);
+          // console.log('ID do remédio extraído do campo data.data.id:', remedioId);
         } else if (data && data.id) {
           // Formato: { id: ... }
           remedioId = data.id;
-          console.log('ID do remédio extraído do campo data.id:', remedioId);
+          // console.log('ID do remédio extraído do campo data.id:', remedioId);
         } else {
           console.error('Resposta da API não contém ID do remédio na estrutura esperada:', data);
           throw new Error('Não foi possível obter o ID do remédio criado');
@@ -417,11 +436,11 @@ const calcularHorariosMedicamento = (
       }
       
       // ID do remédio já foi definido no bloco try acima
-      console.log('Usando remedioId para criar doses:', remedioId);
+      // console.log('Usando remedioId para criar doses:', remedioId);
       
       // Debug dos horários calculados antes da conversão para ISO
-      console.log('%c HORÁRIOS CALCULADOS (antes da conversão ISO):', 'background: #3f51b5; color: white; font-size: 16px; font-weight: bold;');
-      console.log('%c' + JSON.stringify(horariosCalculados, null, 2), 'color: #3f51b5; font-size: 14px;');
+      // console.log('%c HORÁRIOS CALCULADOS (antes da conversão ISO):', 'background: #3f51b5; color: white; font-size: 16px; font-weight: bold;');
+      // console.log('%c' + JSON.stringify(horariosCalculados, null, 2), 'color: #3f51b5; font-size: 14px;');
         // Preparar o array de doses para envio
       const dosesISO = horariosCalculados.map(horario => {
         const [ano, mes, dia] = horario.data.split('-').map(Number);
@@ -437,7 +456,7 @@ const calcularHorariosMedicamento = (
         dataHora.setMilliseconds(0);
         
         // Debug de cada conversão individual
-        console.log(`Convertendo: data=${horario.data}, hora=${horario.hora} => ${dataHora.toISOString()}`);
+        // console.log(`Convertendo: data=${horario.data}, hora=${horario.hora} => ${dataHora.toISOString()}`);
         
         // Garantir que o formato está correto (ISO 8601)
         return dataHora.toISOString();
@@ -461,25 +480,25 @@ const calcularHorariosMedicamento = (
       };
       
       // Log detalhado da identificação do usuário para depuração
-      console.log('%c DETALHES DO USUÁRIO PARA CADASTRO DE DOSES:', 'background: #9C27B0; color: white; font-size: 16px; font-weight: bold;');
-      console.log('ID do usuário sendo usado:', usuarioId);
-      console.log('Objeto user do contexto:', user);
-      console.log('Token presente:', !!localStorage.getItem('access_token'));
+      // console.log('%c DETALHES DO USUÁRIO PARA CADASTRO DE DOSES:', 'background: #9C27B0; color: white; font-size: 16px; font-weight: bold;');
+      // console.log('ID do usuário sendo usado:', usuarioId);
+      // console.log('Objeto user do contexto:', user);
+      // console.log('Token presente:', !!localStorage.getItem('access_token'));
       
       // Log exemplar do formato esperado
-      console.log('%c FORMATO ESPERADO DO JSON DE DOSES:', 'background: #222; color: #bada55; font-size: 16px; font-weight: bold;');
-      console.log('%c' + JSON.stringify({
-        usuarioId: usuarioId,
-        remedioId: "ID retornado do backend",
-        doses: [
-          "2025-06-06T10:00:00.000Z",
-          "2025-06-06T18:00:00.000Z",
-          "2025-06-07T02:00:00.000Z"
-        ]
-      }, null, 2), 'color: #bada55; font-size: 14px;');
+      // console.log('%c FORMATO ESPERADO DO JSON DE DOSES:', 'background: #222; color: #bada55; font-size: 16px; font-weight: bold;');
+      // console.log('%c' + JSON.stringify({
+      //   usuarioId: usuarioId,
+      //   remedioId: "ID retornado do backend",
+      //   doses: [
+      //     "2025-06-06T10:00:00.000Z",
+      //     "2025-06-06T18:00:00.000Z",
+      //     "2025-06-07T02:00:00.000Z"
+      //   ]
+      // }, null, 2), 'color: #bada55; font-size: 14px;');
         // Log dos dados reais sendo enviados
-      console.log('%c DADOS REAIS SENDO ENVIADOS PARA A API:', 'background: #222; color: #ff9800; font-size: 16px; font-weight: bold;');
-      console.log('%c' + JSON.stringify(dadosDoses, null, 2), 'color: #ff9800; font-size: 14px;');
+      // console.log('%c DADOS REAIS SENDO ENVIADOS PARA A API:', 'background: #222; color: #ff9800; font-size: 16px; font-weight: bold;');
+      // console.log('%c' + JSON.stringify(dadosDoses, null, 2), 'color: #ff9800; font-size: 14px;');
         // Requisição para criar as doses usando apiRequest para lidar com autenticação
       try {
         console.log('Enviando requisição para criar doses...');
@@ -496,16 +515,17 @@ const calcularHorariosMedicamento = (
           throw new Error('ID do remédio não disponível. Não é possível criar doses.');
         }
         
-        console.log('ID do remédio usado para criar doses:', remedioId);
+        // console.log('ID do remédio usado para criar doses:', remedioId);
         
         // remedioId já foi convertido durante a criação do objeto dadosDoses
-          const dataDoses = await apiRequest<any>('dose/doses', {
+          const dataDoses = await apiRequest<UsuarioFake>('dose/doses', {
           method: 'POST',
           body: JSON.stringify(dadosDoses),
         });
         
-        console.log('%c DOSES SALVAS COM SUCESSO:', 'background: #ff9800; color: white; font-size: 16px; font-weight: bold;');
-        console.log('%c' + JSON.stringify(dataDoses, null, 2), 'color: #ff9800; font-size: 14px;');
+        void dataDoses
+        // console.log('%c DOSES SALVAS COM SUCESSO:', 'background: #ff9800; color: white; font-size: 16px; font-weight: bold;');
+        // console.log('%c' + JSON.stringify(dataDoses, null, 2), 'color: #ff9800; font-size: 14px;');
         
         alert('Lembrete e doses salvos com sucesso!');
         limparFormulario();
