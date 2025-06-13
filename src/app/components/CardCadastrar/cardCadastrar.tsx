@@ -53,19 +53,34 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [duracao, setDuracao] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [validade, setValidade] = useState<Date | null>(null);
-  const [dataValidade, setDataValidade] = useState('');
-  const [Intervalo, setIntervalo] = useState('');
+  const [dataValidade, setDataValidade] = useState('');  const [Intervalo, setIntervalo] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [erros, setErros] = useState<ErrosForm>({}); // Corrigido o tipo
-  const [unidade, setUnidade] = useState('mg');  // Função para obter dados do usuário atual se necessário
-
-  type UsuarioFake = any
+  const [unidade, setUnidade] = useState('mg');  // Unidade para dosagem
+  
+  // Define a proper interface for user data
+  interface UsuarioAPI {
+    id: string | number;
+    nome?: string;
+    name?: string;
+    email?: string;
+    [key: string]: unknown; // For additional properties
+  }  // Define interface for API responses
+  interface ApiResponse {
+    id?: string | number;
+    data?: {
+      id?: string | number;
+      [key: string]: unknown; // Allow unknown property in data
+    };
+    message?: string;
+    [key: string]: unknown; // Allow unknown other properties
+  }
 
   const obterDadosUsuario = 
   useCallback(async () => {
     try {
       console.log('Tentando obter dados do usuário da API...');
-      const userData = await apiRequest<UsuarioFake>('usuario', {
+      const userData = await apiRequest<UsuarioAPI>('usuario', {
         method: 'GET'
       });
       // console.log('Resposta da API de usuário:', userData);
@@ -141,7 +156,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         void userData
       });
     }
-  }, [user]);
+  }, [user, obterDadosUsuario]); // Added obterDadosUsuario to dependencies // Added user dependency
 
   useEffect(() => {
     setNome(medicamentoSelecionado?.nome || '');
@@ -389,23 +404,22 @@ const calcularHorariosMedicamento = (
       let data;
       // Declarar remedioId no escopo mais amplo para que ele esteja disponível em todo o bloco try/catch externo
       let remedioId: number | string | undefined;
-      
-      try {
-        data = await apiRequest<UsuarioFake>('remedio', {
+        try {
+        data = await apiRequest<UsuarioAPI>('remedio', {
           method: 'POST',
           body: JSON.stringify(dadosLembrete),
         });
         //   console.log('%c MEDICAMENTO SALVO COM SUCESSO:', 'background: #4CAF50; color: white; font-size: 16px; font-weight: bold;');
         // console.log('%c' + JSON.stringify(data, null, 2), 'color: #4CAF50; font-size: 14px;');
-        
-        // Verificar a estrutura da resposta para extrair o ID corretamente
-        if (data && data.data && data.data.id) {
+          // Verificar a estrutura da resposta para extrair o ID corretamente
+        const responseData = data as ApiResponse;
+        if (responseData?.data && 'id' in responseData.data) {
           // Formato: { message: '...', data: { id: ... } }
-          remedioId = data.data.id;
+          remedioId = responseData.data.id;
           // console.log('ID do remédio extraído do campo data.data.id:', remedioId);
-        } else if (data && data.id) {
+        } else if (responseData?.id) {
           // Formato: { id: ... }
-          remedioId = data.id;
+          remedioId = responseData.id;
           // console.log('ID do remédio extraído do campo data.id:', remedioId);
         } else {
           console.error('Resposta da API não contém ID do remédio na estrutura esperada:', data);
@@ -518,7 +532,7 @@ const calcularHorariosMedicamento = (
         // console.log('ID do remédio usado para criar doses:', remedioId);
         
         // remedioId já foi convertido durante a criação do objeto dadosDoses
-          const dataDoses = await apiRequest<UsuarioFake>('dose/doses', {
+        const dataDoses = await apiRequest<ApiResponse>('dose/doses', {
           method: 'POST',
           body: JSON.stringify(dadosDoses),
         });
