@@ -97,6 +97,28 @@ export default function Home() {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 transform transition-all duration-200 ease-in-out origin-top-right scale-100 opacity-100">
                 <Link
+                  href="/medicamentos"
+                  className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F5F5F5] hover:text-[#037F8C] w-full text-left transition-colors duration-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <span className="KantumruyMedium">Meu painel</span>
+                </Link>
+                <div className="h-[1px] bg-gray-200 mx-2"></div>
+                <Link
                   href="/Configuracoes"
                   className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F5F5F5] hover:text-[#037F8C] w-full text-left transition-colors duration-200"
                 >
@@ -106,7 +128,7 @@ export default function Home() {
                 <div className="h-[1px] bg-gray-200 mx-2"></div>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F5F5F5] hover:text-[#037F8C] w-full text-left transition-colors duration-200"
+                  className="cursor-pointer flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F5F5F5] hover:text-[#037F8C] w-full text-left transition-colors duration-200"
                 >
                   <LogOut size={16} />
                   <span className="KantumruyMedium">Sair</span>
@@ -148,7 +170,7 @@ export default function Home() {
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          Meu Painel
+          Meu painel
         </Link>
       </div>
     </main>

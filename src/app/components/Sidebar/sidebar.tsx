@@ -4,11 +4,11 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Sidebar() {
-  const { getUserDisplayName } = useAuth();
+  const { logout, getUserDisplayName } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -22,11 +22,10 @@ export default function Sidebar() {
       'KantumruyMedium px-1 py-1 rounded transition duration-700 ease-in-out';
     const isActive = pathname === path;
 
-    return `${baseStyle} ${
-      isActive
+    return `${baseStyle} ${isActive
         ? 'text-[#E0DDDD] bg-[#037F8C] scale-105'
         : 'text-[#044D55] hover:text-[#E0DDDD] hover:bg-[#037F8C] hover:scale-105'
-    }`;
+      }`;
   };
 
   return (
@@ -119,6 +118,15 @@ export default function Sidebar() {
             <p className="KantumruySemiBold text-[#044D55]">
               {getUserDisplayName()}
             </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={logout}
+              className="cursor-pointer flex items-center gap-2 mt-3 text-sm w-full text-left text-[#037F8C]"
+            >
+              <LogOut size={24}/>
+              <span className="KantumruyMedium text-base">Sair</span>
+            </button>
           </div>
         </div>
       </aside>

@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     checkAuth();
   }, []);
+  
   const login = (token: string, userData?: User) => {
     console.log('AuthContext login called with:', { token: !!token, userData });
 
