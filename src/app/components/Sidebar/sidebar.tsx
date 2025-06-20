@@ -82,25 +82,18 @@ export default function Sidebar() {
 
         <div className="flex flex-col gap-8 pl-10 pr-5 pt-7 flex-grow">
           <Link
-            href="/medicamentos"
-            className={getLinkStyle('/medicamentos')}
+            href="/meus-medicamentos"
+            className={getLinkStyle('/meus-medicamentos')}
             onClick={() => setIsOpen(false)}
           >
             Meus medicamentos
           </Link>
           <Link
-            href="/Lembrete"
-            className={getLinkStyle('/Lembrete')}
+            href="/meus-lembretes"
+            className={getLinkStyle('/meus-lembretes')}
             onClick={() => setIsOpen(false)}
           >
-            Lembrete
-          </Link>
-          <Link
-            href="/historico"
-            className={getLinkStyle('/historico')}
-            onClick={() => setIsOpen(false)}
-          >
-            Histórico
+            Meus lembretes
           </Link>
           <Link
             href="/Configuracoes"

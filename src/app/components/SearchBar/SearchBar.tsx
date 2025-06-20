@@ -72,7 +72,7 @@ export default function SearchBar() {
   };
   const handleCadastrarClick = (medicamento: string) => {
     router.push(
-      `/Lembrete?medicamento=${encodeURIComponent(medicamento.trim())}`,
+      `/meus-lembretes?medicamento=${encodeURIComponent(medicamento.trim())}`,
     );
   };
 

@@ -97,7 +97,7 @@ export default function Home() {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 transform transition-all duration-200 ease-in-out origin-top-right scale-100 opacity-100">
                 <Link
-                  href="/medicamentos"
+                  href="/meus-medicamentos"
                   className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F5F5F5] hover:text-[#037F8C] w-full text-left transition-colors duration-200"
                 >
                   <svg
@@ -152,7 +152,7 @@ export default function Home() {
         <Logo width={200} />
         <SearchBar />
         <Link
-          href={isAuthenticated ? '/medicamentos' : '/login'}
+          href={isAuthenticated ? '/meus-medicamentos' : '/login'}
           className="flex items-center gap-2 text-[#037F8C] hover:text-[#025e6a] transition-colors KantumruyMedium"
         >
           <svg
