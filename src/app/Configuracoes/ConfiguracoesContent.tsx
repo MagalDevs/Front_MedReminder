@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
+import { apiRequest } from '../utils/api';
 
 type Usuario = {
   nome?: string;
   name?: string;
   email?: string;
   id?: string | number;
+  foto?: string;
   [key: string]: unknown;
 };
 
@@ -25,64 +27,105 @@ export default function ConfiguracoesContent() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [foto, setFoto] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    if (user) {
-      setNome(user.name || '');
-      setEmail(user.email || '');
-      setUsuario(user);
-    }
-    setLoading(false);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        // Buscar dados do usuário da API
+        const userData = await apiRequest<Usuario>('usuario/me', {
+          method: 'GET',
+        });
+
+        console.log('Dados do usuário carregados:', userData);
+        setUsuario(userData);
+        setNome(userData.nome || userData.name || '');
+        setEmail(userData.email || '');
+        // Carregar foto do usuário se disponível
+        if (userData.foto && typeof userData.foto === 'string') {
+          setFoto(userData.foto);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        // Fallback para dados do contexto se a API falhar
+        if (user) {
+          setNome((user.nome as string) || (user.name as string) || '');
+          setEmail((user.email as string) || '');
+          setUsuario(user);
+        }
+
+        setMessage(
+          'Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados.',
+        );
+        setMessageType('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, [user]);
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
+    setMessage('');
 
     try {
-      // Em um ambiente real, você utilizaria uma API para atualizar o perfil
-      // Por enquanto, vamos apenas simular isso
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const form = e.target as HTMLFormElement;
+      const formId = form.id;
 
-      // Atualizar os dados do usuário em memória para simular sucesso
-      if (usuario) {
-        // Verificar qual campo foi atualizado com base no form target
-        const form = e.target as HTMLFormElement;
-        const formId = form.id;
+      let updateData: { nome?: string; email?: string } = {};
+      let successMessage = '';
 
-        if (formId === 'nome-form') {
-          setUsuario({
-            ...usuario,
-            nome,
-          });
-          setMessage('Nome atualizado com sucesso!');
-        } else if (formId === 'email-form') {
-          setUsuario({
-            ...usuario,
-            email,
-          });
-          setMessage('E-mail atualizado com sucesso!');
-        } else {
-          // Se não houver ID específico, atualizamos ambos (compatibilidade)
-          setUsuario({
-            ...usuario,
-            nome,
-            email,
-          });
-          setMessage('Perfil atualizado com sucesso!');
-        }
+      if (formId === 'nome-form') {
+        updateData = { nome };
+        successMessage = 'Nome atualizado com sucesso!';
+      } else if (formId === 'email-form') {
+        updateData = { email };
+        successMessage = 'E-mail atualizado com sucesso!';
+      } else {
+        updateData = { nome, email };
+        successMessage = 'Perfil atualizado com sucesso!';
+      } // Fazer chamada à API para atualizar o perfil
+      const updatedUser = await apiRequest<Usuario>('usuario/me', {
+        method: 'PUT',
+        body: JSON.stringify(updateData),
+      });
+
+      console.log('Perfil atualizado:', updatedUser);
+
+      // Atualizar os dados do usuário localmente
+      setUsuario(updatedUser);
+
+      // Se atualizou o nome, também atualizar o campo de nome
+      if (updatedUser.nome || updatedUser.name) {
+        setNome(
+          (updatedUser.nome as string) || (updatedUser.name as string) || '',
+        );
       }
 
+      // Se atualizou o email, também atualizar o campo de email
+      if (updatedUser.email) {
+        setEmail(updatedUser.email as string);
+      }
+
+      setMessage(successMessage);
       setMessageType('success');
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
-      setMessage('Erro ao atualizar dados. Tente novamente.');
+
+      let errorMessage = 'Erro ao atualizar dados. Tente novamente.';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      setMessage(errorMessage);
       setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
-
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -92,12 +135,24 @@ export default function ConfiguracoesContent() {
       return;
     }
 
+    if (novaSenha.length < 6) {
+      setMessage('A nova senha deve ter pelo menos 6 caracteres.');
+      setMessageType('error');
+      return;
+    }
+
     setLoading(true);
+    setMessage('');
 
     try {
-      // Simulação de atualização de senha
-      // Em produção isso seria uma chamada API para validar a senha atual e alterar para a nova
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Fazer chamada à API para atualizar a senha
+      await apiRequest('usuario/senha', {
+        method: 'PUT',
+        body: JSON.stringify({
+          senhaAtual,
+          novaSenha,
+        }),
+      });
 
       // Limpar campos após atualização
       setSenhaAtual('');
@@ -108,29 +163,117 @@ export default function ConfiguracoesContent() {
       setMessageType('success');
     } catch (error) {
       console.error('Erro ao atualizar senha:', error);
-      setMessage(
-        'Erro ao atualizar senha. Verifique se a senha atual está correta.',
-      );
+
+      let errorMessage =
+        'Erro ao atualizar senha. Verifique se a senha atual está correta.';
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes('401') ||
+          error.message.includes('atual incorreta')
+        ) {
+          errorMessage = 'Senha atual incorreta.';
+        } else if (error.message.includes('400')) {
+          errorMessage =
+            'Dados inválidos. Verifique se a nova senha atende aos requisitos.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      setMessage(errorMessage);
       setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
-
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFoto(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('A imagem deve ter no máximo 5MB.');
+        setMessageType('error');
+        return;
+      }
+
+      // Validar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        setMessage('Por favor, selecione apenas arquivos de imagem.');
+        setMessageType('error');
+        return;
+      }
+
+      setLoading(true);
+      setMessage('');
+
+      try {
+        // Criar FormData para upload da imagem
+        const formData = new FormData();
+        formData.append('foto', file);
+
+        // Upload da foto via API
+        const response = await fetch(
+          'https://medreminder-backend.onrender.com/usuario/foto',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+            body: formData,
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Erro ao fazer upload da foto');
+        }
+
+        const result = await response.json();
+        console.log('Foto atualizada:', result);
+
+        // Atualizar preview da foto
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFoto(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        setMessage('Foto atualizada com sucesso!');
+        setMessageType('success');
+      } catch (error) {
+        console.error('Erro ao atualizar foto:', error);
+
+        let errorMessage = 'Erro ao atualizar foto. Tente novamente.';
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        setMessage(errorMessage);
+        setMessageType('error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const openFileSelector = () => {
     fileInputRef.current?.click();
   };
+
+  // Função para limpar mensagens após um tempo
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setMessageType('');
+      }, 5000); // Limpa a mensagem após 5 segundos
+
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   if (loading && !usuario) {
     return (
@@ -316,13 +459,14 @@ export default function ConfiguracoesContent() {
                 ) : (
                   <span className="text-gray-400 text-sm">Sem foto</span>
                 )}
-              </div>
+              </div>{' '}
               <button
                 type="button"
                 onClick={openFileSelector}
-                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+                disabled={loading}
+                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Alterar Foto
+                {loading ? 'Uploading...' : 'Alterar Foto'}
               </button>
             </div>
 
