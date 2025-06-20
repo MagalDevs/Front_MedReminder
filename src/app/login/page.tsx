@@ -63,7 +63,7 @@ export default function Login() {
 
           router.push('/');
         } catch (profileError) {
-          setError('Não foi possível carregar seu perfil. Faça o login novamente.');
+          setError(`Não foi possível carregar seu perfil. Faça o login novamente. ${profileError}`);
           logout();
         }
       } else {
