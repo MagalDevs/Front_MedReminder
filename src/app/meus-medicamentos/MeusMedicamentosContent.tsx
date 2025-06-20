@@ -18,7 +18,7 @@ type Medicamento = {
   dataValidade: string;
 };
 
-export default function MedicamentosContent() {
+export default function MeusMedicamentosContent() {
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,7 +71,7 @@ export default function MedicamentosContent() {
 
   const navegarParaLembrete = (medicamento: Medicamento) => {
     router.push(
-      `/Lembrete?medicamento=${encodeURIComponent(medicamento.nome)}`,
+      `/meus-lembretes?medicamento=${encodeURIComponent(medicamento.nome)}`,
     );
   };
 
@@ -104,14 +104,14 @@ export default function MedicamentosContent() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
-            Meus Medicamentos
+            Meus medicamentos
           </h1>
           <p className="text-gray-600 KantumruyRegular">
-            Gerencie seus medicamentos e lembretes
+            Visualize seus medicamentos
           </p>
         </div>
         <button
-          onClick={() => router.push('/Lembrete')}
+          onClick={() => router.push('/meus-lembretes')}
           className="mt-4 md:mt-0 bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#044D55] transition-colors flex items-center KantumruyMedium"
         >
           <svg
@@ -151,7 +151,7 @@ export default function MedicamentosContent() {
             medicamentos para receber lembretes e acompanhar seus tratamentos.
           </p>
           <button
-            onClick={() => router.push('/Lembrete')}
+            onClick={() => router.push('/meus-lembretes')}
             className="bg-[#037F8C] text-white px-6 py-3 rounded-md hover:bg-[#025e6a] transition-colors flex items-center justify-center w-full KantumruyMedium"
           >
             <svg
