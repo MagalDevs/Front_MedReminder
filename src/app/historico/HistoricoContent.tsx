@@ -41,11 +41,6 @@ export default function HistoricoContent() {
         const medicamentosData = await responseMedicamentos.json();
         setMedicamentos(medicamentosData);
 
-        // Buscar histórico
-        // Simulando uma chamada à API de histórico (você precisará implementar essa API no backend)
-        // const responseHistorico = await fetch('https://medreminder-backend.onrender.com/historico');
-
-        // Enquanto a API não está implementada, vamos criar dados simulados
         const dataAtual = new Date();
         const historicoDados: RegistroHistorico[] = [];
 
