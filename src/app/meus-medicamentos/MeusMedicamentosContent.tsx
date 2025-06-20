@@ -79,7 +79,7 @@ export default function MeusMedicamentosContent() {
     if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
       try {
         const response = await fetch(
-          `https://medreminder-backend.onrender.com/${id}`,
+          `https://medreminder-backend.onrender.com/remedio/${id}`,
           {
             method: 'DELETE',
           },
