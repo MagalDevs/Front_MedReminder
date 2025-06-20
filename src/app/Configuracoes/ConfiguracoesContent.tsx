@@ -446,7 +446,8 @@ export default function ConfiguracoesContent() {
               </button>
             </div>
           </form>
-        </div>        {/* Atualizar foto de perfil */}
+        </div>{' '}
+        {/* Atualizar foto de perfil */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-[#037F8C] mb-6 KantumruySemiBold text-center">
             Alterar foto de perfil
@@ -463,7 +464,9 @@ export default function ConfiguracoesContent() {
                     height={192}
                   />
                 ) : (
-                  <span className="text-gray-400 text-lg KantumruyMedium">Sem foto</span>
+                  <span className="text-gray-400 text-lg KantumruyMedium">
+                    Sem foto
+                  </span>
                 )}
               </div>
               <button
@@ -475,7 +478,8 @@ export default function ConfiguracoesContent() {
                 {loading ? 'Enviando...' : 'Alterar Foto'}
               </button>
               <p className="text-sm text-gray-500 text-center max-w-xs KantumruyRegular">
-                Selecione uma imagem de até 5MB para atualizar sua foto de perfil
+                Selecione uma imagem de até 5MB para atualizar sua foto de
+                perfil
               </p>
             </div>
             <input
