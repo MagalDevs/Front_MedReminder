@@ -13,7 +13,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +22,6 @@ export default function Login() {
     try {
       const data = await apiRequest<{
         access_token: string;
-        user?: Record<string, unknown>;
         message?: string;
       }>('auth/login', {
         method: 'POST',
@@ -34,53 +33,43 @@ export default function Login() {
       });
 
       if (data.message && !data.access_token) {
-        console.error('Error in response:', data.message);
         setError(data.message);
         return;
       }
 
       if (data.access_token) {
-        console.log('Login successful, full response:', data);
-
-        let userData = data.user;
-
-        if (!userData || !userData.nome) {
-          try {
-            console.log('Fetching user profile...');
-            const profileData = await apiRequest<{
-              id: string;
+        try {
+          const userData = await apiRequest<{
+            message: string;
+            data: {
+              id: string | number;
               nome: string;
               email: string;
-              [key: string]: unknown;
-            }>('usuario/perfil', {
-              method: 'GET',
-              requireAuth: false,
-              headers: {
-                Authorization: `Bearer ${data.access_token}`,
-              },
-            });
-
-            console.log('User profile data:', profileData);
-            userData = profileData;
-          } catch (profileError) {
-            console.warn('Could not fetch user profile:', profileError);
-            // Use email as fallback if profile fetch fails
-            userData = {
-              email: username,
-              nome: username.split('@')[0],
+              cep: string;
+              cpf: string;
+              cuidador: boolean;
+              dataNasc: Date;
+              senha: string;
             };
-          }
-        }
-        console.log('Storing user data:', userData);
-        login(data.access_token, userData);
+          }>('usuario/me', {
+            method: 'GET',
+            requireAuth: false,
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          });
 
-        router.push('/');
+          login(data.access_token, userData.data);
+
+          router.push('/');
+        } catch (profileError) {
+          setError('Não foi possível carregar seu perfil. Faça o login novamente.');
+          logout();
+        }
       } else {
-        console.error('No access_token in successful response:', data);
-        setError('Erro no servidor: Token de autenticação não encontrado');
+        setError('Erro no servidor: Token de autenticação não encontrado.');
       }
     } catch (err) {
-      console.error('Login error:', err);
       if (err instanceof Error) {
         const errorMessage = err.message;
         if (

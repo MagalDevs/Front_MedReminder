@@ -11,9 +11,13 @@ import { useRouter } from 'next/navigation';
 
 interface User {
   id?: string | number;
-  name?: string;
+  nome?: string;
   email?: string;
-  [key: string]: unknown; // For additional properties
+  cep?: string;
+  cpf?: string;
+  cuidador?: boolean;
+  dataNasc?: Date;
+  senha?: string;
 }
 
 interface AuthContextType {
@@ -29,17 +33,8 @@ interface AuthContextType {
 const formatUserDisplayName = (user: User | null): string => {
   if (!user) return 'Usuário';
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Formatting display name for user:', user);
-  }
-
-  // Check different possible name properties
   if (typeof user.nome === 'string' && user.nome.trim()) {
-    return user.nome.trim();
-  }
-
-  if (typeof user.name === 'string' && user.name.trim()) {
-    return user.name.trim();
+    return user.nome.split(' ')[0];
   }
 
   // If we have an email, use the part before '@'
@@ -97,19 +92,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   
   const login = (token: string, userData?: User) => {
-    console.log('AuthContext login called with:', { token: !!token, userData });
-
     localStorage.setItem('access_token', token);
 
-    // Store user data in localStorage for persistence across refreshes
     if (userData) {
       localStorage.setItem('user_data', JSON.stringify(userData));
-      console.log('Stored user data:', userData);
     }
 
     setIsAuthenticated(true);
     setUser(userData || null);
-    console.log('Login successful, user set to:', userData);
   };
 
   const logout = () => {

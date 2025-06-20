@@ -1,8 +1,5 @@
 'use client';
 
-/**
- * Utility for making authenticated API requests
- */
 export const API_URL = 'https://medreminder-backend.onrender.com';
 
 interface FetchOptions extends RequestInit {

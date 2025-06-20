@@ -5,11 +5,14 @@ import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
 
 type Usuario = {
-  nome?: string;
-  name?: string;
-  email?: string;
   id?: string | number;
-  [key: string]: unknown;
+  nome?: string;
+  email?: string;
+  cep?: string;
+  cpf?: string;
+  cuidador?: boolean;
+  dataNasc?: Date;
+  senha?: string;
 };
 
 export default function ConfiguracoesContent() {
@@ -28,7 +31,7 @@ export default function ConfiguracoesContent() {
 
   useEffect(() => {
     if (user) {
-      setNome(user.name || '');
+      setNome(user.nome || '');
       setEmail(user.email || '');
       setUsuario(user);
     }
