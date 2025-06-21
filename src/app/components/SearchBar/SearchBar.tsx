@@ -1,7 +1,5 @@
 'use client';
 
-// alteração para dar o commit
-
 import Papa, { ParseResult } from 'papaparse';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -72,7 +70,7 @@ export default function SearchBar() {
   };
   const handleCadastrarClick = (medicamento: string) => {
     router.push(
-      `/meus-lembretes?medicamento=${encodeURIComponent(medicamento.trim())}`,
+      `/novo-medicamento?medicamento=${encodeURIComponent(medicamento.trim())}`,
     );
   };
 
