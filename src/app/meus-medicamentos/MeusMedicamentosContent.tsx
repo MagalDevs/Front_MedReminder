@@ -111,7 +111,7 @@ export default function MeusMedicamentosContent() {
           </p>
         </div>
         <button
-          onClick={() => router.push('/meus-lembretes')}
+          onClick={() => router.push('/novo-medicamento')}
           className="mt-4 md:mt-0 bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#044D55] transition-colors flex items-center KantumruyMedium"
         >
           <svg
@@ -151,7 +151,7 @@ export default function MeusMedicamentosContent() {
             medicamentos para receber lembretes e acompanhar seus tratamentos.
           </p>
           <button
-            onClick={() => router.push('/meus-lembretes')}
+            onClick={() => router.push('/novo-medicamento')}
             className="bg-[#037F8C] text-white px-6 py-3 rounded-md hover:bg-[#025e6a] transition-colors flex items-center justify-center w-full KantumruyMedium"
           >
             <svg
