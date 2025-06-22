@@ -3,15 +3,17 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
+import { apiRequest } from '../utils/api';
 
 type Usuario = {
   id?: string | number;
   nome?: string;
   email?: string;
-  cep?: string;
   cpf?: string;
   cuidador?: boolean;
   dataNasc?: Date;
+  foto?: string;
+  cep?: string;
   senha?: string;
 };
 
@@ -19,6 +21,7 @@ export default function ConfiguracoesContent() {
   const { user } = useAuth();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [cep, setCep] = useState('');
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
@@ -28,112 +31,216 @@ export default function ConfiguracoesContent() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [foto, setFoto] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    if (user) {
-      setNome(user.nome || '');
-      setEmail(user.email || '');
-      setUsuario(user);
-    }
-    setLoading(false);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const userData = await apiRequest<Usuario>('usuario/me', {
+          method: 'GET',
+        });
+        setUsuario(userData);
+        setNome(userData.nome || userData.nome || '');
+        setEmail(userData.email || '');
+        setCep((userData.cep as string) || '');
+
+        if (userData.foto && typeof userData.foto === 'string') {
+          setFoto(userData.foto);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        if (user) {
+          setNome((user.nome as string) || (user.nome as string) || '');
+          setEmail((user.email as string) || '');
+          setCep((user.cep as string) || '');
+          setUsuario(user);
+        }
+        setMessage(
+          'Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados.',
+        );
+        setMessageType('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, [user]);
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setLoading(true);
-
-    try {
-      // Em um ambiente real, você utilizaria uma API para atualizar o perfil
-      // Por enquanto, vamos apenas simular isso
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Atualizar os dados do usuário em memória para simular sucesso
-      if (usuario) {
-        // Verificar qual campo foi atualizado com base no form target
-        const form = e.target as HTMLFormElement;
-        const formId = form.id;
-
-        if (formId === 'nome-form') {
-          setUsuario({
-            ...usuario,
-            nome,
-          });
-          setMessage('Nome atualizado com sucesso!');
-        } else if (formId === 'email-form') {
-          setUsuario({
-            ...usuario,
-            email,
-          });
-          setMessage('E-mail atualizado com sucesso!');
-        } else {
-          // Se não houver ID específico, atualizamos ambos (compatibilidade)
-          setUsuario({
-            ...usuario,
-            nome,
-            email,
-          });
-          setMessage('Perfil atualizado com sucesso!');
-        }
-      }
-
-      setMessageType('success');
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      setMessage('Erro ao atualizar dados. Tente novamente.');
-      setMessageType('error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (novaSenha !== confirmarSenha) {
-      setMessage('As senhas não coincidem.');
+    if (!nome.trim()) {
+      setMessage('Nome é obrigatório.');
       setMessageType('error');
       return;
     }
 
+    if (!email.trim()) {
+      setMessage('E-mail é obrigatório.');
+      setMessageType('error');
+      return;
+    }
+    if (cep.trim()) {
+      const cepSemFormatacao = cep.replace(/\D/g, '');
+      if (cepSemFormatacao.length !== 8) {
+        setMessage('CEP deve ter 8 dígitos ou deixe em branco.');
+        setMessageType('error');
+        return;
+      }
+    }
+    if (senhaAtual || novaSenha || confirmarSenha) {
+      if (!senhaAtual) {
+        setMessage('Senha atual é obrigatória para alterar a senha.');
+        setMessageType('error');
+        return;
+      }
+      if (!novaSenha) {
+        setMessage('Nova senha é obrigatória.');
+        setMessageType('error');
+        return;
+      }
+      if (novaSenha !== confirmarSenha) {
+        setMessage('As senhas não coincidem.');
+        setMessageType('error');
+        return;
+      }
+      if (novaSenha.length < 8) {
+        setMessage('A nova senha deve ter pelo menos 8 caracteres.');
+        setMessageType('error');
+        return;
+      }
+    }
     setLoading(true);
-
+    setMessage('');
     try {
-      // Simulação de atualização de senha
-      // Em produção isso seria uma chamada API para validar a senha atual e alterar para a nova
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Limpar campos após atualização
-      setSenhaAtual('');
-      setNovaSenha('');
-      setConfirmarSenha('');
-
-      setMessage('Senha atualizada com sucesso!');
+      const updateData: { nome: string; email: string; cep?: string } = {
+        nome,
+        email,
+      };
+      if (cep.trim()) {
+        updateData.cep = cep.replace(/\D/g, '');
+      }
+      const updatedUser = await apiRequest<Usuario>('usuario/me', {
+        method: 'PATCH',
+        body: JSON.stringify(updateData),
+      });
+      if (senhaAtual && novaSenha) {
+        await apiRequest('usuario/senha', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            senhaAtual,
+            novaSenha,
+          }),
+        });
+        setSenhaAtual('');
+        setNovaSenha('');
+        setConfirmarSenha('');
+      }
+      setUsuario(updatedUser);
+      setNome(updatedUser.nome || updatedUser.nome || '');
+      setEmail(updatedUser.email || '');
+      setCep((updatedUser.cep as string) || '');
+      setMessage('Dados atualizados com sucesso!');
       setMessageType('success');
     } catch (error) {
-      console.error('Erro ao atualizar senha:', error);
-      setMessage(
-        'Erro ao atualizar senha. Verifique se a senha atual está correta.',
-      );
+      let errorMessage = 'Erro ao atualizar dados. Tente novamente.';
+      if (error instanceof Error) {
+        if (
+          error.message.includes('401') ||
+          error.message.includes('atual incorreta')
+        ) {
+          errorMessage = 'Senha atual incorreta.';
+        } else if (error.message.includes('400')) {
+          errorMessage =
+            'Dados inválidos. Verifique as informações fornecidas.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      setMessage(errorMessage);
       setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
-
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFoto(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('A imagem deve ter no máximo 5MB.');
+        setMessageType('error');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setMessage('Por favor, selecione apenas arquivos de imagem.');
+        setMessageType('error');
+        return;
+      }
+      setLoading(true);
+      setMessage('');
+      try {
+        const formData = new FormData();
+        formData.append('foto', file);
+
+        const response = await fetch(
+          'https://medreminder-backend.onrender.com/usuario/foto',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+            body: formData,
+          },
+        );
+        if (!response.ok) {
+          throw new Error('Erro ao fazer upload da foto');
+        }
+        const result = await response.json();
+        console.log('Foto atualizada:', result);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFoto(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+        setMessage('Foto atualizada com sucesso!');
+        setMessageType('success');
+      } catch (error) {
+        console.error('Erro ao atualizar foto:', error);
+        let errorMessage = 'Erro ao atualizar foto. Tente novamente.';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        setMessage(errorMessage);
+        setMessageType('error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
-
   const openFileSelector = () => {
     fileInputRef.current?.click();
   };
+  const formatCep = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 5) return numbers;
+    return `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
+  };
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCep(e.target.value);
+    if (formattedValue.length <= 9) {
+      setCep(formattedValue);
+    }
+  };
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setMessageType('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   if (loading && !usuario) {
     return (
@@ -156,7 +263,6 @@ export default function ConfiguracoesContent() {
           Gerencie suas informações pessoais
         </p>
       </div>
-
       {message && (
         <div
           className={`p-4 mb-6 rounded-md ${
@@ -169,166 +275,157 @@ export default function ConfiguracoesContent() {
         >
           {message}
         </div>
-      )}
+      )}{' '}
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Formulário para alteração de nome */}
+        {/* Formulário unificado para alteração de dados */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          {' '}
           <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
-            Alterar Nome
+            Alterar Informações Pessoais
           </h2>
-          <form
-            id="nome-form"
-            onSubmit={handleUpdateProfile}
-            className="space-y-6"
-          >
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            {/* Nome */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nome
-              </label>{' '}
+              </label>
               <input
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                placeholder="Digite seu novo nome"
+                placeholder="Digite seu nome completo"
                 className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Atualizando...' : 'Atualizar Nome'}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Formulário para alteração de email */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          {' '}
-          <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
-            Alterar E-mail
-          </h2>
-          <form
-            id="email-form"
-            onSubmit={handleUpdateProfile}
-            className="space-y-6"
-          >
+            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 E-mail
-              </label>{' '}
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Digite seu novo e-mail"
+                placeholder="Digite seu e-mail"
                 className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
                 required
               />
             </div>
 
+            {/* CEP */}
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                CEP
+              </label>
+              <input
+                type="text"
+                value={cep}
+                onChange={handleCepChange}
+                placeholder="00000-000"
+                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Digite apenas números, a formatação será aplicada
+                automaticamente.
+              </p>
+            </div>
+
+            {/* Divider para seção de senha */}
+            <div className="border-t border-gray-200 pt-4 mt-6">
+              <h3 className="text-lg font-medium text-[#037F8C] mb-3 KantumruySemiBold">
+                Alterar Senha
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Preencha os campos abaixo apenas se desejar alterar sua senha.
+              </p>
+
+              {/* Senha Atual */}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Senha Atual
+                </label>
+                <input
+                  type="password"
+                  value={senhaAtual}
+                  onChange={(e) => setSenhaAtual(e.target.value)}
+                  placeholder="Digite sua senha atual"
+                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nova Senha
+                </label>
+                <input
+                  type="password"
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
+                  placeholder="Digite sua nova senha"
+                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar Nova Senha
+                </label>
+                <input
+                  type="password"
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  placeholder="Confirme sua nova senha"
+                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#037F8C] text-white py-3 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Atualizando...' : 'Atualizar E-mail'}
+                {loading ? 'Atualizando...' : 'Salvar Alterações'}
               </button>
             </div>
           </form>
-        </div>
-
-        {/* Formulário para alteração de senha */}
+        </div>{' '}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
-            Alterar Senha
-          </h2>
-          <form onSubmit={handleUpdatePassword} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Senha Atual
-              </label>{' '}
-              <input
-                type="password"
-                value={senhaAtual}
-                onChange={(e) => setSenhaAtual(e.target.value)}
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nova Senha
-              </label>{' '}
-              <input
-                type="password"
-                value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmar Nova Senha
-              </label>{' '}
-              <input
-                type="password"
-                value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
-                required
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Atualizando...' : 'Atualizar Senha'}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Atualizar foto de perfil */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
+          <h2 className="text-xl font-semibold text-[#037F8C] mb-6 KantumruySemiBold text-center">
             Alterar foto de perfil
           </h2>
-          <div className="space-y-6">
-            <div className="flex flex-col items-center gap-4 pt-10">
-              <div className="w-40 h-40 rounded-full border-2 border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center gap-8 py-8">
+              <div className="w-48 h-48 rounded-full border-4 border-[#037F8C] border-opacity-20 overflow-hidden bg-gray-50 flex items-center justify-center shadow-lg">
                 {foto ? (
                   <Image
                     src={foto}
                     alt="Foto de perfil atual"
                     className="w-full h-full object-cover"
+                    width={192}
+                    height={192}
                   />
                 ) : (
-                  <span className="text-gray-400 text-sm">Sem foto</span>
+                  <span className="text-gray-400 text-lg KantumruyMedium">
+                    Sem foto
+                  </span>
                 )}
               </div>
               <button
                 type="button"
                 onClick={openFileSelector}
-                className="bg-[#037F8C] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
+                disabled={loading}
+                className="bg-[#037F8C] text-white py-4 px-8 rounded-lg text-lg hover:bg-opacity-90 hover:scale-105 hover:bg-[#044D55] hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
               >
-                Alterar Foto
+                {loading ? 'Enviando...' : 'Alterar Foto'}
               </button>
+              <p className="text-sm text-gray-500 text-center max-w-xs KantumruyRegular">
+                Selecione uma imagem de até 5MB para atualizar sua foto de
+                perfil
+              </p>
             </div>
-
             <input
               ref={fileInputRef}
               type="file"
