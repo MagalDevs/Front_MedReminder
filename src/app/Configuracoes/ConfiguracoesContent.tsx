@@ -33,29 +33,25 @@ export default function ConfiguracoesContent() {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        // Buscar dados do usuário da API
         const userData = await apiRequest<Usuario>('usuario/me', {
           method: 'GET',
         });
-        console.log('Dados do usuário carregados:', userData);
         setUsuario(userData);
         setNome(userData.nome || userData.name || '');
         setEmail(userData.email || '');
         setCep((userData.cep as string) || '');
 
-        // Carregar foto do usuário se disponível
         if (userData.foto && typeof userData.foto === 'string') {
           setFoto(userData.foto);
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error); // Fallback para dados do contexto se a API falhar
+        console.error('Erro ao carregar dados do usuário:', error);
         if (user) {
           setNome((user.nome as string) || (user.name as string) || '');
           setEmail((user.email as string) || '');
           setCep((user.cep as string) || '');
           setUsuario(user);
         }
-
         setMessage(
           'Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados.',
         );
@@ -70,7 +66,6 @@ export default function ConfiguracoesContent() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações
     if (!nome.trim()) {
       setMessage('Nome é obrigatório.');
       setMessageType('error');
@@ -82,8 +77,6 @@ export default function ConfiguracoesContent() {
       setMessageType('error');
       return;
     }
-
-    // Validar CEP se fornecido
     if (cep.trim()) {
       const cepSemFormatacao = cep.replace(/\D/g, '');
       if (cepSemFormatacao.length !== 8) {
@@ -92,86 +85,62 @@ export default function ConfiguracoesContent() {
         return;
       }
     }
-
-    // Validar senhas se fornecidas
     if (senhaAtual || novaSenha || confirmarSenha) {
       if (!senhaAtual) {
         setMessage('Senha atual é obrigatória para alterar a senha.');
         setMessageType('error');
         return;
       }
-
       if (!novaSenha) {
         setMessage('Nova senha é obrigatória.');
         setMessageType('error');
         return;
       }
-
       if (novaSenha !== confirmarSenha) {
         setMessage('As senhas não coincidem.');
         setMessageType('error');
         return;
       }
-
-      if (novaSenha.length < 6) {
-        setMessage('A nova senha deve ter pelo menos 6 caracteres.');
+      if (novaSenha.length < 8) {
+        setMessage('A nova senha deve ter pelo menos 8 caracteres.');
         setMessageType('error');
         return;
       }
     }
-
     setLoading(true);
     setMessage('');
-
     try {
-      // Preparar dados para atualização
       const updateData: { nome: string; email: string; cep?: string } = {
         nome,
         email,
       };
-
-      // Adicionar CEP se fornecido
       if (cep.trim()) {
         updateData.cep = cep.replace(/\D/g, '');
       }
-
-      // Fazer chamada à API para atualizar o perfil
       const updatedUser = await apiRequest<Usuario>('usuario/me', {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(updateData),
       });
-
-      console.log('Perfil atualizado:', updatedUser);
-
-      // Se há dados de senha, fazer uma segunda chamada para atualizar a senha
       if (senhaAtual && novaSenha) {
         await apiRequest('usuario/senha', {
-          method: 'PUT',
+          method: 'PATCH',
           body: JSON.stringify({
             senhaAtual,
             novaSenha,
           }),
         });
-
-        // Limpar campos de senha após atualização
         setSenhaAtual('');
         setNovaSenha('');
         setConfirmarSenha('');
       }
-
-      // Atualizar os dados do usuário localmente
       setUsuario(updatedUser);
       setNome(updatedUser.nome || updatedUser.name || '');
       setEmail(updatedUser.email || '');
       setCep((updatedUser.cep as string) || '');
-
       setMessage('Dados atualizados com sucesso!');
       setMessageType('success');
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-
       let errorMessage = 'Erro ao atualizar dados. Tente novamente.';
-
       if (error instanceof Error) {
         if (
           error.message.includes('401') ||
@@ -185,7 +154,6 @@ export default function ConfiguracoesContent() {
           errorMessage = error.message;
         }
       }
-
       setMessage(errorMessage);
       setMessageType('error');
     } finally {
@@ -197,29 +165,22 @@ export default function ConfiguracoesContent() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validar tamanho do arquivo (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setMessage('A imagem deve ter no máximo 5MB.');
         setMessageType('error');
         return;
       }
-
-      // Validar tipo do arquivo
       if (!file.type.startsWith('image/')) {
         setMessage('Por favor, selecione apenas arquivos de imagem.');
         setMessageType('error');
         return;
       }
-
       setLoading(true);
       setMessage('');
-
       try {
-        // Criar FormData para upload da imagem
         const formData = new FormData();
         formData.append('foto', file);
 
-        // Upload da foto via API
         const response = await fetch(
           'https://medreminder-backend.onrender.com/usuario/foto',
           {
@@ -230,32 +191,24 @@ export default function ConfiguracoesContent() {
             body: formData,
           },
         );
-
         if (!response.ok) {
           throw new Error('Erro ao fazer upload da foto');
         }
-
         const result = await response.json();
         console.log('Foto atualizada:', result);
-
-        // Atualizar preview da foto
         const reader = new FileReader();
         reader.onload = (e) => {
           setFoto(e.target?.result as string);
         };
         reader.readAsDataURL(file);
-
         setMessage('Foto atualizada com sucesso!');
         setMessageType('success');
       } catch (error) {
         console.error('Erro ao atualizar foto:', error);
-
         let errorMessage = 'Erro ao atualizar foto. Tente novamente.';
-
         if (error instanceof Error) {
           errorMessage = error.message;
         }
-
         setMessage(errorMessage);
         setMessageType('error');
       } finally {
@@ -266,30 +219,23 @@ export default function ConfiguracoesContent() {
   const openFileSelector = () => {
     fileInputRef.current?.click();
   };
-
-  // Função para formatar CEP
   const formatCep = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 5) return numbers;
     return `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
   };
-
-  // Função para lidar com mudança no campo CEP
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatCep(e.target.value);
     if (formattedValue.length <= 9) {
       setCep(formattedValue);
     }
   };
-
-  // Função para limpar mensagens após um tempo
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
         setMessage('');
         setMessageType('');
-      }, 5000); // Limpa a mensagem após 5 segundos
-
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [message]);
@@ -386,7 +332,7 @@ export default function ConfiguracoesContent() {
             {/* Divider para seção de senha */}
             <div className="border-t border-gray-200 pt-4 mt-6">
               <h3 className="text-lg font-medium text-[#037F8C] mb-3 KantumruySemiBold">
-                Alterar Senha (Opcional)
+                Alterar Senha
               </h3>
               <p className="text-sm text-gray-600 mb-4">
                 Preencha os campos abaixo apenas se desejar alterar sua senha.
@@ -406,7 +352,6 @@ export default function ConfiguracoesContent() {
                 />
               </div>
 
-              {/* Nova Senha */}
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nova Senha
@@ -420,7 +365,6 @@ export default function ConfiguracoesContent() {
                 />
               </div>
 
-              {/* Confirmar Nova Senha */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirmar Nova Senha
@@ -435,7 +379,6 @@ export default function ConfiguracoesContent() {
               </div>
             </div>
 
-            {/* Botão de submit */}
             <div className="pt-4">
               <button
                 type="submit"
@@ -447,7 +390,6 @@ export default function ConfiguracoesContent() {
             </div>
           </form>
         </div>{' '}
-        {/* Atualizar foto de perfil */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-[#037F8C] mb-6 KantumruySemiBold text-center">
             Alterar foto de perfil
