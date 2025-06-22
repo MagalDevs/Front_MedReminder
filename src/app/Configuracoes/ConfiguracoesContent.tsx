@@ -39,7 +39,7 @@ export default function ConfiguracoesContent() {
           method: 'GET',
         });
         setUsuario(userData);
-        setNome(userData.nome || userData.name || '');
+        setNome(userData.nome || userData.nome || '');
         setEmail(userData.email || '');
         setCep((userData.cep as string) || '');
 
@@ -49,7 +49,7 @@ export default function ConfiguracoesContent() {
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
         if (user) {
-          setNome((user.nome as string) || (user.name as string) || '');
+          setNome((user.nome as string) || (user.nome as string) || '');
           setEmail((user.email as string) || '');
           setCep((user.cep as string) || '');
           setUsuario(user);
@@ -136,7 +136,7 @@ export default function ConfiguracoesContent() {
         setConfirmarSenha('');
       }
       setUsuario(updatedUser);
-      setNome(updatedUser.nome || updatedUser.name || '');
+      setNome(updatedUser.nome || updatedUser.nome || '');
       setEmail(updatedUser.email || '');
       setCep((updatedUser.cep as string) || '');
       setMessage('Dados atualizados com sucesso!');
