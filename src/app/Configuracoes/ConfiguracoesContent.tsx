@@ -6,13 +6,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiRequest } from '../utils/api';
 
 type Usuario = {
-  nome?: string;
-  name?: string;
-  email?: string;
   id?: string | number;
+  nome?: string;
+  email?: string;
+  cpf?: string;
+  cuidador?: boolean;
+  dataNasc?: Date;
   foto?: string;
   cep?: string;
-  [key: string]: unknown;
+  senha?: string;
 };
 
 export default function ConfiguracoesContent() {

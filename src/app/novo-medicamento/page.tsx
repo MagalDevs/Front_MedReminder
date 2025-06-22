@@ -11,8 +11,7 @@ type Medicamento = {
   DESCRIÇÃO: string;
 };
 
-// Componente filho que usa o hook useSearchParams
-function LembreteContent() {
+function NovoMedicamentoContent() {
   const [medicamentoSelecionado, setMedicamentoSelecionado] =
     useState<Medicamento | null>(null);
   const searchParams = useSearchParams();
@@ -36,10 +35,10 @@ function LembreteContent() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
-            Lembrete
+            Adicionar medicamento
           </h1>
           <p className="text-gray-600 KantumruyRegular ml-10">
-            Configure lembretes para seus medicamentos
+            Cadastre lembretes para seus medicamentos
           </p>
         </div>
       </div>
@@ -69,7 +68,7 @@ export default function Lembrete() {
           <Sidebar />
         </div>
         <Suspense fallback={<div className="flex-1 p-6">Carregando...</div>}>
-          <LembreteContent />
+          <NovoMedicamentoContent />
         </Suspense>
       </div>
     </>
