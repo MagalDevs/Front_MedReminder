@@ -35,27 +35,35 @@ export default function ConfiguracoesContent() {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const userData = await apiRequest<Usuario>('usuario/me', {
+        const response = await apiRequest<{
+          message: string;
+          data: Usuario;
+        }>('usuario/me', {
           method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
         });
+
+        const userData = response.data;
+
         setUsuario(userData);
-        setNome(userData.nome || userData.nome || '');
+        setNome(userData.nome || '');
         setEmail(userData.email || '');
-        setCep((userData.cep as string) || '');
+        setCep(userData.cep || '');
 
         if (userData.foto && typeof userData.foto === 'string') {
           setFoto(userData.foto);
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
         if (user) {
-          setNome((user.nome as string) || (user.nome as string) || '');
-          setEmail((user.email as string) || '');
-          setCep((user.cep as string) || '');
+          setNome(user.nome || '');
+          setEmail(user.email || '');
+          setCep(user.cep || '');
           setUsuario(user);
         }
         setMessage(
-          'Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados.',
+          `Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados. ${error}`,
         );
         setMessageType('error');
       } finally {
@@ -73,12 +81,12 @@ export default function ConfiguracoesContent() {
       setMessageType('error');
       return;
     }
-
     if (!email.trim()) {
       setMessage('E-mail é obrigatório.');
       setMessageType('error');
       return;
     }
+
     if (cep.trim()) {
       const cepSemFormatacao = cep.replace(/\D/g, '');
       if (cepSemFormatacao.length !== 8) {
@@ -87,6 +95,7 @@ export default function ConfiguracoesContent() {
         return;
       }
     }
+
     if (senhaAtual || novaSenha || confirmarSenha) {
       if (!senhaAtual) {
         setMessage('Senha atual é obrigatória para alterar a senha.');
@@ -111,18 +120,19 @@ export default function ConfiguracoesContent() {
     }
     setLoading(true);
     setMessage('');
+
     try {
       const updateData: { nome: string; email: string; cep?: string } = {
         nome,
         email,
+        cep: cep.replace(/\D/g, '').trim(),
       };
-      if (cep.trim()) {
-        updateData.cep = cep.replace(/\D/g, '');
-      }
+
       const updatedUser = await apiRequest<Usuario>('usuario/me', {
         method: 'PATCH',
         body: JSON.stringify(updateData),
       });
+
       if (senhaAtual && novaSenha) {
         await apiRequest('usuario/senha', {
           method: 'PATCH',
@@ -184,7 +194,7 @@ export default function ConfiguracoesContent() {
         formData.append('foto', file);
 
         const response = await fetch(
-          'https://medreminder-backend.onrender.com/usuario/foto',
+          'https://medreminder-backend.onrender.com/usuario/foto', //nao existe
           {
             method: 'POST',
             headers: {
@@ -196,8 +206,6 @@ export default function ConfiguracoesContent() {
         if (!response.ok) {
           throw new Error('Erro ao fazer upload da foto');
         }
-        const result = await response.json();
-        console.log('Foto atualizada:', result);
         const reader = new FileReader();
         reader.onload = (e) => {
           setFoto(e.target?.result as string);
@@ -218,6 +226,7 @@ export default function ConfiguracoesContent() {
       }
     }
   };
+
   const openFileSelector = () => {
     fileInputRef.current?.click();
   };
@@ -297,8 +306,6 @@ export default function ConfiguracoesContent() {
                 required
               />
             </div>
-
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 E-mail
@@ -313,7 +320,6 @@ export default function ConfiguracoesContent() {
               />
             </div>
 
-            {/* CEP */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 CEP
