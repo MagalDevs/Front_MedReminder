@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar/sidebar';
 import BuscaMedicamento from '../components/CardBusca/cardBusca';
 import ConfigurarLembrete from '../components/CardCadastrar/cardCadastrar';
+import { useSidebar } from '../contexts/SidebarContext';
 
 type Medicamento = {
   NOME_PRODUTO: string;
@@ -30,6 +31,7 @@ function NovoMedicamentoContent() {
   const handleMedicamentoSelecionado = (medicamento: Medicamento) => {
     setMedicamentoSelecionado(medicamento);
   };
+  
   return (
     <div className="flex-1 p-6 overflow-y-hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -61,16 +63,16 @@ function NovoMedicamentoContent() {
 
 // Componente principal que usa Suspense
 export default function Lembrete() {
+  const { isOpen } = useSidebar();
+
   return (
-    <>
-      <div className="flex min-h-screen bg-[#E8E6E6]">
-        <div className='flex-initial'>
-          <Sidebar />
-        </div>
-        <Suspense fallback={<div className="flex-1 p-6">Carregando...</div>}>
+    <div className="flex min-h-screen bg-[#E8E6E6]">
+      <Sidebar />
+      <div className="flex-1">
+        <Suspense fallback={<div className="p-6">Carregando...</div>}>
           <NovoMedicamentoContent />
         </Suspense>
       </div>
-    </>
+    </div>
   );
 }

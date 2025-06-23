@@ -4,15 +4,20 @@ import { Suspense } from 'react';
 import Sidebar from '../components/Sidebar/sidebar';
 import ConfiguracoesContent from './ConfiguracoesContent';
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
+import { useSidebar } from '../contexts/SidebarContext';
 
 export default function Configuracoes() {
+  const { isOpen } = useSidebar();
+
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen bg-[#E8E6E6]">
         <Sidebar />
-        <Suspense fallback={<div className="flex-1 p-6">Carregando...</div>}>
-          <ConfiguracoesContent />
-        </Suspense>
+        <div className="flex-1">
+          <Suspense fallback={<div className="p-6">Carregando...</div>}>
+            <ConfiguracoesContent />
+          </Suspense>
+        </div>
       </div>
     </ProtectedRoute>
   );
