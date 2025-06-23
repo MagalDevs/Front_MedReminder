@@ -3,11 +3,9 @@
 import { Suspense } from 'react';
 import Sidebar from '../components/Sidebar/sidebar';
 import MeusMedicamentosContent from './MeusMedicamentosContent';
-import { useSidebar } from '../contexts/SidebarContext';
 
 export default function MeusMedicamentos() {
-  const { isOpen } = useSidebar();
-
+  
   return (
     <div className="flex min-h-screen bg-[#E8E6E6]">
       <Sidebar />
