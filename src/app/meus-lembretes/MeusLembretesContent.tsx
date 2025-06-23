@@ -95,8 +95,8 @@ export default function MeusLembretesContent() {
     const hoje = new Date();
 
     medicamentos.forEach((medicamento) => {
-      const horaInicio = medicamento.horaInicio || '08:00';
-      const quantidadeDiaria = medicamento.quantidadeDiaria || 1;
+      const horaInicio = medicamento.horaInicio;
+      const quantidadeDiaria = medicamento.quantidadeDiaria;
 
       for (let i = 0; i < quantidadeDiaria; i++) {
         const [hora, minuto] = horaInicio.split(':').map(Number);
