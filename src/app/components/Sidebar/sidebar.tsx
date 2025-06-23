@@ -50,11 +50,9 @@ export default function Sidebar() {
             className="absolute top-4 right-4 p-1 rounded-lg hover:bg-[#037F8C] hover:text-[#E0DDDD] text-[#044D55] transition-colors z-10"
           >
             <X size={20} />
-          </button>
-
-          {/* Logo */}
+          </button>          {/* Logo */}
           <div className="pb-5 pt-5 flex justify-center items-center">
-            <Link href="/" onClick={toggleSidebar}>
+            <Link href="/">
               <Image
                 src="/assets/LogoDeitada.png"
                 alt="MedReminder Logo"
@@ -72,21 +70,18 @@ export default function Sidebar() {
             <Link
               href="/meus-medicamentos"
               className={getLinkStyle('/meus-medicamentos')}
-              onClick={toggleSidebar}
             >
               Meus medicamentos
             </Link>
             <Link
               href="/meus-lembretes"
               className={getLinkStyle('/meus-lembretes')}
-              onClick={toggleSidebar}
             >
               Meus lembretes
             </Link>
             <Link
               href="/Configuracoes"
               className={getLinkStyle('/Configuracoes')}
-              onClick={toggleSidebar}
             >
               Configurações
             </Link>
