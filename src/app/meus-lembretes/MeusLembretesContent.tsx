@@ -112,15 +112,13 @@ export default function MeusLembretesContent() {
           medicamentoNome: medicamento.nome,
           data: hoje.toISOString().split('T')[0],
           horario: horarioLembrete.toTimeString().slice(0, 5),
-          dosagem: `${medicamento.quantidadeDose || '1'} ${
-            medicamento.unidadeMedida || 'mg'
-          }`,
+          dosagem: `${medicamento.quantidadeDose} ${medicamento.unidadeMedida}`,
           status,
           medicamento: {
             id: medicamento.id,
             nome: medicamento.nome,
-            cor: medicamento.cor || '#037F8C',
-            unidadeMedida: medicamento.unidadeMedida || 'mg',
+            cor: medicamento.cor,
+            unidadeMedida: medicamento.unidadeMedida,
           },
         });
       }
