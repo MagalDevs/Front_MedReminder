@@ -98,6 +98,17 @@ export default function MeusLembretesContent() {
 
   const marcarComoTomado = async (lembreteId: number) => {
     try {
+      await apiRequest(`dose/me/${lembreteId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({
+          tomado: true,
+        }),
+      });
+
       setLembretes(
         lembretes.map((lembrete) =>
           lembrete.id === lembreteId
@@ -107,6 +118,9 @@ export default function MeusLembretesContent() {
       );
     } catch (err) {
       console.error('Erro ao marcar lembrete como tomado:', err);
+      setError(
+        'Não foi possível marcar o lembrete como tomado. Tente novamente.',
+      );
     }
   };
 
