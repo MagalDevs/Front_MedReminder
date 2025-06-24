@@ -6,13 +6,16 @@ import ConfiguracoesContent from './ConfiguracoesContent';
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
 
 export default function Configuracoes() {
+
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen bg-[#E8E6E6]">
         <Sidebar />
-        <Suspense fallback={<div className="flex-1 p-6">Carregando...</div>}>
-          <ConfiguracoesContent />
-        </Suspense>
+        <div className="flex-1">
+          <Suspense fallback={<div className="p-6">Carregando...</div>}>
+            <ConfiguracoesContent />
+          </Suspense>
+        </div>
       </div>
     </ProtectedRoute>
   );
