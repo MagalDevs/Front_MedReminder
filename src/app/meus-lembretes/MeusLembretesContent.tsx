@@ -34,17 +34,10 @@ type Medicamento = {
 
 type Lembrete = {
   id: number;
-  medicamentoNome: string;
-  data: string;
-  horario: string;
-  dosagem: string;
-  status: 'tomado' | 'pendente';
-  medicamento: {
-    id: number;
-    nome: string;
-    cor: string;
-    unidadeMedida: string;
-  };
+  tomado: boolean;
+  data_dose: Date;
+  usuarioId: number;
+  remedioId: number;
 };
 
 export default function MeusLembretesContent() {
@@ -73,10 +66,17 @@ export default function MeusLembretesContent() {
 
         setMedicamentos(medicamentosResponse.data);
 
-        const lembretesSimulados = gerarLembretesSimulados(
-          medicamentosResponse.data,
-        );
-        setLembretes(lembretesSimulados);
+        const dosesResponse = await apiRequest<{
+          message: string;
+          data: Lembrete[];
+        }>('dose/me', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
+        });
+
+        setLembretes(dosesResponse.data);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
         setError(
@@ -90,44 +90,7 @@ export default function MeusLembretesContent() {
     fetchData();
   }, []);
 
-  const gerarLembretesSimulados = (medicamentos: Medicamento[]): Lembrete[] => {
-    const lembretes: Lembrete[] = [];
-    const hoje = new Date();
-
-    medicamentos.forEach((medicamento) => {
-      const horaInicio = medicamento.horaInicio;
-      const quantidadeDiaria = medicamento.quantidadeDiaria;
-
-      for (let i = 0; i < quantidadeDiaria; i++) {
-        const [hora, minuto] = horaInicio.split(':').map(Number);
-        const intervaloHoras = 24 / quantidadeDiaria;
-        const horarioLembrete = new Date(hoje);
-        horarioLembrete.setHours(hora + i * intervaloHoras, minuto, 0, 0);
-
-        const agora = new Date();
-        const status = horarioLembrete <= agora ? 'tomado' : 'pendente';
-
-        lembretes.push({
-          id: lembretes.length + 1,
-          medicamentoNome: medicamento.nome,
-          data: hoje.toISOString().split('T')[0],
-          horario: horarioLembrete.toTimeString().slice(0, 5),
-          dosagem: `${medicamento.quantidadeDose} ${medicamento.unidadeMedida}`,
-          status,
-          medicamento: {
-            id: medicamento.id,
-            nome: medicamento.nome,
-            cor: medicamento.cor,
-            unidadeMedida: medicamento.unidadeMedida,
-          },
-        });
-      }
-    });
-
-    return lembretes.sort((a, b) => a.horario.localeCompare(b.horario));
-  };
-
-  const formatarData = (dataString: string) => {
+  const formatarData = (dataString: Date) => {
     if (!dataString) return 'Sem data';
     const data = new Date(dataString);
     return data.toLocaleDateString('pt-BR');
@@ -138,7 +101,7 @@ export default function MeusLembretesContent() {
       setLembretes(
         lembretes.map((lembrete) =>
           lembrete.id === lembreteId
-            ? { ...lembrete, status: 'tomado' as const }
+            ? { ...lembrete, tomado: true as const }
             : lembrete,
         ),
       );
@@ -150,15 +113,16 @@ export default function MeusLembretesContent() {
   const lembreteFiltrados = lembretes.filter((lembrete) => {
     if (
       filtroMedicamento &&
-      lembrete.medicamento.id.toString() !== filtroMedicamento
+      lembrete.remedioId &&
+      lembrete.remedioId.toString() !== filtroMedicamento
     ) {
       return false;
     }
-    if (filtroStatus && lembrete.status !== filtroStatus) {
+    if (filtroStatus && lembrete.tomado.toString() !== filtroStatus) {
       return false;
     }
 
-    const dataLembrete = new Date(lembrete.data);
+    const dataLembrete = new Date(lembrete.data_dose);
     const hoje = new Date();
 
     switch (filtroPeriodo) {
@@ -267,8 +231,8 @@ export default function MeusLembretesContent() {
                   onChange={(e) => setFiltroStatus(e.target.value)}
                 >
                   <option value="">Todos os status</option>
-                  <option value="tomado">Tomado</option>
-                  <option value="pendente">Pendente</option>
+                  <option value="true">Tomado</option>
+                  <option value="false">Pendente</option>
                 </select>
               </div>
 
@@ -301,7 +265,7 @@ export default function MeusLembretesContent() {
                 <div className="flex items-center p-4">
                   {/* Checkbox e status */}
                   <div className="flex items-center mr-4">
-                    {lembrete.status === 'tomado' ? (
+                    {lembrete.tomado === true ? (
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -342,36 +306,36 @@ export default function MeusLembretesContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center mb-1">
                       <h3 className="text-lg font-semibold text-[#037F8C] KantumruySemiBold mr-2">
-                        {lembrete.medicamentoNome}
+                        {lembrete.remedioId}
                       </h3>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          lembrete.status === 'tomado'
+                          lembrete.tomado === true
                             ? 'bg-green-100 text-green-800'
                             : 'bg-orange-100 text-orange-800'
                         }`}
                       >
-                        {lembrete.status === 'tomado' ? 'Tomado' : 'Pendente'}
+                        {lembrete.tomado === true ? 'Tomado' : 'Pendente'}
                       </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600 space-x-4">
-                      <span>{formatarData(lembrete.data)}</span>
-                      <span>{lembrete.horario}</span>
-                      <span>{lembrete.dosagem}</span>
+                      <span>{formatarData(lembrete.data_dose)}</span>
+                      <span>5 comprimidos</span>
                     </div>
                   </div>
 
                   {/* Botão marcar como tomado */}
-                  {lembrete.status === 'pendente' && (
-                    <div className="ml-4">
-                      <button
-                        onClick={() => marcarComoTomado(lembrete.id)}
-                        className="bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#025e6a] transition-colors text-sm KantumruyMedium"
-                      >
-                        ✓ Marcar como tomado
-                      </button>
-                    </div>
-                  )}
+                  {lembrete.tomado === false &&
+                    new Date(lembrete.data_dose) <= new Date() && (
+                      <div className="ml-4">
+                        <button
+                          onClick={() => marcarComoTomado(lembrete.id)}
+                          className="bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#025e6a] transition-colors text-sm KantumruyMedium"
+                        >
+                          ✓ Marcar como tomado
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             ))}
