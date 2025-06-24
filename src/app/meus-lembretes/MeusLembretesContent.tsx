@@ -98,7 +98,7 @@ export default function MeusLembretesContent() {
 
   const marcarComoTomado = async (lembreteId: number) => {
     try {
-      await apiRequest(`dose/me/${lembreteId}`, {
+      await apiRequest(`dose/${lembreteId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
