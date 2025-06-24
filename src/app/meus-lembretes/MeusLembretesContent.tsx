@@ -147,10 +147,10 @@ export default function MeusLembretesContent() {
   });
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-6 bg-[#e8e6e6]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
+          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
             Meus lembretes
           </h1>
           <p className="text-gray-600 KantumruyRegular">

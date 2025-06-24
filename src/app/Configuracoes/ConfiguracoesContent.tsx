@@ -265,7 +265,7 @@ export default function ConfiguracoesContent() {
   return (
     <div className="flex-1 p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
+        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
           Configurações
         </h1>
         <p className="text-gray-600 KantumruyRegular">
