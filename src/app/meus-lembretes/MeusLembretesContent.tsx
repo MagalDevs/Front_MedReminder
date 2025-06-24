@@ -99,7 +99,7 @@ export default function MeusLembretesContent() {
   const marcarComoTomado = async (lembreteId: number) => {
     try {
       await apiRequest(`dose/me/${lembreteId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
