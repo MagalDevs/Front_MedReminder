@@ -19,16 +19,6 @@ type Medicamento = {
   foto: Blob;
   observacao: string;
   quantidadeDose: string;
-  usuario: {
-    id?: string | number;
-    nome?: string;
-    email?: string;
-    cep?: string;
-    cpf?: string;
-    cuidador?: boolean;
-    dataNasc?: Date;
-    senha?: string;
-  };
   usuarioId: number;
 };
 
@@ -38,6 +28,7 @@ type Lembrete = {
   data_dose: Date;
   usuarioId: number;
   remedioId: number;
+  remedio: Medicamento;
 };
 
 export default function MeusLembretesContent() {
@@ -320,7 +311,7 @@ export default function MeusLembretesContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center mb-1">
                       <h3 className="text-lg font-semibold text-[#037F8C] KantumruySemiBold mr-2">
-                        {lembrete.remedioId}
+                        {lembrete.remedio.nome}
                       </h3>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -334,7 +325,7 @@ export default function MeusLembretesContent() {
                     </div>
                     <div className="flex items-center text-sm text-gray-600 space-x-4">
                       <span>{formatarData(lembrete.data_dose)}</span>
-                      <span>5 comprimidos</span>
+                      <span>{lembrete.remedio.quantidadeDose}</span>
                     </div>
                   </div>
 
