@@ -1,21 +1,31 @@
+import { LembreteContext } from '@/app/contexts/lembreteContext';
+import { apiRequest } from '@/app/utils/api';
 import { Bell, Pill, X } from 'lucide-react';
-import React from 'react'
+import React, { useContext } from 'react'
 
 interface alarmeDoseProps {
   dataHora: string;
   medicamentoNome: string;
   quantidadeDose: string;
   cor: string;
+  id: number;
   onClose: () => void;
 }
 
 const Lembrete = (props: alarmeDoseProps) => {
-  const { dataHora, medicamentoNome, quantidadeDose, cor, onClose } = props;
+  const { dataHora, medicamentoNome, quantidadeDose, cor, id, onClose } = props;
+  const context = useContext(LembreteContext);
 
-  const dia = dataHora.split('T')[0].split('-')[2];
-  const mes = dataHora.split('T')[0].split('-')[1];
-  const ano = dataHora.split('T')[0].split('-')[0];
-  const horario = dataHora.split('T')[1].slice(0, 5); 
+  const dataDose = new Date(dataHora);
+
+  const dia = String(dataDose.getDate()).padStart(2, '0');
+  const mes = String(dataDose.getMonth() + 1).padStart(2, '0');
+  const ano = dataDose.getFullYear().toString();
+
+  const hora = String(dataDose.getHours()).padStart(2, '0');
+  const minuto = String(dataDose.getMinutes()).padStart(2, '0');
+  const horario = `${hora}:${minuto}`;
+
 
   const hashCor: Record<string, string> = {
     'Vermelho': '#FF0000',
@@ -32,29 +42,58 @@ const Lembrete = (props: alarmeDoseProps) => {
 
   const corFundo = hashCor[cor] || '#FF0000';
 
+  const medicamentoTomado = async () => {
+    await apiRequest(`dose/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      },
+      body: JSON.stringify({
+        tomado: true,
+      }),
+    });
+
+    await context?.getLembretes(); // Atualiza os lembretes no contexto
+    onClose();
+  }
+
   return (
     <div
-      className={`bg-[${corFundo}] fixed inset-0 flex flex-col items-center justify-center text-white z-50 min-h-screen w-full`}
+      className={`fixed inset-0 flex flex-col items-center justify-center z-50 min-h-screen w-full ${
+        cor === 'Branco' ? 'text-gray-800' : 'text-white'
+      }`}
+      style={{
+        backgroundColor: corFundo,
+        ...(cor === 'Branco' && {
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 0 12px rgba(0,0,0,0.08)',
+        }),
+      }}
     >
       <div className="w-full max-w-md px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/20 rounded-full">
-              <Bell className="w-8 h-8 animate-bounce" />
+            <div className={`p-3 rounded-full ${
+              cor === 'Branco' ? 'bg-gray-200' : 'bg-white/20'
+            }`}>
+              <Bell className="w-8 h-8 animate-bounce" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
             </div>
             <h2 className="text-2xl font-bold">Hora do Medicamento!</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-white hover:bg-white/20 p-2 h-auto"
+            className={`p-2 h-auto rounded-full transition ${
+              cor === 'Branco' ? 'bg-gray-100 hover:bg-gray-300' : 'bg-white/20 hover:bg-white/30'
+            }`}
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" color={cor === 'Branco' ? '#4B5563' : '#FFFFFF'} />
           </button>
         </div>
 
         <div className="space-y-6 mb-8">
           <div className="flex items-center gap-4">
-            <Pill className="w-6 h-6" />
+            <Pill className="w-6 h-6" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
             <div>
               <p className="text-lg opacity-90">Medicamento</p>
               <p className="text-3xl font-bold">{medicamentoNome}</p>
@@ -72,15 +111,23 @@ const Lembrete = (props: alarmeDoseProps) => {
             </div>
           </div>
 
-          <div className="bg-white/20 rounded-lg p-6 text-center">
+          <div
+            className={`rounded-lg p-6 text-center ${
+              cor === 'Branco' ? 'bg-gray-100 shadow-inner' : 'bg-white/20'
+            }`}
+          >
             <p className="text-lg opacity-90">Dosagem</p>
             <p className="text-4xl font-bold">{quantidadeDose}</p>
           </div>
         </div>
 
         <button
-          onClick={onClose}
-          className="w-full bg-white text-black hover:bg-gray-100 font-bold py-4 text-lg"
+          onClick={medicamentoTomado}
+          className={`w-full transition ${
+            cor === 'Branco'
+              ? 'bg-gray-100 hover:bg-gray-300 text-gray-900'
+              : 'bg-white hover:bg-gray-100 text-black'
+          } font-bold py-4 text-lg rounded-md`}
         >
           Medicamento Tomado
         </button>

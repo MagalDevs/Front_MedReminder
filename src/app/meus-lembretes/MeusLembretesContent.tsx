@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
+import { LembreteContext } from '../contexts/lembreteContext';
 
 type Medicamento = {
   id: number;
@@ -22,17 +23,7 @@ type Medicamento = {
   usuarioId: number;
 };
 
-type Lembrete = {
-  id: number;
-  tomado: boolean;
-  data_dose: Date;
-  usuarioId: number;
-  remedioId: number;
-  remedio: Medicamento;
-};
-
 export default function MeusLembretesContent() {
-  const [lembretes, setLembretes] = useState<Lembrete[]>([]);
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -40,6 +31,9 @@ export default function MeusLembretesContent() {
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroPeriodo, setFiltroPeriodo] = useState('hoje');
   const router = useRouter();
+  const lembreteContext = useContext(LembreteContext);
+  const getLembretes = lembreteContext?.getLembretes;
+  const lembretes = lembreteContext?.lembretes ?? [];
 
   useEffect(() => {
     async function fetchData() {
@@ -57,17 +51,9 @@ export default function MeusLembretesContent() {
 
         setMedicamentos(medicamentosResponse.data);
 
-        const dosesResponse = await apiRequest<{
-          message: string;
-          data: Lembrete[];
-        }>('dose/me', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
-
-        setLembretes(dosesResponse.data);
+        if (getLembretes) {
+          await getLembretes();
+        }
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
         setError(
@@ -100,13 +86,9 @@ export default function MeusLembretesContent() {
         }),
       });
 
-      setLembretes(
-        lembretes.map((lembrete) =>
-          lembrete.id === lembreteId
-            ? { ...lembrete, tomado: true as const }
-            : lembrete,
-        ),
-      );
+      if (getLembretes) {
+        await getLembretes();
+      }
     } catch (err) {
       console.error('Erro ao marcar lembrete como tomado:', err);
       setError(

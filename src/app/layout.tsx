@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '../app/contexts/AuthContext';
 import { SidebarProvider } from '../app/contexts/SidebarContext';
+import { LembreteProvider } from './contexts/lembreteContext';
+import AlertaLembretes from './components/AlarmeDose/AlertaLembrete';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,7 +32,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F6F6F6]`}
       >
         <AuthProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <LembreteProvider>
+            <AlertaLembretes />
+            <SidebarProvider>{children}</SidebarProvider>
+          </LembreteProvider>
         </AuthProvider>
       </body>
     </html>
