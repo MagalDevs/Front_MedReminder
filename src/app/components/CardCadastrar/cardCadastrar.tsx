@@ -77,32 +77,37 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   };
   const validarFormulario = (): boolean => {
     const novosErros: ErrosForm = {};
-    if (!nome.trim()) {
-      novosErros.nome = 'Nome do medicamento é obrigatório';
-    }
+
+    if (!nome.trim()) novosErros.nome = 'Nome do medicamento é obrigatório';
+
     if (!dosagem.trim()) {
       novosErros.dosagem = 'Dosagem é obrigatória';
     } else if (parseFloat(dosagem) <= 0) {
       novosErros.dosagem = 'Dosagem deve ser maior que zero';
     }
+
     if (!quantidade.trim()) {
       novosErros.quantidade = 'Quantidade é obrigatória';
     } else if (parseInt(quantidade) <= 0) {
       novosErros.quantidade = 'Quantidade deve ser maior que zero';
     }
+
     if (!duracao.trim()) {
       novosErros.duracao = 'Duração é obrigatória';
     } else if (parseInt(duracao) <= 0) {
       novosErros.duracao = 'Duração deve ser maior que zero';
     }
+
     if (!intervalo.trim()) {
       novosErros.intervalo = 'Intervalo é obrigatório';
     } else if (parseInt(intervalo) <= 0) {
       novosErros.intervalo = 'Intervalo deve ser maior que zero';
     }
+
     if (horarios.length === 0 || !horarios[0].hora) {
       novosErros.horario = 'Horário da primeira dose é obrigatório';
     }
+
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   };
@@ -250,21 +255,10 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         }
       } catch (error) {
         console.error('Erro ao salvar medicamento:', error);
-        let mensagemErro = 'Erro ao salvar o medicamento';
-
-        if (error instanceof Error) {
-          mensagemErro = `${mensagemErro}: ${error.message}`;
-          console.error('Detalhes do erro:', error.message);
-        }
-        if (typeof mensagemErro === 'string') {
-          if (mensagemErro.toLowerCase().includes('usuarioid')) {
-            mensagemErro += '. Verifique se você está logado corretamente.';
-          } else if (mensagemErro.toLowerCase().includes('horaini')) {
-            mensagemErro += '. Verifique se o horário inicial está correto.';
-          } else if (mensagemErro.toLowerCase().includes('quantidadediaria')) {
-            mensagemErro += '. Verifique o campo de intervalo.';
-          }
-        }
+        const mensagemErro =
+          error instanceof Error
+            ? `Erro ao salvar o medicamento: ${error.message}`
+            : 'Erro ao salvar o medicamento';
         alert(mensagemErro);
         throw error;
       }
@@ -304,17 +298,16 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
       try {
         if (!Array.isArray(dosesISO) || dosesISO.length === 0) {
-          console.error('Nenhuma dose calculada para enviar');
           throw new Error(
             'Não foi possível calcular as doses. Verifique a duração e o intervalo.',
           );
         }
         if (!remedioId) {
-          console.error('ID do remédio não disponível para criar doses');
           throw new Error(
             'ID do remédio não disponível. Não é possível criar doses.',
           );
         }
+
         const dataDoses = await apiRequest<unknown>('dose/doses', {
           method: 'POST',
           headers: {
@@ -328,30 +321,15 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         limparFormulario();
       } catch (error) {
         console.error('Erro ao salvar doses:', error);
-        let mensagemErro = 'Erro ao salvar as doses';
-
-        if (error instanceof Error) {
-          console.error('Detalhes do erro:', error.message);
-          mensagemErro = `${mensagemErro}: ${error.message}`;
-          if (
-            error.message.toLowerCase().includes('invalid') ||
-            error.message.toLowerCase().includes('invalid input') ||
-            error.message.toLowerCase().includes('formato') ||
-            error.message.toLowerCase().includes('400')
-          ) {
-            mensagemErro +=
-              '. Pode haver um problema com o formato dos dados enviados.';
-          }
-        }
+        const mensagemErro =
+          error instanceof Error
+            ? `Erro ao salvar as doses: ${error.message}`
+            : 'Erro ao salvar as doses';
         alert(mensagemErro);
         throw error;
       }
     } catch (error) {
-      console.error(
-        '%c ERRO NA OPERAÇÃO:',
-        'background: #f44336; color: white; font-size: 16px; font-weight: bold;',
-      );
-      console.error('%c', 'color: #f44336; font-size: 14px;', error);
+      console.error('ERRO NA OPERAÇÃO:', error);
 
       let mensagemErro = 'Erro ao salvar o lembrete. Tente novamente.';
       if (error instanceof Error) {
