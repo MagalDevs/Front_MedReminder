@@ -18,7 +18,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [isAuthenticated, loading, router]);
 
-  // Show nothing while checking authentication
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -26,13 +25,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       </div>
     );
   }
-
-  // If not authenticated, don't render children
-  // The effect will redirect to login
   if (!isAuthenticated) {
     return null;
   }
 
-  // If authenticated, render children
   return <>{children}</>;
 }
