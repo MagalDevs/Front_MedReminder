@@ -232,6 +232,10 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           data: { id: number };
         }>('remedio', {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
           body: JSON.stringify(dadosLembrete),
         });
         const responseData = data;
@@ -313,6 +317,10 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         }
         const dataDoses = await apiRequest<unknown>('dose/doses', {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
           body: JSON.stringify(dadosDoses),
         });
         void dataDoses;
