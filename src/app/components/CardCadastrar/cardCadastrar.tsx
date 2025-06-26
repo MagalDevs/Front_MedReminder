@@ -239,7 +239,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(dadosLembrete),
         });
@@ -312,7 +312,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(dadosDoses),
         });
