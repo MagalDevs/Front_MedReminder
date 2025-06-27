@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiRequest } from '../../utils/api';
+import { LembreteContext } from '@/app/contexts/lembreteContext';
 
 const Cores = [
   '#FF0000',
@@ -39,6 +40,7 @@ type ErrosForm = {
 };
 
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
+  const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
   const [erros, setErros] = useState<ErrosForm>({});
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || '');
@@ -322,6 +324,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         void dataLembretes;
         alert('Lembrete e doses salvos com sucesso!');
         limparFormulario();
+        await context?.getLembretes();
       } catch (error) {
         console.error('Erro ao salvar doses:', error);
         const mensagemErro =
