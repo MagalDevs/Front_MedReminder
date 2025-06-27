@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiRequest } from '../../utils/api';
 import { LembreteContext } from '@/app/contexts/lembreteContext';
+import { Loader2 } from 'lucide-react';
 
 const Cores = [
   '#FF0000',
@@ -46,6 +47,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || '');
   const [dosagem, setDosagem] = useState('');
   const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || '');
+  const [isLoading, setIsLoading] = useState(false);
   const [corSelecionada, setCorSelecionada] = useState('#FF0000');
   const [horarios, setHorarios] = useState<Horario[]>([
     {
@@ -172,6 +174,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     }
 
     const usuarioId = user.id;
+    setIsLoading(true);
     try {
       const horaInicio = new Date();
       let horaInicialString = '10:00';
@@ -350,6 +353,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       }
 
       alert(mensagemErro);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -629,13 +634,22 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       <div className="flex gap-4">
         <button
           onClick={salvarLembrete}
+          disabled={isLoading}
           className="bg-[#0B6E71] text-white py-2 px-6 rounded-lg hover:bg-[#044D55] hover:cursor-pointer transition-colors font-medium"
         >
-          Salvar lembrete
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Salvando...
+            </div>
+          ) : (
+            'Salvar lembrete'
+          )}
         </button>
 
         <button
           onClick={limparFormulario}
+          disabled={isLoading}
           className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 hover:cursor-pointer transition-colors font-medium max-w-[calc(100%-64px)]"
         >
           Limpar formulário
