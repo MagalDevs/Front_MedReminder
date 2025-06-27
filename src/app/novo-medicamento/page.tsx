@@ -35,10 +35,10 @@ function NovoMedicamentoContent() {
     <div className="flex-1 p-6 overflow-y-hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-10">
+          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2 ml-6">
             Adicionar medicamento
           </h1>
-          <p className="text-gray-600 KantumruyRegular ml-10">
+          <p className="text-gray-600 KantumruyRegular ml-6">
             Cadastre lembretes para seus medicamentos
           </p>
         </div>

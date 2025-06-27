@@ -130,7 +130,7 @@ export default function SearchBar() {
 
       {isOpen && (
         <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10 max-h-72 overflow-y-auto">
-          <div className="py-2 flex flex-col gap-1">
+          <div className="flex flex-col">
             {searchQuery && filtered.length > 0 ? (
               filtered.slice(0, 10).map((med, idx) => (
                 <div
@@ -158,10 +158,14 @@ export default function SearchBar() {
                 </div>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">
-                {searchQuery
-                  ? 'Nenhum resultado encontrado'
-                  : 'Digite para buscar um medicamento'}
+              <div className="flex items-center pl-3 pr-4 py-2 text-sm text-gray-500 KantumruyRegular w-full">
+                <span className="text-gray-500 mr-2 w-5 h-5"></span>
+                <span className="flex-1">
+                  {searchQuery
+                    ? 'Nenhum resultado encontrado'
+                    : 'Digite para buscar um medicamento'}
+                </span>
+                <span className="ml-2 w-5 h-5"></span>
               </div>
             )}
           </div>
