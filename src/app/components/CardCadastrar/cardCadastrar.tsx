@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiRequest } from '../../utils/api';
+import { LembreteContext } from '@/app/contexts/lembreteContext';
 
 const Cores = [
   '#FF0000',
@@ -41,6 +42,7 @@ type ErrosForm = {
 };
 
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
+  const context = useContext(LembreteContext)
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || '');
   const [dosagem, setDosagem] = useState(medicamentoSelecionado?.dosagem || '');
   const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || '');
@@ -543,6 +545,7 @@ const calcularHorariosMedicamento = (
         
         alert('Lembrete e doses salvos com sucesso!');
         limparFormulario();
+        await context?.getLembretes()
       } catch (error) {
         console.error('Erro ao salvar doses:', error);
         
