@@ -59,6 +59,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [intervalo, setIntervalo] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [unidade, setUnidade] = useState('mg');
+  const [unidadeDosagem, setUnidadeDosagem] = useState('mg');
   const [unidadeDuracao, setUnidadeDuracao] = useState(1);
 
   useEffect(() => {
@@ -213,7 +214,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       if (validade) {
         dataValidadeFormatada = validade.toString().split('T')[0];
       }
-      const dadosLembrete = {
+      const dadosMedicamento = {
         nome: nome,
         quantidadeCaixa: parseInt(quantidade) || 0,
         dataValidade: dataValidadeFormatada,
@@ -226,7 +227,9 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         motivo: motivo || 'Não especificado',
         quantidadeDias: parseInt(duracao) || 0,
         quantidadeDose:
-          parseFloat(dosagem) > 0 ? `${dosagem} ${unidade}` : `1 ${unidade}`,
+          parseFloat(dosagem) > 0
+            ? `${dosagem} ${unidadeDosagem}`
+            : `1 ${unidadeDosagem}`,
         observacao: observacoes || '',
         usuarioId: usuarioId,
       };
@@ -241,7 +244,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(dadosLembrete),
+          body: JSON.stringify(dadosMedicamento),
         });
         const responseData = data;
         if (responseData?.data) {
@@ -290,7 +293,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       const remedioIdNumber =
         typeof remedioId === 'string' ? parseInt(remedioId) : remedioId;
 
-      const dadosDoses = {
+      const dadosLembretes = {
         usuarioId: usuarioId,
         remedioId: remedioIdNumber,
         doses: dosesISO.map((dose) => dose.trim()),
@@ -308,15 +311,15 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           );
         }
 
-        const dataDoses = await apiRequest<unknown>('dose/doses', {
+        const dataLembretes = await apiRequest<unknown>('dose/doses', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(dadosDoses),
+          body: JSON.stringify(dadosLembretes),
         });
-        void dataDoses;
+        void dataLembretes;
         alert('Lembrete e doses salvos com sucesso!');
         limparFormulario();
       } catch (error) {
@@ -539,8 +542,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             />
             <select
               className="w-20 text-sm p-2 bg-gray-50 border-l border-[#037F8C] outline-none text-gray-700 KantumruyMedium cursor-pointer hover:bg-gray-100 transition-colors"
-              value={unidade}
-              onChange={(e) => setUnidade(e.target.value)}
+              value={unidadeDosagem}
+              onChange={(e) => setUnidadeDosagem(e.target.value)}
             >
               <option value="mg">mg</option>
               <option value="ml">ml</option>
