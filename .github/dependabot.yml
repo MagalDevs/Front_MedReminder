@@ -1,0 +1,60 @@
+# Atualizacoes de versao semanais; correcoes de seguranca dependem
+# de Dependabot alerts e Dependabot security updates habilitados no GitHub.
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      # Pacotes relacionados ficam juntos, inclusive em upgrades major.
+      # PRs major exigem revisar compatibilidade e eventuais migracoes.
+      nextjs:
+        applies-to: "version-updates"
+        patterns:
+          - "next"
+          - "eslint-config-next"
+          - "@next/*"
+      react:
+        applies-to: "version-updates"
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      tailwind:
+        applies-to: "version-updates"
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      # As demais atualizacoes major ficam em PRs individuais.
+      production:
+        applies-to: "version-updates"
+        dependency-type: "production"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      development:
+        applies-to: "version-updates"
+        dependency-type: "development"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
