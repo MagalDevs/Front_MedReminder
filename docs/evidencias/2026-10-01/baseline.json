@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-01",
+  "timezone": "America/Sao_Paulo",
+  "repository": "Front_MedReminder",
+  "head": "ffd8893b423879194e512f65de8db7de099d2b06",
+  "node": "v24.21.0",
+  "npm": "11.19.0",
+  "scope": "local build/typecheck/lint/tests; no deployment or device E2E",
+  "graphify": "unavailable in tool/resource list"
+}

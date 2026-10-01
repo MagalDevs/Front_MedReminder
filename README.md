@@ -34,3 +34,8 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Documentação de evolução do MVP
+
+Consulte [docs/README.md](docs/README.md) para inventário, backlog priorizado, planejamento, contribuição das disciplinas, plano de testes, validação inicial e roteiro de apresentação. As evidências reais e pendências de aceite estão em [docs/RELATORIO_QUALIDADE.md](docs/RELATORIO_QUALIDADE.md).

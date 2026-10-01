@@ -1,0 +1,10 @@
+
+> front_medreminder@0.1.0 lint
+> next lint
+
+
+./src/app/meus-lembretes/MeusLembretesContent.tsx
+68:6  Warning: React Hook useEffect has a missing dependency: 'getLembretes'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+EXIT_CODE=0
