@@ -1,42 +1,49 @@
 # MedReminder — Frontend
 
-Aplicação web para organizar medicamentos, configurar tratamentos e acompanhar a confirmação de doses. Este repositório contém a interface em português do MedReminder, integrada à API NestJS compartilhada com o aplicativo mobile.
+O MedReminder é uma aplicação web para organizar medicamentos, configurar horários de tratamento e acompanhar a confirmação das doses. A interface em português reúne busca de medicamentos, formulários de cadastro, listas de tratamentos e lembretes em uma experiência construída com Next.js e React.
 
-## Estado do projeto
+Este repositório contém o frontend web. Os dados de usuários, medicamentos e doses são persistidos por uma API compartilhada com o aplicativo mobile.
 
-O frontend contém busca de medicamentos, cadastro/login, gerenciamento de medicamentos e lembretes, confirmação de doses e edição de perfil. A validação técnica de **01/10/2026** aprovou instalação, build e lint, com um aviso de dependência de `useEffect`.
+## Funcionalidades
 
-O aceite funcional do MVP ainda depende da execução do fluxo integrado e do fechamento das tarefas P0. O histórico atual gera registros simulados; alertas dependem da página aberta; troca de senha e foto chamam endpoints ainda ausentes no backend analisado. Consulte o [relatório de qualidade](docs/RELATORIO_QUALIDADE.md) para os resultados e limites da validação.
+- Busca de medicamentos por nome a partir de um catálogo CSV.
+- Cadastro de usuário e login.
+- Cadastro de medicamentos com informações do tratamento, dosagem, intervalo e duração.
+- Consulta dos medicamentos cadastrados e exclusão de registros.
+- Consulta de lembretes com filtros e confirmação de dose tomada.
+- Alerta visual no horário da dose enquanto a página permanece aberta.
+- Consulta e atualização de informações do perfil.
 
-## Funcionalidades e rotas
-
-| Rota | Conteúdo | Situação |
-| --- | --- | --- |
-| `/` | Página inicial e busca de medicamentos no catálogo CSV | Implementada; desempenho e acessibilidade a validar |
-| `/cadastro` | Cadastro de usuário na API | Implementada; fluxo integrado a validar |
-| `/login` | Login com JWT e consulta de perfil | Implementada; validação de sessão a melhorar |
-| `/novo-medicamento` | Seleção, configuração de tratamento e criação de doses | Implementada; recuperação de falha parcial pendente |
-| `/meus-medicamentos` | Lista e manutenção dos medicamentos do usuário | Implementada; isolamento e regressão a validar |
-| `/meus-lembretes` | Lista de doses, filtros e confirmação de dose tomada | Implementada; ciclo de atualização/alertas a melhorar |
-| `/historico` | Histórico e filtros | Usa registros simulados; substituição planejada |
-| `/Configuracoes` | Perfil, senha e foto | Perfil integrado; senha/foto dependem de contratos ausentes |
-
-A rota `/Configuracoes` utiliza inicial maiúscula, conforme a pasta existente.
+A interface também possui uma tela de histórico com filtros. Na versão atual, seus registros são simulados. As ações de troca de senha e envio de foto exibidas nas configurações dependem de endpoints ainda indisponíveis na API.
 
 ## Tecnologias
 
-- Next.js 15 com App Router e React 19.
-- TypeScript e Tailwind CSS.
-- React Context para autenticação, lembretes e sidebar.
-- Papa Parse para leitura do catálogo CSV.
-- Lucide React, React Datepicker e React Input Mask.
-- ESLint para análise estática.
+| Tecnologia | Uso no frontend |
+| --- | --- |
+| Next.js 15 | Rotas com App Router, desenvolvimento e build |
+| React 19 | Componentes e gerenciamento de estado da interface |
+| TypeScript | Tipagem do código |
+| Tailwind CSS | Estilização |
+| React Context | Estado de autenticação, lembretes e sidebar |
+| Papa Parse | Leitura do catálogo de medicamentos em CSV |
+| Lucide React | Ícones |
+| React Datepicker | Seleção de datas |
+| React Input Mask | Máscaras de campos |
+| ESLint | Análise estática |
 
-As versões efetivas são determinadas por `package-lock.json`. O ambiente usado na validação inicial foi Windows, Node.js **v24.21.0** e npm **11.19.0**; isso registra o ambiente testado, sem definir uma matriz de compatibilidade completa.
+As versões das dependências estão registradas em `package.json` e `package-lock.json`.
 
-## Executar localmente
+## Como executar
 
-### 1. Obter o projeto e instalar
+### Pré-requisitos
+
+- Node.js e npm.
+- Git para clonar o repositório.
+- Acesso à API para utilizar cadastro, login e dados persistidos.
+
+O ambiente utilizado na execução local foi Node.js **v24.21.0** e npm **11.19.0**.
+
+### Instalação
 
 ```bash
 git clone https://github.com/MagalDevs/Front_MedReminder.git
@@ -44,124 +51,120 @@ cd Front_MedReminder
 npm ci
 ```
 
-### 2. Iniciar em desenvolvimento
+### Desenvolvimento
+
+```bash
+npm run dev
+```
+
+Abra [http://localhost:3000](http://localhost:3000).
+
+Para utilizar outra porta, por exemplo quando uma API local estiver na porta 3000:
 
 ```bash
 npm run dev -- --port 3001
 ```
 
-Abra [http://localhost:3001](http://localhost:3001). A porta 3001 permite executar uma API local na porta 3000 sem conflito. O comando `npm run dev` sem porta usa a porta padrão do Next.js.
+Nesse caso, abra [http://localhost:3001](http://localhost:3001).
 
-### 3. Compilar e iniciar o build
+### Build e execução
 
 ```bash
 npm run build
+npm run start
+```
+
+Para iniciar o build em outra porta:
+
+```bash
 npm run start -- --port 3001
 ```
 
-### 4. Analisar o código
+### Comandos disponíveis
 
-```bash
-npm run lint
-```
-
-Não existe script `npm test` nem suíte funcional automatizada própria nesta versão. A tarefa [FE-07](https://github.com/MagalDevs/Front_MedReminder/issues/31) prevê testes de componentes, E2E e execução em CI.
-
-## Integração com a API
-
-A URL atualmente utilizada é `https://medreminder-backend.onrender.com`. Ela está definida em `src/app/utils/api.ts` e repetida em chamadas diretas nas telas de cadastro, histórico e configurações. A disponibilidade do serviço e a implantação cloud não foram comprovadas pela rodada local.
-
-| Operação | Endpoint utilizado |
+| Comando | Finalidade |
 | --- | --- |
-| Cadastro | `POST /usuario` |
-| Login web | `POST /auth/login` |
-| Consultar/atualizar perfil | `GET /usuario/me`, `PATCH /usuario/me` |
-| Criar e listar medicamentos próprios | `POST /remedio`, `GET /remedio/me` |
-| Atualizar/excluir medicamento | `PUT /remedio/:id`, `DELETE /remedio/:id` |
-| Criar lote de doses | `POST /dose/doses` |
-| Consultar/confirmar doses | `GET /dose/me`, `PUT /dose/:id` |
+| `npm run dev` | Inicia o ambiente de desenvolvimento com Turbopack |
+| `npm run build` | Gera o build da aplicação |
+| `npm run start` | Inicia a aplicação a partir do build |
+| `npm run lint` | Executa a análise estática |
 
-O cliente central adiciona o token Bearer salvo em `localStorage` sob `access_token`; o perfil é armazenado em `user_data`. O tratamento de sessão e a limpeza dos dados estão planejados em [FE-03](https://github.com/MagalDevs/Front_MedReminder/issues/27).
+## Navegação
 
-**Configuração por ambiente:** `NEXT_PUBLIC_API_URL` ainda não é lida pelo código. Criar um `.env.local` com essa variável não muda a API utilizada nesta versão. A implementação está em [FE-06](https://github.com/MagalDevs/Front_MedReminder/issues/30). Para integrar uma API local antes dessa tarefa, é necessário ajustar as URLs existentes e a configuração CORS do backend.
+| Rota | Tela |
+| --- | --- |
+| `/` | Página inicial e busca de medicamentos |
+| `/cadastro` | Cadastro de usuário |
+| `/login` | Login |
+| `/novo-medicamento` | Seleção de medicamento e configuração de tratamento |
+| `/meus-medicamentos` | Medicamentos cadastrados |
+| `/meus-lembretes` | Lembretes e confirmação de doses |
+| `/historico` | Histórico com filtros |
+| `/Configuracoes` | Configurações do perfil |
 
-## Estrutura
+A rota `/Configuracoes` utiliza inicial maiúscula, conforme a estrutura atual.
+
+## Organização do frontend
 
 ```text
 src/app/
+  layout.tsx           Layout principal e providers
+  page.tsx             Página inicial
+  globals.css          Estilos globais
   components/          Busca, formulários, sidebar e alertas
   contexts/            Autenticação, lembretes e sidebar
   utils/api.ts         Cliente HTTP autenticado
   cadastro/            Cadastro de usuário
   login/               Login
   novo-medicamento/    Configuração de medicamento e tratamento
-  meus-medicamentos/   Gerenciamento de medicamentos
+  meus-medicamentos/   Lista de medicamentos
   meus-lembretes/      Consulta e confirmação de doses
-  historico/           Histórico
+  historico/           Tela de histórico
   Configuracoes/       Configurações de perfil
-public/assets/         Assets e catálogo CSV
-docs/                  Backlog, planejamento, cloud, qualidade e evidências
-tests/                 Organização e modelo de registro de execução
+public/
+  assets/              Imagens e catálogo CSV
+  fonts/               Recursos de fontes
 ```
 
-O catálogo utilizado pela busca está em `public/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv`. A documentação da origem, versão e atualização, junto da otimização da busca, está prevista em [FE-10](https://github.com/MagalDevs/Front_MedReminder/issues/34).
+O layout principal reúne os providers de autenticação, lembretes e sidebar. Os componentes de busca e cadastro compõem o fluxo de configuração de tratamentos, enquanto as telas de consulta apresentam os medicamentos e doses recebidos da API.
 
-## Backlog e prioridades
+## Catálogo de medicamentos
 
-As **15 tarefas do frontend** estão publicadas como issues com atividades, critérios de aceite, estimativas, dependências e evidências esperadas.
+A busca lê o arquivo:
 
-| Prioridade | Significado | Tarefas |
-| --- | --- | --- |
-| P0 | Bloqueiam o aceite | FE-01: execução reproduzível; FE-02: histórico real; FE-03: sessão |
-| P1 | Confiabilidade e entrega | FE-04 a FE-09; FE-12 a FE-15 |
-| P2 | Evolução posterior | FE-10: catálogo/busca; FE-11: notificação fora da página e adiamento |
+```text
+public/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv
+```
 
-Consulte o [índice das issues](docs/ISSUES.md), o [backlog detalhado](docs/BACKLOG.md) e o [planejamento por ciclos](docs/PLANEJAMENTO.md). Os IDs BE/MO referem-se a dependências planejadas dos outros repositórios; esta publicação criou somente issues do frontend.
+O arquivo é disponibilizado pelo frontend em `/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv` e interpretado com Papa Parse. A interface utiliza os campos `NOME_PRODUTO` e `DESCRIÇÃO` para apresentar os resultados e selecionar um medicamento.
 
-## Integração das disciplinas
+## Integração com a API
 
-| Disciplina | Contribuição para o frontend | Tarefas |
-| --- | --- | --- |
-| Computação em Nuvem 2 | Configuração por ambiente, implantação HTTPS, capacidade/cache, rollback, monitoramento e evidências | FE-06, FE-12, FE-13 |
-| Qualidade e Teste de Software | Testes de componentes/E2E, CI, acessibilidade, performance, execução e relatórios | FE-07, FE-09, FE-14 |
-| Integração do MVP | Fluxo real, confirmação persistida, isolamento entre contas e apresentação com evidências | FE-15 |
+A aplicação utiliza a API em:
 
-A [documentação de cloud](docs/CLOUD.md) descreve o plano de implantação e operação. Ela não comprova infraestrutura configurada. O [plano de testes](docs/PLANO_TESTES.md) define os cenários funcionais e não funcionais.
+```text
+https://medreminder-backend.onrender.com
+```
 
-## Validação e evidências
+O cliente HTTP principal está em `src/app/utils/api.ts`. Ele adiciona o token Bearer às requisições autenticadas e trata respostas de erro. Também existem chamadas diretas nas telas de cadastro, histórico e configurações.
 
-Resultados executados na baseline de 01/10/2026:
-
-| Verificação | Resultado |
+| Recurso | Operações utilizadas |
 | --- | --- |
-| `npm ci --no-audit --no-fund` | Aprovado |
-| `npm run build` | Aprovado |
-| `npm run lint` | Aprovado com aviso em `MeusLembretesContent.tsx` |
-| Fluxo funcional em navegador e integração API/mobile | Pendente |
-| Acessibilidade, desempenho e operação cloud | Pendentes |
+| Autenticação | `POST /auth/login` |
+| Usuário | `POST /usuario`, `GET /usuario/me`, `PATCH /usuario/me` |
+| Medicamentos | `POST /remedio`, `GET /remedio/me`, `DELETE /remedio/:id` |
+| Doses | `POST /dose/doses`, `GET /dose/me`, `PUT /dose/:id` |
 
-Os [logs e hashes da baseline](docs/evidencias/2026-10-01/README.md) preservam os resultados. Para novas rodadas, registrar data, ambiente, commit, caso, resultado e evidência conforme [tests/REGISTRO_EXECUCAO.md](tests/REGISTRO_EXECUCAO.md).
+O token da sessão é armazenado no `localStorage` com a chave `access_token`, e os dados do perfil com a chave `user_data`.
 
-O MVP será aceito após fechar P0, aprovar os cenários críticos e demonstrar cadastro/login → busca → tratamento → confirmação → recarga com dados persistidos e isolamento entre contas. A [apresentação do MVP](docs/APRESENTACAO_MVP.md) traz roteiro e checklist.
+A URL da API está definida no código. Atualmente, `NEXT_PUBLIC_API_URL` não é utilizada; para conectar outra API, é necessário ajustar as URLs existentes e autorizar a origem do frontend na configuração CORS do servidor.
 
-## Contribuir
+## Fluxo de uso
 
-1. Escolha uma [issue](https://github.com/MagalDevs/Front_MedReminder/issues) e confira prioridade, dependências e aceite.
-2. Crie uma branch para a mudança e mantenha o escopo ligado à tarefa.
-3. Execute lint, build e os testes pertinentes disponíveis.
-4. Atualize documentação, relatório e evidências quando necessário.
-5. Abra um PR com comportamento anterior/novo, validação e vínculo à issue, usando `Closes #numero` quando cumprir todo o aceite.
+1. Criar uma conta e realizar o login.
+2. Buscar e selecionar um medicamento.
+3. Informar os dados do tratamento e configurar seus horários.
+4. Consultar os medicamentos e lembretes cadastrados.
+5. Confirmar uma dose como tomada para atualizar seu estado na API.
 
-Evite incluir credenciais, tokens ou dados pessoais em commits, logs e capturas.
-
-## Documentação
-
-- [Índice geral](docs/README.md)
-- [Inventário das funcionalidades](docs/INVENTARIO.md)
-- [Backlog priorizado](docs/BACKLOG.md)
-- [Issues publicadas](docs/ISSUES.md)
-- [Planejamento integrado](docs/PLANEJAMENTO.md)
-- [Cloud](docs/CLOUD.md)
-- [Plano de testes](docs/PLANO_TESTES.md)
-- [Relatório de qualidade](docs/RELATORIO_QUALIDADE.md)
-- [Apresentação do MVP](docs/APRESENTACAO_MVP.md)
+Os alertas visuais usam temporizadores no navegador e dependem da página aberta. A aplicação atual não oferece garantia de notificação com a página fechada.
