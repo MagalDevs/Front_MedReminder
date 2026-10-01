@@ -4,6 +4,7 @@ Pacote criado em 01/10/2026 para organizar a evolução do MVP e integrar Comput
 
 - [Inventário e diagnóstico](INVENTARIO.md)
 - [Backlog com prioridades e aceite](BACKLOG.md)
+- [Índice das 15 issues publicadas](ISSUES.md)
 - [Planejamento integrado](PLANEJAMENTO.md)
 - [Configuração e operação cloud](CLOUD.md)
 - [Plano de testes](PLANO_TESTES.md)
