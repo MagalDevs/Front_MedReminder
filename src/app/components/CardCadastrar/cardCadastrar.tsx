@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useContext } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { apiRequest } from '../../utils/api';
-import { LembreteContext } from '@/app/contexts/lembreteContext';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect, useContext } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { apiRequest } from "../../utils/api";
+import { LembreteContext } from "@/app/contexts/lembreteContext";
+import { Loader2 } from "lucide-react";
 
 const Cores = [
-  '#FF0000',
-  '#4B00FF',
-  '#FFFF00',
-  '#FFA500',
-  '#00CFFF',
-  '#FFFFFF',
-  '#00FF7F',
-  '#006400',
-  '#000000',
-  '#DA70D6',
+  "#FF0000",
+  "#4B00FF",
+  "#FFFF00",
+  "#FFA500",
+  "#00CFFF",
+  "#FFFFFF",
+  "#00FF7F",
+  "#006400",
+  "#000000",
+  "#DA70D6",
 ];
 
 type Props = {
@@ -44,31 +44,31 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
   const [erros, setErros] = useState<ErrosForm>({});
-  const [nome, setNome] = useState(medicamentoSelecionado?.nome || '');
-  const [dosagem, setDosagem] = useState('');
-  const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || '');
+  const [nome, setNome] = useState(medicamentoSelecionado?.nome || "");
+  const [dosagem, setDosagem] = useState("");
+  const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || "");
   const [isLoading, setIsLoading] = useState(false);
-  const [corSelecionada, setCorSelecionada] = useState('#FF0000');
+  const [corSelecionada, setCorSelecionada] = useState("#FF0000");
   const [horarios, setHorarios] = useState<Horario[]>([
     {
-      data: new Date().toISOString().split('T')[0],
-      hora: '10:00',
-      dose: '1 comp.',
+      data: new Date().toISOString().split("T")[0],
+      hora: "10:00",
+      dose: "1 comp.",
     },
   ]);
-  const [motivo, setMotivo] = useState('');
-  const [duracao, setDuracao] = useState('');
-  const [quantidade, setQuantidade] = useState('');
+  const [motivo, setMotivo] = useState("");
+  const [duracao, setDuracao] = useState("");
+  const [quantidade, setQuantidade] = useState("");
   const [validade, setValidade] = useState<string | null>(null);
-  const [intervalo, setIntervalo] = useState('');
-  const [observacoes, setObservacoes] = useState('');
-  const [unidade, setUnidade] = useState('mg');
-  const [unidadeDosagem, setUnidadeDosagem] = useState('mg');
+  const [intervalo, setIntervalo] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+  const [unidade, setUnidade] = useState("mg");
+  const [unidadeDosagem, setUnidadeDosagem] = useState("mg");
   const [unidadeDuracao, setUnidadeDuracao] = useState(1);
 
   useEffect(() => {
-    setNome(medicamentoSelecionado?.nome || '');
-    setTipo(medicamentoSelecionado?.tipo || '');
+    setNome(medicamentoSelecionado?.nome || "");
+    setTipo(medicamentoSelecionado?.tipo || "");
   }, [medicamentoSelecionado]);
 
   const atualizarHorario = (
@@ -83,34 +83,34 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const validarFormulario = (): boolean => {
     const novosErros: ErrosForm = {};
 
-    if (!nome.trim()) novosErros.nome = 'Nome do medicamento é obrigatório';
+    if (!nome.trim()) novosErros.nome = "Nome do medicamento é obrigatório";
 
     if (!dosagem.trim()) {
-      novosErros.dosagem = 'Dosagem é obrigatória';
+      novosErros.dosagem = "Dosagem é obrigatória";
     } else if (parseFloat(dosagem) <= 0) {
-      novosErros.dosagem = 'Dosagem deve ser maior que zero';
+      novosErros.dosagem = "Dosagem deve ser maior que zero";
     }
 
     if (!quantidade.trim()) {
-      novosErros.quantidade = 'Quantidade é obrigatória';
+      novosErros.quantidade = "Quantidade é obrigatória";
     } else if (parseInt(quantidade) <= 0) {
-      novosErros.quantidade = 'Quantidade deve ser maior que zero';
+      novosErros.quantidade = "Quantidade deve ser maior que zero";
     }
 
     if (!duracao.trim()) {
-      novosErros.duracao = 'Duração é obrigatória';
+      novosErros.duracao = "Duração é obrigatória";
     } else if (parseInt(duracao) <= 0) {
-      novosErros.duracao = 'Duração deve ser maior que zero';
+      novosErros.duracao = "Duração deve ser maior que zero";
     }
 
     if (!intervalo.trim()) {
-      novosErros.intervalo = 'Intervalo é obrigatório';
+      novosErros.intervalo = "Intervalo é obrigatório";
     } else if (parseInt(intervalo) <= 0) {
-      novosErros.intervalo = 'Intervalo deve ser maior que zero';
+      novosErros.intervalo = "Intervalo deve ser maior que zero";
     }
 
     if (horarios.length === 0 || !horarios[0].hora) {
-      novosErros.horario = 'Horário da primeira dose é obrigatório';
+      novosErros.horario = "Horário da primeira dose é obrigatório";
     }
 
     setErros(novosErros);
@@ -121,12 +121,12 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     horaInicial: string,
     intervaloHoras: number,
     duracaoDias: number,
-    dataInicial: string = new Date().toISOString().split('T')[0],
+    dataInicial: string = new Date().toISOString().split("T")[0],
   ): { data: string; hora: string }[] => {
     const horarios: { data: string; hora: string }[] = [];
-    const [horasIniciais, minutosIniciais] = horaInicial.split(':').map(Number);
+    const [horasIniciais, minutosIniciais] = horaInicial.split(":").map(Number);
     const [anoInicial, mesInicial, diaInicial] = dataInicial
-      .split('-')
+      .split("-")
       .map(Number);
     const dataHoraInicio = new Date();
     dataHoraInicio.setFullYear(anoInicial);
@@ -139,14 +139,14 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
     let dataHoraAtual = new Date(dataHoraInicio);
     while (dataHoraAtual < dataHoraFim) {
-      const dataFormatada = dataHoraAtual.toISOString().split('T')[0];
+      const dataFormatada = dataHoraAtual.toISOString().split("T")[0];
       const horarioFormatado = `${dataHoraAtual
         .getHours()
         .toString()
-        .padStart(2, '0')}:${dataHoraAtual
+        .padStart(2, "0")}:${dataHoraAtual
         .getMinutes()
         .toString()
-        .padStart(2, '0')}`;
+        .padStart(2, "0")}`;
       horarios.push({
         data: dataFormatada,
         hora: horarioFormatado,
@@ -158,33 +158,32 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
   const salvarLembrete = async () => {
     if (!validarFormulario()) {
-      alert('Por favor, corrija os erros no formulário');
+      alert("Por favor, corrija os erros no formulário");
       return;
     }
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     if (!isAuthenticated || !token) {
-      alert('Você precisa estar logado para salvar um lembrete');
+      alert("Você precisa estar logado para salvar um lembrete");
       return;
     }
     if (!user || !user.id) {
       alert(
-        'Não foi possível identificar seu usuário. Por favor, faça login novamente.',
+        "Não foi possível identificar seu usuário. Por favor, faça login novamente.",
       );
       return;
     }
 
-    const usuarioId = user.id;
     setIsLoading(true);
     try {
       const horaInicio = new Date();
-      let horaInicialString = '10:00';
-      let dataInicial = new Date().toISOString().split('T')[0];
+      let horaInicialString = "10:00";
+      let dataInicial = new Date().toISOString().split("T")[0];
 
       if (horarios[0]?.hora) {
         horaInicialString = horarios[0].hora;
         dataInicial = horarios[0].data;
-        const [ano, mes, dia] = dataInicial.split('-').map(Number);
-        const [horas, minutos] = horaInicialString.split(':').map(Number);
+        const [ano, mes, dia] = dataInicial.split("-").map(Number);
+        const [horas, minutos] = horaInicialString.split(":").map(Number);
         horaInicio.setFullYear(ano);
         horaInicio.setMonth(mes - 1);
         horaInicio.setDate(dia);
@@ -203,50 +202,49 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       );
 
       const nomeCores: Record<string, string> = {
-        '#FF0000': 'Vermelho',
-        '#4B00FF': 'Azul',
-        '#FFFF00': 'Amarelo',
-        '#FFA500': 'Laranja',
-        '#00CFFF': 'Azul claro',
-        '#FFFFFF': 'Branco',
-        '#00FF7F': 'Verde claro',
-        '#006400': 'Verde escuro',
-        '#000000': 'Preto',
-        '#DA70D6': 'Orquídea',
+        "#FF0000": "Vermelho",
+        "#4B00FF": "Azul",
+        "#FFFF00": "Amarelo",
+        "#FFA500": "Laranja",
+        "#00CFFF": "Azul claro",
+        "#FFFFFF": "Branco",
+        "#00FF7F": "Verde claro",
+        "#006400": "Verde escuro",
+        "#000000": "Preto",
+        "#DA70D6": "Orquídea",
       };
 
       let dataValidadeFormatada = null;
       if (validade) {
-        dataValidadeFormatada = validade.toString().split('T')[0];
+        dataValidadeFormatada = validade.toString().split("T")[0];
       }
       const dadosMedicamento = {
         nome: nome,
         quantidadeCaixa: parseInt(quantidade) || 0,
         dataValidade: dataValidadeFormatada,
         quantidadeDiaria: parseInt(intervalo) || 0,
-        foto: 'https://example.com/image.jpg',
-        classificacao: tipo || 'Não classificado',
+        foto: "https://example.com/image.jpg",
+        classificacao: tipo || "Não classificado",
         horaInicio: horaInicio.toISOString(),
-        cor: nomeCores[corSelecionada] || 'Vermelho',
+        cor: nomeCores[corSelecionada] || "Vermelho",
         unidadeMedida: unidade,
-        motivo: motivo || 'Não especificado',
+        motivo: motivo || "Não especificado",
         quantidadeDias: parseInt(duracao) || 0,
         quantidadeDose:
           parseFloat(dosagem) > 0
             ? `${dosagem} ${unidadeDosagem}`
             : `1 ${unidadeDosagem}`,
-        observacao: observacoes || '',
-        usuarioId: usuarioId,
+        observacao: observacoes || "",
       };
 
       let remedioId: number | string | undefined;
       try {
         const data = await apiRequest<{
           data: { id: number };
-        }>('remedio', {
-          method: 'POST',
+        }>("remedio", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(dadosMedicamento),
@@ -256,24 +254,24 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           remedioId = responseData.data.id;
         } else {
           console.error(
-            'Resposta da API não contém ID do remédio na estrutura esperada:',
+            "Resposta da API não contém ID do remédio na estrutura esperada:",
             data,
           );
-          throw new Error('Não foi possível obter o ID do remédio criado');
+          throw new Error("Não foi possível obter o ID do remédio criado");
         }
       } catch (error) {
-        console.error('Erro ao salvar medicamento:', error);
+        console.error("Erro ao salvar medicamento:", error);
         const mensagemErro =
           error instanceof Error
             ? `Erro ao salvar o medicamento: ${error.message}`
-            : 'Erro ao salvar o medicamento';
+            : "Erro ao salvar o medicamento";
         alert(mensagemErro);
         throw error;
       }
 
       const dosesISO = horariosCalculados.map((horario) => {
-        const [ano, mes, dia] = horario.data.split('-').map(Number);
-        const [horas, minutos] = horario.hora.split(':').map(Number);
+        const [ano, mes, dia] = horario.data.split("-").map(Number);
+        const [horas, minutos] = horario.hora.split(":").map(Number);
         const dataHora = new Date();
         dataHora.setFullYear(ano);
         dataHora.setMonth(mes - 1);
@@ -289,17 +287,16 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       dosesISO.sort();
       if (!remedioId) {
         console.error(
-          'ID do remédio não disponível, não será possível criar doses',
+          "ID do remédio não disponível, não será possível criar doses",
         );
         throw new Error(
-          'Não foi possível obter o ID do remédio para criar as doses',
+          "Não foi possível obter o ID do remédio para criar as doses",
         );
       }
       const remedioIdNumber =
-        typeof remedioId === 'string' ? parseInt(remedioId) : remedioId;
+        typeof remedioId === "string" ? parseInt(remedioId) : remedioId;
 
       const dadosLembretes = {
-        usuarioId: usuarioId,
         remedioId: remedioIdNumber,
         doses: dosesISO.map((dose) => dose.trim()),
       };
@@ -307,49 +304,49 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       try {
         if (!Array.isArray(dosesISO) || dosesISO.length === 0) {
           throw new Error(
-            'Não foi possível calcular as doses. Verifique a duração e o intervalo.',
+            "Não foi possível calcular as doses. Verifique a duração e o intervalo.",
           );
         }
         if (!remedioId) {
           throw new Error(
-            'ID do remédio não disponível. Não é possível criar doses.',
+            "ID do remédio não disponível. Não é possível criar doses.",
           );
         }
 
-        const dataLembretes = await apiRequest<unknown>('dose/doses', {
-          method: 'POST',
+        const dataLembretes = await apiRequest<unknown>("dose/doses", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(dadosLembretes),
         });
         void dataLembretes;
-        alert('Lembrete e doses salvos com sucesso!');
+        alert("Lembrete e doses salvos com sucesso!");
         limparFormulario();
         await context?.getLembretes();
       } catch (error) {
-        console.error('Erro ao salvar doses:', error);
+        console.error("Erro ao salvar doses:", error);
         const mensagemErro =
           error instanceof Error
             ? `Erro ao salvar as doses: ${error.message}`
-            : 'Erro ao salvar as doses';
+            : "Erro ao salvar as doses";
         alert(mensagemErro);
         throw error;
       }
     } catch (error) {
-      console.error('ERRO NA OPERAÇÃO:', error);
+      console.error("ERRO NA OPERAÇÃO:", error);
 
-      let mensagemErro = 'Erro ao salvar o lembrete. Tente novamente.';
+      let mensagemErro = "Erro ao salvar o lembrete. Tente novamente.";
       if (error instanceof Error) {
         mensagemErro = error.message;
       }
       if (
-        mensagemErro.includes('Authentication required') ||
-        mensagemErro.includes('token') ||
-        mensagemErro.includes('401')
+        mensagemErro.includes("Authentication required") ||
+        mensagemErro.includes("token") ||
+        mensagemErro.includes("401")
       ) {
-        mensagemErro = 'Sua sessão expirou. Por favor, faça login novamente.';
+        mensagemErro = "Sua sessão expirou. Por favor, faça login novamente.";
       }
 
       alert(mensagemErro);
@@ -359,24 +356,24 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   };
 
   const limparFormulario = () => {
-    setNome('');
-    setDosagem('');
-    setTipo('');
-    setCorSelecionada('#FF0000');
+    setNome("");
+    setDosagem("");
+    setTipo("");
+    setCorSelecionada("#FF0000");
     setHorarios([
       {
-        data: new Date().toISOString().split('T')[0],
-        hora: '10:00',
-        dose: '1 comp.',
+        data: new Date().toISOString().split("T")[0],
+        hora: "10:00",
+        dose: "1 comp.",
       },
     ]);
-    setMotivo('');
-    setDuracao('');
-    setQuantidade('');
+    setMotivo("");
+    setDuracao("");
+    setQuantidade("");
     setValidade(null);
-    setIntervalo('');
-    setObservacoes('');
-    setUnidade('mg');
+    setIntervalo("");
+    setObservacoes("");
+    setUnidade("mg");
     setUnidadeDuracao(1);
     setErros({});
   };
@@ -391,7 +388,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           <label className="text-m text-[#0B6E71] mb-1 block">Nome</label>
           <input
             className={`p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium w-full ${
-              erros.nome ? 'border-red-500' : 'border-[#037F8C]'
+              erros.nome ? "border-red-500" : "border-[#037F8C]"
             }`}
             placeholder="Dipirona"
             value={nome}
@@ -420,7 +417,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           </label>
           <div
             className={`flex border rounded bg-white overflow-hidden ${
-              erros.quantidade ? 'border-red-500' : 'border-[#037F8C]'
+              erros.quantidade ? "border-red-500" : "border-[#037F8C]"
             }`}
           >
             <input
@@ -454,7 +451,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           </label>
           <input
             type="date"
-            value={validade || ''}
+            value={validade || ""}
             onChange={(e) => setValidade(e.target.value)}
             className={`p-2 rounded border bg-white outline-none text-gray-700 KantumruyMedium w-full border-[#037F8C]`}
           />
@@ -469,8 +466,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
                 key={i}
                 className={`w-5 h-8 rounded cursor-pointer border hover:border-black ${
                   corSelecionada === cor
-                    ? 'border-black border-2'
-                    : 'border-transparent'
+                    ? "border-black border-2"
+                    : "border-transparent"
                 }`}
                 style={{ backgroundColor: cor }}
                 onClick={() => setCorSelecionada(cor)}
@@ -506,20 +503,20 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
                 type="date"
                 value={h.data}
                 onChange={(e) =>
-                  atualizarHorario(index, 'data', e.target.value)
+                  atualizarHorario(index, "data", e.target.value)
                 }
                 className={`p-2 rounded border bg-white outline-none text-gray-700 KantumruyMedium w-40 ${
-                  erros.horario ? 'border-red-500' : 'border-[#037F8C]'
+                  erros.horario ? "border-red-500" : "border-[#037F8C]"
                 }`}
               />
               <input
                 type="time"
                 value={h.hora}
                 onChange={(e) =>
-                  atualizarHorario(index, 'hora', e.target.value)
+                  atualizarHorario(index, "hora", e.target.value)
                 }
                 className={`p-2 rounded border bg-white outline-none text-gray-700 KantumruyMedium w-28 ${
-                  erros.horario ? 'border-red-500' : 'border-[#037F8C]'
+                  erros.horario ? "border-red-500" : "border-[#037F8C]"
                 }`}
               />
             </div>
@@ -536,7 +533,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           {/* Input de dosagem com select de unidade */}
           <div
             className={`flex border rounded bg-white overflow-hidden ${
-              erros.dosagem ? 'border-red-500' : 'border-[#037F8C]'
+              erros.dosagem ? "border-red-500" : "border-[#037F8C]"
             }`}
           >
             <input
@@ -576,7 +573,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             value={intervalo}
             onChange={(e) => setIntervalo(e.target.value)}
             className={`w-full p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium mb-1 ${
-              erros.intervalo ? 'border-red-500' : 'border-[#037F8C]'
+              erros.intervalo ? "border-red-500" : "border-[#037F8C]"
             }`}
           />
           {erros.intervalo && (
@@ -589,7 +586,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           </label>
           <div
             className={`flex border rounded bg-white overflow-hidden ${
-              erros.duracao ? 'border-red-500' : 'border-[#037F8C]'
+              erros.duracao ? "border-red-500" : "border-[#037F8C]"
             }`}
           >
             <input
@@ -643,7 +640,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
               Salvando...
             </div>
           ) : (
-            'Salvar lembrete'
+            "Salvar lembrete"
           )}
         </button>
 
