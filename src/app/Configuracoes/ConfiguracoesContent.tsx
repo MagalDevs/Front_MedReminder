@@ -3,7 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
-import { apiRequest } from '../utils/api';
+import { apiRequest, ApiError } from '../utils/api';
+
+function profileErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.status) {
+      case 400: return error.messages.length ? error.messages.join(' ') : 'Dados inválidos. Verifique os campos.';
+      case 401: return 'Sessão expirada. Entre novamente.';
+      case 409: return 'Conflito ao atualizar os dados. Verifique o e-mail informado.';
+      case 429: return `Muitas tentativas. Tente novamente mais tarde.${error.retryAfter ? ` Aguarde ${error.retryAfter} segundos.` : ''}`;
+    }
+  }
+  return 'Não foi possível atualizar os dados. Tente novamente mais tarde.';
+}
 
 type Usuario = {
   id?: string | number;
@@ -128,45 +140,46 @@ export default function ConfiguracoesContent() {
         cep: cep.replace(/\D/g, '').trim(),
       };
 
-      const updatedUser = await apiRequest<Usuario>('usuario/me', {
+      const { data: updatedUser } = await apiRequest<{ message: string; data: Usuario }>('usuario/me', {
         method: 'PATCH',
         body: JSON.stringify(updateData),
       });
+      setUsuario(updatedUser);
+      setNome(updatedUser.nome || '');
+      setEmail(updatedUser.email || '');
+      setCep(updatedUser.cep || '');
 
       if (senhaAtual && novaSenha) {
-        await apiRequest('usuario/senha', {
-          method: 'PATCH',
-          body: JSON.stringify({
-            senhaAtual,
-            novaSenha,
-          }),
-        });
-        setSenhaAtual('');
-        setNovaSenha('');
-        setConfirmarSenha('');
-      }
-      setUsuario(updatedUser);
-      setNome(updatedUser.nome || updatedUser.nome || '');
-      setEmail(updatedUser.email || '');
-      setCep((updatedUser.cep as string) || '');
-      setMessage('Dados atualizados com sucesso!');
-      setMessageType('success');
-    } catch (error) {
-      let errorMessage = 'Erro ao atualizar dados. Tente novamente.';
-      if (error instanceof Error) {
-        if (
-          error.message.includes('401') ||
-          error.message.includes('atual incorreta')
-        ) {
-          errorMessage = 'Senha atual incorreta.';
-        } else if (error.message.includes('400')) {
-          errorMessage =
-            'Dados inválidos. Verifique as informações fornecidas.';
-        } else {
-          errorMessage = error.message;
+        try {
+          await apiRequest('usuario/senha', {
+            method: 'PATCH',
+            onUnauthorized: 'throw',
+            body: JSON.stringify({ senhaAtual, novaSenha }),
+          });
+          setSenhaAtual('');
+          setNovaSenha('');
+          setConfirmarSenha('');
+        } catch (error) {
+          let detail = profileErrorMessage(error);
+          if (error instanceof ApiError && error.status === 401) {
+            try {
+              await apiRequest('usuario/me');
+              detail = 'Senha atual incorreta. Sua sessão continua válida.';
+            } catch (sessionError) {
+              detail = sessionError instanceof ApiError && sessionError.status === 401
+                ? 'Sessão expirada. Entre novamente.'
+                : 'Não foi possível verificar a sessão. A alteração da senha não foi confirmada.';
+            }
+          }
+          setMessage(`Perfil atualizado. Senha não atualizada: ${detail}`);
+          setMessageType('error');
+          return;
         }
       }
-      setMessage(errorMessage);
+      setMessage(senhaAtual ? 'Perfil e senha atualizados com sucesso!' : 'Dados atualizados com sucesso!');
+      setMessageType('success');
+    } catch (error) {
+      setMessage(profileErrorMessage(error));
       setMessageType('error');
     } finally {
       setLoading(false);

@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { apiRequest, ApiError } from '../utils/api';
 
 type RegistroHistorico = {
   id: string;
   medicamentoId: string;
   nomeMedicamento: string;
   dataHora: string;
-  status: 'tomado' | 'nao_tomado' | 'adiado';
+  status: 'tomado' | 'nao_tomado';
   observacao?: string;
 };
 
@@ -17,9 +19,20 @@ type Medicamento = {
   cor: string;
 };
 
+type DoseHistorico = {
+  id: string | number;
+  data_dose: string;
+  tomado: boolean;
+  remedio: { id: string | number; nome: string; cor?: string };
+};
+
 export default function HistoricoContent() {
-  const [registros, setRegistros] = useState<RegistroHistorico[]>([]);
-  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const identity = !authLoading && isAuthenticated ? String(user?.id ?? user?.email ?? '') : '';
+  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; registros: RegistroHistorico[]; medicamentos: Medicamento[] }>({ identity: '', token: null, registros: [], medicamentos: [] });
+  const registros = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.registros : [];
+  const medicamentos = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.medicamentos : [];
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filtroMedicamento, setFiltroMedicamento] = useState<string>('');
@@ -27,69 +40,47 @@ export default function HistoricoContent() {
   const [filtroPeriodo, setFiltroPeriodo] = useState<string>('todos');
 
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
     async function fetchDados() {
+      if (!identity || !token) {
+        setLoading(authLoading);
+        return;
+      }
+      setError('');
+      setLoading(true);
       try {
-        setLoading(true);
-
-        // Buscar medicamentos
-        const responseMedicamentos = await fetch(
-          'https://medreminder-backend.onrender.com/remedio',
-        );
-        if (!responseMedicamentos.ok) {
-          throw new Error('Falha ao carregar medicamentos');
-        }
-        const medicamentosData = await responseMedicamentos.json();
-        setMedicamentos(medicamentosData);
-
-        const dataAtual = new Date();
-        const historicoDados: RegistroHistorico[] = [];
-
-        // Criar registros simulados para os últimos 30 dias
-        for (let i = 0; i < 30; i++) {
-          const data = new Date(dataAtual);
-          data.setDate(data.getDate() - i);
-
-          // Para cada medicamento, criar alguns registros
-          medicamentosData.forEach((med: Medicamento, index: number) => {
-            // Criar de 0 a 3 registros por dia para cada medicamento
-            const registrosPorDia = Math.floor(Math.random() * 4);
-
-            for (let j = 0; j < registrosPorDia; j++) {
-              const hora = Math.floor(Math.random() * 24);
-              const minutos = Math.floor(Math.random() * 60);
-              const dataHora = new Date(data);
-              dataHora.setHours(hora, minutos);
-
-              const status = ['tomado', 'nao_tomado', 'adiado'][
-                Math.floor(Math.random() * 3)
-              ] as 'tomado' | 'nao_tomado' | 'adiado';
-
-              historicoDados.push({
-                id: `hist-${i}-${index}-${j}`,
-                medicamentoId: med.id,
-                nomeMedicamento: med.nome,
-                dataHora: dataHora.toISOString(),
-                status,
-                observacao:
-                  status === 'adiado' ? 'Adiado para mais tarde' : undefined,
-              });
-            }
-          });
-        }
-
-        setRegistros(historicoDados);
+        // Sem query: o contrato legado devolve a lista completa, sem paginação.
+        const response = await apiRequest<{ data: DoseHistorico[] }>('dose/me', { signal: controller.signal });
+        if (!active || localStorage.getItem('access_token') !== token) return;
+        const rows = response.data.map((dose): RegistroHistorico => {
+          if (typeof dose.tomado !== 'boolean' || !Number.isFinite(Date.parse(dose.data_dose)) || !dose.remedio) {
+            throw new Error('Resposta de histórico inválida');
+          }
+          return {
+            id: String(dose.id),
+            medicamentoId: String(dose.remedio.id),
+            nomeMedicamento: dose.remedio.nome,
+            dataHora: dose.data_dose,
+            status: dose.tomado ? 'tomado' : 'nao_tomado',
+          };
+        });
+        const meds = Array.from(new Map(response.data.map((dose) => [String(dose.remedio.id), {
+          id: String(dose.remedio.id), nome: dose.remedio.nome, cor: dose.remedio.cor || '#037F8C',
+        }])).values());
+        setSnapshot({ identity, token, registros: rows, medicamentos: meds });
       } catch (err) {
-        console.error('Erro ao buscar dados:', err);
-        setError(
-          'Não foi possível carregar o histórico. Tente novamente mais tarde.',
-        );
+        if (!active) return;
+        setError(err instanceof ApiError && err.status === 401
+          ? 'Sessão expirada. Entre novamente para consultar o histórico.'
+          : 'Não foi possível carregar o histórico. Tente novamente mais tarde.');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
-
-    fetchDados();
-  }, []);
+    void fetchDados();
+    return () => { active = false; controller.abort(); };
+  }, [authLoading, identity, token]);
 
   // Filtrar registros com base nos filtros selecionados
   const registrosFiltrados = registros.filter((registro) => {
@@ -166,8 +157,6 @@ export default function HistoricoContent() {
         return { texto: 'Tomado', classe: 'bg-green-100 text-green-800' };
       case 'nao_tomado':
         return { texto: 'Não tomado', classe: 'bg-red-100 text-red-800' };
-      case 'adiado':
-        return { texto: 'Adiado', classe: 'bg-yellow-100 text-yellow-800' };
       default:
         return { texto: status, classe: 'bg-gray-100 text-gray-800' };
     }
@@ -202,6 +191,7 @@ export default function HistoricoContent() {
               Medicamento
             </label>{' '}
             <select
+              aria-label="Medicamento"
               className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroMedicamento}
               onChange={(e) => setFiltroMedicamento(e.target.value)}
@@ -220,7 +210,7 @@ export default function HistoricoContent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
             </label>{' '}
-            <select
+            <select aria-label="Status"
               className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroStatus}
               onChange={(e) => setFiltroStatus(e.target.value)}
@@ -228,7 +218,6 @@ export default function HistoricoContent() {
               <option value="">Todos os status</option>
               <option value="tomado">Tomado</option>
               <option value="nao_tomado">Não tomado</option>
-              <option value="adiado">Adiado</option>
             </select>
           </div>
 
@@ -237,7 +226,7 @@ export default function HistoricoContent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Período
             </label>{' '}
-            <select
+            <select aria-label="Período"
               className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroPeriodo}
               onChange={(e) => setFiltroPeriodo(e.target.value)}
