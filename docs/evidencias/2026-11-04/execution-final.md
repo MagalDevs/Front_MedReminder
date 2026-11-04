@@ -1,5 +1,7 @@
 # Consolidação da execução — 04/11/2026
 
+> Registro desta rodada preservado. As falhas de lint e capturas identificadas no primeiro CI remoto receberam [correções posteriores](ci-corrections.md), com nova medição local e workflow público para conferência.
+
 A sessão anterior parou por limite de uso durante a integração. As alterações existentes foram preservadas e os nove commits de dependências foram incorporados à branch `feat/executar-specs`. Não houve push, merge remoto, deploy ou chamada à API de produção.
 
 ## Implementação e rastreabilidade

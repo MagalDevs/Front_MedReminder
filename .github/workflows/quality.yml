@@ -4,13 +4,11 @@
 # - Nenhum job usa continue-on-error e nenhuma suíte usa passWithNoTests: falha de
 #   comando ou seleção vazia de testes reprova o job (vitest.config.mts já sai com
 #   código 1 sem testes executados; o Playwright sai com 1 sem testes).
-# - O job de lint é separado e FALHA enquanto existirem os achados preexistentes
-#   (docs/evidencias/2026-11-04/lint-baseline.log). Isso é intencional e visível.
+# - O job de lint é separado e reprova erros e avisos, sem desativar regras.
 # - O E2E real só roda com a variável de repositório E2E_API_URL (API isolada com
 #   dados sintéticos). Sem ela, o job "e2e-bloqueado" registra BLOQUEIO no summary;
 #   isso NÃO é aprovação do fluxo real.
-# - Execução no GitHub ainda não comprovada: este arquivo foi revisado e validado
-#   localmente (sintaxe YAML), sem push.
+# - Resultados remotos estão registrados nas execuções do workflow quality.
 name: quality
 
 on:
@@ -40,8 +38,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      # Falha enquanto houver achados (8 erros e 2 avisos preexistentes no produto).
-      - run: npx eslint .
+      - run: npx eslint . --max-warnings=0
 
   typecheck:
     name: tsc (Node ${{ matrix.node }})

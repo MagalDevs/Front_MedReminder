@@ -65,7 +65,7 @@ export default function MeusLembretesContent() {
     }
 
     fetchData();
-  }, []);
+  }, [getLembretes]);
 
   const formatarData = (dataString: Date) => {
     if (!dataString) return 'Sem data';

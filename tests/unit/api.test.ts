@@ -17,6 +17,7 @@ function requestHeaders(index = 0) {
 // jsdom cannot navigate. Replace only the location boundary, forwarding all
 // other window properties to the real window; setup.ts restores the global.
 function controlledLocation() {
+  vi.spyOn(window, 'dispatchEvent');
   const location = { href: 'http://localhost/area-protegida' };
   vi.stubGlobal('window', new Proxy(window, {
     get(target, property) {
@@ -109,7 +110,7 @@ describe('apiRequest real — TEST-01', () => {
     await expect(apiRequest('/fixture', { requireAuth: false })).rejects.toThrow('Erro interno do servidor');
   });
 
-  it('UT-06 TEST-01 401 autenticado limpa sessão e redireciona para /login', async () => {
+  it('UT-06 TEST-01 401 autenticado limpa sessão e notifica o redirecionamento', async () => {
     const location = controlledLocation();
     localStorage.setItem('access_token', 'token-sintetico');
     localStorage.setItem('user_data', JSON.stringify({ nome: 'Ana Teste' }));
@@ -119,7 +120,8 @@ describe('apiRequest real — TEST-01', () => {
     expect(localStorage.getItem('access_token')).toBeNull();
     expect(localStorage.getItem('user_data')).toBeNull();
     expect(localStorage.getItem('preferencia')).toBe('preservada');
-    expect(location.href).toBe('/login');
+    expect(location.href).toBe('http://localhost/area-protegida');
+    expect(window.dispatchEvent).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ type: 'medreminder:session-invalidated' }));
   });
 
   it('UT-06 TEST-01 401 público rejeita preservando sessão e navegação', async () => {
@@ -201,7 +203,8 @@ describe('IT-08 SEC-02 — diagnósticos HTTP sem conteúdo arbitrário', () => 
     expect(localStorage.getItem('access_token')).toBe(requireAuth ? null : 'token-sintetico');
     expect(localStorage.getItem('user_data')).toBe(requireAuth ? null : sensitive);
     expect(localStorage.getItem('preferencia')).toBe('preservada');
-    expect(location.href).toBe(requireAuth ? '/login' : 'http://localhost/area-protegida');
+    expect(location.href).toBe('http://localhost/area-protegida');
+    expect(window.dispatchEvent).toHaveBeenCalledTimes(requireAuth ? 1 : 0);
     expectPrivateConsole();
   });
 });

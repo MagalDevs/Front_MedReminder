@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar/sidebar';
 import BuscaMedicamento from '../components/CardBusca/cardBusca';
@@ -12,24 +12,25 @@ type Medicamento = {
 };
 
 function NovoMedicamentoContent() {
-  const [medicamentoSelecionado, setMedicamentoSelecionado] =
-    useState<Medicamento | null>(null);
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const medicamento = searchParams.get('medicamento');
-
-    if (medicamento) {
+  const medicamentoInicial = searchParams.get('medicamento');
+  const [previousQuery, setPreviousQuery] = useState(medicamentoInicial);
+  const [medicamentoSelecionado, setMedicamentoSelecionado] = useState<Medicamento | null>(
+    () => medicamentoInicial ? { NOME_PRODUTO: medicamentoInicial, DESCRIÇÃO: '' } : null,
+  );
+  if (medicamentoInicial !== previousQuery) {
+    setPreviousQuery(medicamentoInicial);
+    if (medicamentoInicial) {
       setMedicamentoSelecionado({
-        NOME_PRODUTO: medicamento,
+        NOME_PRODUTO: medicamentoInicial,
         DESCRIÇÃO: '',
       });
     }
-  }, [searchParams]);
+  }
 
-  const handleMedicamentoSelecionado = (medicamento: Medicamento) => {
+  const handleMedicamentoSelecionado = useCallback((medicamento: Medicamento) => {
     setMedicamentoSelecionado(medicamento);
-  };
+  }, []);
   
   return (
     <div className="flex-1 p-6 overflow-y-hidden">

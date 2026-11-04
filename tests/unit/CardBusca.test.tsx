@@ -157,6 +157,38 @@ describe('CardBusca — UT-14 CODE-02 TEST-01 DEP-03', () => {
       NOME_PRODUTO: 'Sem Descrição', DESCRIÇÃO: '',
     });
   });
+
+  it('CODE-02 reabrir após escolher duplicado com consulta exata mantém só a linha escolhida', async () => {
+    const { input, onSelect } = await mount();
+    search(input, 'DIP Repetido');
+    fireEvent.click(screen.getByText('duplicado dois'));
+    fireEvent.click(screen.getByRole('button'));
+    expect(names()).toEqual(['DIP Repetido']);
+    expect(screen.getByText('duplicado dois')).toBeVisible();
+    expect(screen.queryByText('duplicado um')).not.toBeInTheDocument();
+    expect(onSelect).not.toHaveBeenCalled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith({ NOME_PRODUTO: 'DIP Repetido', DESCRIÇÃO: 'duplicado dois' });
+    search(input, 'DIP Repetid');
+    expect(names()).toEqual(['DIP Repetido', 'DIP Repetido']);
+  });
+
+  it('CODE-02 mudança de inicial atualiza seleção encontrada e preserva a última quando não encontra', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(CSV)));
+    const onSelect = vi.fn();
+    let view!: ReturnType<typeof render>;
+    await act(async () => {
+      view = render(<BuscaMedicamento onSelect={onSelect} medicamentoInicial="Sol Sintético" />);
+    });
+    expect(screen.getByText('Selecionado: Sol Sintético')).toBeVisible();
+    view.rerender(<BuscaMedicamento onSelect={onSelect} medicamentoInicial="DIP Zeta" />);
+    expect(screen.getByText('Selecionado: DIP Zeta')).toBeVisible();
+    expect(onSelect).toHaveBeenLastCalledWith({ NOME_PRODUTO: 'DIP Zeta', DESCRIÇÃO: 'primeiro DIP' });
+    view.rerender(<BuscaMedicamento onSelect={onSelect} medicamentoInicial="Inexistente" />);
+    expect(screen.getByText('Selecionado: DIP Zeta')).toBeVisible();
+    expect(onSelect).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('textbox')).toHaveValue('Sol Sintético');
+  });
 });
 
 // IT-09: dataset fixo com entradas que divergiriam se o termo fosse aparado ou sem acentos.

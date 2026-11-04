@@ -121,10 +121,12 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const [unidadeDosagem, setUnidadeDosagem] = useState("mg");
   const [unidadeDuracao, setUnidadeDuracao] = useState(1);
 
-  useEffect(() => {
+  const [previousMedicamento, setPreviousMedicamento] = useState(medicamentoSelecionado);
+  if (medicamentoSelecionado !== previousMedicamento) {
+    setPreviousMedicamento(medicamentoSelecionado);
     setNome(medicamentoSelecionado?.nome || "");
     setTipo(medicamentoSelecionado?.tipo || "");
-  }, [medicamentoSelecionado]);
+  }
 
   const atualizarHorario = (
     index: number,

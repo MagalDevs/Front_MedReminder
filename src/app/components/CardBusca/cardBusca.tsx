@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 
 type Medicamento = {
@@ -19,27 +19,36 @@ export default function BuscaMedicamento({
 }: Props) {
   const [searchTerm, setSearchTerm] = useState(medicamentoInicial || '');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
-  const [filtered, setFiltered] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMedicamento, setSelectedMedicamento] =
-    useState<Medicamento | null>(null);
+  const [selection, setSelection] = useState<{
+    value: Medicamento | null;
+    catalog: Medicamento[];
+    initial: string | undefined;
+    notify: Props['onSelect'];
+  } | null>(null);
+  const [selectedResult, setSelectedResult] = useState<{
+    medicamento: Medicamento;
+    catalog: Medicamento[];
+  } | null>(null);
+
+  const initialMatch = useMemo(() => medicamentoInicial
+    ? medicamentos.find((med) =>
+      med.NOME_PRODUTO.trim().toLowerCase() === medicamentoInicial.toLowerCase(),
+    ) ?? null
+    : null, [medicamentos, medicamentoInicial]);
+  // Reconcile a new matching input during render so no stale selection is
+  // committed. An unmatched initial value retains the last selection, as before.
+  if (initialMatch && (selection?.catalog !== medicamentos ||
+    selection.initial !== medicamentoInicial || selection.notify !== onSelect)) {
+    setSelection({ value: initialMatch, catalog: medicamentos, initial: medicamentoInicial, notify: onSelect });
+  }
+  const selectedMedicamento = selection?.value ?? null;
 
   // Efeito para buscar medicamento quando o componente é carregado com medicamentoInicial
   useEffect(() => {
-    if (medicamentoInicial && medicamentos.length > 0) {
-      const foundMed = medicamentos.find(
-        (med) =>
-          med.NOME_PRODUTO.trim().toLowerCase() ===
-          medicamentoInicial.toLowerCase(),
-      );
-
-      if (foundMed) {
-        setSelectedMedicamento(foundMed);
-        onSelect(foundMed);
-      }
-    }
-  }, [medicamentos, medicamentoInicial, onSelect]);
+    if (initialMatch) onSelect(initialMatch);
+  }, [initialMatch, medicamentoInicial, onSelect]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,17 +71,16 @@ export default function BuscaMedicamento({
     void fetchData();
   }, []);
 
-  useEffect(() => {
-    if (searchTerm.length > 0) {
-      const lowerTerm = searchTerm.toLowerCase();
-      const results = medicamentos.filter((med) =>
-        med.NOME_PRODUTO?.toLowerCase().includes(lowerTerm),
-      );
-      setFiltered(results);
-    } else {
-      setFiltered([]);
-    }
+  const filtered = useMemo(() => {
+    if (selectedResult?.catalog === medicamentos) return [selectedResult.medicamento];
+    if (!searchTerm) return [];
+    const lowerTerm = searchTerm.toLowerCase();
+    return medicamentos.filter((med) =>
+      med.NOME_PRODUTO?.toLowerCase().includes(lowerTerm),
+    );
+  }, [searchTerm, medicamentos, selectedResult]);
 
+  useEffect(() => {
     // Se houver erro, podemos mostrar em algum elemento UI
     if (error) {
       console.log(error);
@@ -81,30 +89,29 @@ export default function BuscaMedicamento({
 
   const handleSearch = (term: string): void => {
     setSearchTerm(term);
+    setSelectedResult(null);
     setIsDropdownOpen(true);
 
     if (term === '') {
-      setSelectedMedicamento(null);
+      setSelection({ value: null, catalog: medicamentos, initial: medicamentoInicial, notify: onSelect });
       onSelect({ NOME_PRODUTO: '', DESCRIÇÃO: '' });
     }
   };
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
-    if (!isDropdownOpen && !searchTerm) {
-      setFiltered(medicamentos.slice(0, 10));
-    }
   };
 
   const handleResultClick = (med: Medicamento) => {
     // Atualiza o campo de busca com novo valor
-    setSearchTerm(med.NOME_PRODUTO.trim());
+    const nextTerm = med.NOME_PRODUTO.trim();
+    setSelectedResult(nextTerm === searchTerm ? { medicamento: med, catalog: medicamentos } : null);
+    setSearchTerm(nextTerm);
 
     // Armazena o medicamento selecionado
-    setSelectedMedicamento(med);
+    setSelection({ value: med, catalog: medicamentos, initial: medicamentoInicial, notify: onSelect });
 
     // Fecha o dropdown e atualiza os resultados
-    setFiltered([med]);
     setIsDropdownOpen(false);
 
     // Garante que sempre chamamos o onSelect com o novo medicamento

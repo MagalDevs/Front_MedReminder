@@ -132,6 +132,27 @@ describe('SearchBar — CODE-01 TEST-01 DEP-03', () => {
     expect(screen.queryByRole('button', { name: 'Cadastrar' })).not.toBeInTheDocument();
   });
 
+  it('CODE-01 selecionar uma linha duplicada com consulta já exata preserva a escolha explícita', async () => {
+    const input = await mount();
+    search(input, 'DIP Repetido');
+    fireEvent.click(screen.getByText('duplicado dois'));
+    expect(names()).toEqual(['DIP Repetido']);
+    expect(screen.queryByText('duplicado um')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
+    expect(push).toHaveBeenCalledExactlyOnceWith('/novo-medicamento?medicamento=DIP%20Repetido');
+    search(input, 'DIP Repetid');
+    expect(names()).toEqual(['DIP Repetido', 'DIP Repetido']);
+  });
+
+  it('CODE-01 seleção que muda a consulta conserva outras correspondências de prefixo', async () => {
+    const input = await mount('NOME_PRODUTO,DESCRIÇÃO\nDIP,curto\nDIP Longo,longo\n');
+    search(input, 'dip');
+    fireEvent.click(screen.getByText('curto'));
+    expect(input).toHaveValue('DIP');
+    expect(names()).toEqual(['DIP', 'DIP Longo']);
+    expect(screen.queryByRole('button', { name: 'Cadastrar' })).not.toBeInTheDocument();
+  });
+
   it('UT-09 CODE-01 TEST-01 botão fecha e reabre dropdown preservando consulta', async () => {
     const input = await mount();
     search(input, 'Zeta');

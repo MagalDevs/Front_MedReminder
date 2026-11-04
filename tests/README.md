@@ -75,6 +75,8 @@ E2E_API_URL=http://localhost:3000 npm run test:e2e
 
 ## Servidor dos testes Playwright
 
+As capturas de novo medicamento mascaram somente os inputs nativos de data/hora, pois sua apresentação varia conforme a regionalização do Windows. Antes da captura, os valores e a quantidade desses campos são verificados explicitamente. Não aumentar tolerância nem atualizar todas as referências para resolver uma divergência localizada; ver [correções do CI](../docs/evidencias/2026-11-04/ci-corrections.md).
+
 `playwright.config.ts` executa `npm run build && npm run start -- --port 3001` e usa `http://localhost:3001`. Localmente reaproveita um servidor já ativo nessa porta (`reuseExistingServer`); com `CI` definida nunca reaproveita. Se houver um servidor antigo na porta 3001, finalize-o para testar o build atual.
 
 ## Tipos de testes

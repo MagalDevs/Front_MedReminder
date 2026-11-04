@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthProvider, useAuth } from '@/app/contexts/AuthContext';
 import { LembreteProvider, LembreteContext } from '@/app/contexts/lembreteContext';
+import { apiRequest } from '@/app/utils/api';
 
 const { router } = vi.hoisted(() => ({ router: { push: vi.fn() } }));
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
@@ -20,6 +21,20 @@ const dose = { id: 1, tomado: false, data_dose: '2026-11-04T12:00:00Z', remedio:
 function token() { localStorage.setItem('access_token', 'token-a'); localStorage.setItem('user_data', JSON.stringify({ id: 999, nome: 'Stale' })); }
 
 describe('BEAPI-03/BEAPI-04 restauração e consultas por identidade', () => {
+  it('BEAPI-03 o provider navega ao login e limpa o estado após 401 do cliente real', async () => {
+    token();
+    vi.mocked(fetch).mockResolvedValueOnce(json({ data: { id: 1 } })).mockResolvedValueOnce(json({ data: [] }));
+    mount();
+    await waitFor(() => expect(state().authenticated).toBe(true));
+    vi.mocked(fetch).mockResolvedValueOnce(json({}, 401));
+    await act(async () => {
+      await expect(apiRequest('fixture-private')).rejects.toMatchObject({ status: 401 });
+    });
+    expect(state().authenticated).toBe(false);
+    expect(localStorage.getItem('access_token')).toBeNull();
+    expect(screen.getByTestId('doses')).toHaveTextContent('[]');
+    expect(router.push).toHaveBeenCalledWith('/login');
+  });
   it('BEAPI-03 BEAPI-04 sem token não consulta perfil nem doses', async () => {
     mount(); await waitFor(() => expect(state().loading).toBe(false));
     expect(fetch).not.toHaveBeenCalled(); expect(state().authenticated).toBe(false);

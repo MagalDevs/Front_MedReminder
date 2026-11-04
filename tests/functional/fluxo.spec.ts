@@ -24,7 +24,7 @@
  * dependem de plataforma (sufixo -win32/-linux) e fonte; gere-as por plataforma
  * e nunca regenere para esconder regressão visual.
  */
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { PRODUCTION_API_ORIGIN, expect, test as guarded } from "../support/api-guard";
 
 const NOW = new Date("2026-11-04T12:00:00-03:00");
@@ -1038,11 +1038,12 @@ for (const viewport of VIEWPORTS) {
   test.describe(`FN-06 TEST-03 snapshots ${viewport.width}px`, () => {
     test.use({ viewport });
 
-    async function capturar(page: Page, nome: string): Promise<void> {
+    async function capturar(page: Page, nome: string, mask: Locator[] = []): Promise<void> {
       await page.mouse.move(0, 0); // evita estado de hover
       await expect(page).toHaveScreenshot(`${nome}-${viewport.width}.png`, {
         fullPage: true,
         animations: "disabled",
+        mask,
       });
     }
 
@@ -1064,7 +1065,17 @@ for (const viewport of VIEWPORTS) {
       await page.goto(URL_NOVO_TRATAMENTO);
       await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
       await expect(page.getByPlaceholder("Dipirona")).toHaveValue("FUNED LORATADINA");
-      await capturar(page, "novo-medicamento");
+      const datas = page.locator('input[type="date"]');
+      const hora = page.locator('input[type="time"]');
+      await expect(datas).toHaveCount(2);
+      await expect(datas.nth(0)).toHaveValue("");
+      await expect(datas.nth(1)).toHaveValue("2026-11-04");
+      await expect(hora).toHaveCount(1);
+      await expect(hora).toHaveValue("10:00");
+      // Windows runners may render native date/time controls in a different
+      // regional format even with browser locale set. Their canonical values
+      // remain asserted above; mask only their platform-specific presentation.
+      await capturar(page, "novo-medicamento", [datas, hora]);
     });
 
     test(`FN-06 TEST-03 meus-lembretes ${viewport.width}px`, async ({ page, api }) => {

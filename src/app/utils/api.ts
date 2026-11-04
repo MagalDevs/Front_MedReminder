@@ -23,8 +23,8 @@
  *   cadastro).
  * - `onUnauthorized` (padrão `'invalidate'`): o que fazer num HTTP 401 de chamada
  *   autenticada.
- *   - `'invalidate'`: remove `access_token`/`user_data` do localStorage e navega para
- *     `/login` (sessão expirada/inválida) e depois lança `ApiError`.
+ *   - `'invalidate'`: remove `access_token`/`user_data` do localStorage, notifica
+ *     AuthProvider para navegar a `/login` e depois lança `ApiError`.
  *   - `'throw'`: só lança `ApiError`, preservando a sessão. Uso previsto: operações em
  *     que 401 significa falha operacional, p.ex. PATCH `/usuario/senha` com senha atual
  *     incorreta (o design chama isso de `invalidateSessionOn401=false`). O chamador deve
@@ -324,7 +324,6 @@ export async function apiRequest<T = unknown>(
       localStorage.removeItem('access_token');
       localStorage.removeItem('user_data');
       window.dispatchEvent(new Event(SESSION_INVALIDATED_EVENT));
-      window.location.href = '/login';
     }
 
     // Keep diagnostics independent of arbitrary response content.

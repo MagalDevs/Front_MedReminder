@@ -26,6 +26,7 @@ function sentHeaders(index = 0) {
 }
 
 function controlledLocation() {
+  vi.spyOn(window, 'dispatchEvent');
   const location = { href: 'http://localhost/area-protegida' };
   vi.stubGlobal('window', new Proxy(window, {
     get(target, property) {
@@ -259,7 +260,8 @@ describe('BEAPI-02 erro HTTP estruturado', () => {
     expect(error.message).toBe('Não autorizado');
     expect(window.localStorage.getItem('access_token')).toBeNull();
     expect(window.localStorage.getItem('user_data')).toBeNull();
-    expect(location.href).toBe('/login');
+    expect(location.href).toBe('http://localhost/area-protegida');
+    expect(window.dispatchEvent).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ type: 'medreminder:session-invalidated' }));
   });
 
   it("BEAPI-02 401 com onUnauthorized:'throw' preserva sessão e navegação, mas mantém o erro", async () => {
@@ -287,7 +289,8 @@ describe('BEAPI-02 erro HTTP estruturado', () => {
     respondJson({}, 401);
     await expect(apiRequest('/usuario/me', { onUnauthorized: 'invalidate' })).rejects.toThrow('Não autorizado');
     expect(window.localStorage.getItem('access_token')).toBeNull();
-    expect(location.href).toBe('/login');
+    expect(location.href).toBe('http://localhost/area-protegida');
+    expect(window.dispatchEvent).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ type: 'medreminder:session-invalidated' }));
   });
 
   it('BEAPI-02 429 com Retry-After em segundos', async () => {

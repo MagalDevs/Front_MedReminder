@@ -1,20 +1,20 @@
 'use client';
 
 import Papa, { ParseResult } from 'papaparse';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+type Medicamento = { NOME_PRODUTO: string; DESCRIÇÃO: string };
 
 export default function SearchBar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [medicamentos, setMedicamentos] = useState<
-    { NOME_PRODUTO: string; DESCRIÇÃO: string }[]
-  >([]);
-  const [filtered, setFiltered] = useState<
-    { NOME_PRODUTO: string; DESCRIÇÃO: string }[]
-  >([]);
-  const [showCadastrar, setShowCadastrar] = useState(false);
+  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  const [selectedResult, setSelectedResult] = useState<{
+    medicamento: Medicamento;
+    catalog: Medicamento[];
+  } | null>(null);
 
   useEffect(() => {
     fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
@@ -32,32 +32,20 @@ export default function SearchBar() {
       });
   }, []);
 
-  useEffect(() => {
-    if (searchQuery.length > 0) {
-      const lowerQuery = searchQuery.toLowerCase();
-      setFiltered(
-        medicamentos.filter((med) =>
-          med.NOME_PRODUTO?.toLowerCase().includes(lowerQuery),
-        ),
-      );
-    } else {
-      setFiltered([]);
-    }
-  }, [searchQuery, medicamentos]);
-
-  useEffect(() => {
-    if (
-      filtered.length === 1 &&
-      searchQuery === filtered[0].NOME_PRODUTO.trim()
-    ) {
-      setShowCadastrar(true);
-    } else {
-      setShowCadastrar(false);
-    }
-  }, [filtered, searchQuery]);
+  const filtered = useMemo(() => {
+    if (selectedResult?.catalog === medicamentos) return [selectedResult.medicamento];
+    if (!searchQuery) return [];
+    const lowerQuery = searchQuery.toLowerCase();
+    return medicamentos.filter((med) =>
+      med.NOME_PRODUTO?.toLowerCase().includes(lowerQuery),
+    );
+  }, [searchQuery, medicamentos, selectedResult]);
+  const showCadastrar = filtered.length === 1 &&
+    searchQuery === filtered[0].NOME_PRODUTO.trim();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setSelectedResult(null);
     setIsOpen(true);
   };
 
@@ -65,9 +53,12 @@ export default function SearchBar() {
     NOME_PRODUTO: string;
     DESCRIÇÃO: string;
   }) => {
-    setSearchQuery(med.NOME_PRODUTO.trim());
+    const nextQuery = med.NOME_PRODUTO.trim();
+    // An unchanged query keeps the explicit row selection; a changed query is
+    // filtered against the catalog, preserving matching duplicate/prefix names.
+    setSelectedResult(nextQuery === searchQuery ? { medicamento: med, catalog: medicamentos } : null);
+    setSearchQuery(nextQuery);
     setIsOpen(true);
-    setFiltered([med]);
   };
   const handleCadastrarClick = (medicamento: string) => {
     router.push(

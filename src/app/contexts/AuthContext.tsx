@@ -64,10 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setIsAuthenticated(false);
       setLoading(false);
+      router.push('/login');
     };
     window.addEventListener(SESSION_INVALIDATED_EVENT, invalidate);
     return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, invalidate);
-  }, []);
+  }, [router]);
 
   // Each explicit login/logout revokes outstanding restoration responses.
 

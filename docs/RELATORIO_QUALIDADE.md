@@ -1,5 +1,7 @@
 # Relatório de qualidade — validação inicial
 
+> Correção posterior dos checks: [CI, lint e estabilidade das capturas](evidencias/2026-11-04/ci-corrections.md). O lint foi corrigido sem desativar regras; 321 testes Vitest foram aprovados e os 53 funcionais atenderam às expectativas. As falhas esperadas conhecidas continuam explicitadas no registro. A descrição de sete erros de lint abaixo pertence à rodada anterior.
+
 > Atualização final de 04/11/2026: [consolidação da execução](evidencias/2026-11-04/execution-final.md). O texto de outubro e a coleta intermediária abaixo permanecem históricos. Resultado final: 316 testes Vitest aprovados e 4 falhas esperadas conhecidas; 53 funcionais (incluindo 1 falha esperada), 10 NF, 11 E2E e 4 CORS reais atenderam às expectativas. Cobertura final: linhas 790/1016 (77,75%), branches 589/798 (73,80%), funções 169/213 (79,34%) e statements 833/1082 (76,98%). Lint continua reprovado por 7 erros e 2 avisos preexistentes; audit conserva 8 entradas moderate e 1 high. A comparação histórica e o parsing no Chromium foram concluídos. Aceite global ainda depende da revisão manual de acessibilidade, do CI remoto e dos defeitos FE-03/FE-05 explicitados no registro final.
 
 Data: 01/10/2026, America/Sao_Paulo. Baseline: ffd8893b423879194e512f65de8db7de099d2b06. Windows, Node v24.21.0, npm 11.19.0.

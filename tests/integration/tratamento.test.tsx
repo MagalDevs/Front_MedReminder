@@ -1,6 +1,6 @@
 // BEAPI-07/BEAPI-08: formulário e providers reais; transporte sintético atômico.
 // Tabelas literais de instantes preservam os horários locais e o fim exclusivo.
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useContext } from "react";
 import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 
@@ -249,7 +249,9 @@ function hexParaRgb(hex: string) {
 const aguardarSessao = () => waitFor(() => expect(screen.getByTestId("sessao-pronta")).toHaveTextContent("pronta"));
 const salvar = async () => {
   await aguardarSessao();
-  fireEvent.click(screen.getByRole("button", { name: "Salvar lembrete" }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Salvar lembrete" }));
+  });
 };
 
 const formatarLocal = (iso: string) =>

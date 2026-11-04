@@ -5,17 +5,17 @@ import Logo from './components/Logo/Logo';
 import Link from 'next/link';
 import { User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+const subscribeHydration = () => () => {};
+const clientHydrated = () => true;
+const serverHydrated = () => false;
 
 export default function Home() {
   const { isAuthenticated, logout, getUserDisplayName } = useAuth();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Handle hydration mismatch with client/server
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
