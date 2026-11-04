@@ -95,3 +95,16 @@ Gates T19 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/t
 Fontes: Context7 `/microsoft/typescript` (mudanças do compilador nativo TS7 e defaults) e [notas oficiais 5.9](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-9.html). Atenção às mudanças de `lib.d.ts`, ArrayBuffer/TypedArray/Buffer e inferência de argumentos; nenhuma mudança de produto foi necessária. A migração de compilador TS7 não foi instalada nem certificada nesta manutenção. `npm view typescript@5 version` confirmou 5.9.3 como último 5.x; `npm view typescript version` confirmou 7.0.2. Sem advisory direto registrado. `tsconfig.json` permanece idêntico, incluindo strict/noEmit e resolução bundler; não há relaxamento de tipos, exclusões ou alterações de harness.
 
 Gates T20: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T21 — Tailwind e PostCSS
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| tailwindcss | 4.3.3 | 4.3.4 | Atualizar patch em conjunto. |
+| @tailwindcss/postcss | 4.3.3 | 4.3.4 | Atualizar patch em conjunto. |
+
+Fontes: Context7 `/tailwindlabs/tailwindcss.com` (plugin PostCSS dedicado na v4); [release 4.3.4](https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.4), que corrige escopo, detecção de fontes e geração de utilitários; `npm view` confirmou latest de ambos os pacotes. Nenhum advisory direto registrado. A configuração atual já usa `@tailwindcss/postcss` e `@import 'tailwindcss'`; não houve migração de tema, adoção de outro plugin, edição de CSS ou alteração de fontes. A resolução npm acompanha os componentes transitivos do Tailwind.
+
+Prova visual: FN-06 login, home/busca/resultados, novo-medicamento e meus-lembretes nos três viewports 360/768/1440px (12 comparações com as referências originais). Nenhuma autorização para regenerar snapshots foi usada.
+
+Gates T21: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.

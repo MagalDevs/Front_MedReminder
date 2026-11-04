@@ -531,17 +531,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T20
 **Reuses**: FE-01/09; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] CSS, fontes e utilitários seguem iguais nos viewports do plano; nenhuma migração de tema ou reestilização implícita.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] CSS, fontes e utilitários seguem iguais nos viewports do plano; nenhuma migração de tema ou reestilização implícita.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: functional: capturas de login/busca/formulário/lembretes antes/depois; revisão das diferenças com fonte de estilos.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps): update styling toolchain compatibly`
+
+**Execution note**: 2026-11-04. Decisão por pacote, fontes e resultado dos gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md). `npm ci`, tipos, build e regressão: exit 0; lint: exit 1, mesmos 10 achados preexistentes, sem aumento. Seleção preservada: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais, 12 snapshots.
 
 ### T22: Revisar ESLint e tipagens do runtime
 
