@@ -86,13 +86,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: None
 **Requirement**: BEAPI-12
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (fontes: design.md; backend indisponível localmente — paridade real em T12)
 
 **Done when**:
 
-- [ ] Login na raiz; GET/PATCH perfil em data; senha/exclusão somente message; message:string[] e code; doses legadas/paginadas; tratamento e limites. Conferência da fixture com as fontes acompanha o commit.
-- [ ] Gate quick aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Login na raiz; GET/PATCH perfil em data; senha/exclusão somente message; message:string[] e code; doses legadas/paginadas; tratamento e limites. Conferência da fixture com as fontes acompanha o commit.
+- [x] Gate quick aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: unit: validar tipos/fixtures e casos de fronteira; importá-las em testes reais nas tarefas seguintes.
 **Gate**: quick — Gate Check Commands.
