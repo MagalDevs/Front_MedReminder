@@ -745,7 +745,7 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T32
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: CI-01
-**Status**: Pending
+**Status**: Parcial — workflow criado e validado localmente; execução no GitHub NÃO comprovada (sem push)
 
 **Done when**:
 

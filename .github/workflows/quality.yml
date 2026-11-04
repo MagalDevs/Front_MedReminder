@@ -1,0 +1,195 @@
+# Portões de qualidade por commit (CI-01 / T33).
+#
+# Regras deste workflow:
+# - Nenhum job usa continue-on-error e nenhuma suíte usa passWithNoTests: falha de
+#   comando ou seleção vazia de testes reprova o job (vitest.config.mts já sai com
+#   código 1 sem testes executados; o Playwright sai com 1 sem testes).
+# - O job de lint é separado e FALHA enquanto existirem os achados preexistentes
+#   (docs/evidencias/2026-11-04/lint-baseline.log). Isso é intencional e visível.
+# - O E2E real só roda com a variável de repositório E2E_API_URL (API isolada com
+#   dados sintéticos). Sem ela, o job "e2e-bloqueado" registra BLOQUEIO no summary;
+#   isso NÃO é aprovação do fluxo real.
+# - Execução no GitHub ainda não comprovada: este arquivo foi revisado e validado
+#   localmente (sintaxe YAML), sem push.
+name: quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      # Falha enquanto houver achados (8 erros e 2 avisos preexistentes no produto).
+      - run: npx eslint .
+
+  typecheck:
+    name: tsc (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  build:
+    name: build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  unit-integration-coverage:
+    name: unit + integration + coverage (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Testes unitários
+        run: npm run test:unit
+      - name: Testes de integração
+        run: npm run test:integration
+      # Instrumenta unit + integration sobre src/** e grava coverage/ (JSON, LCOV, HTML).
+      - name: Cobertura (unit + integration)
+        run: npm run test:coverage
+      # Nenhuma das quatro métricas pode ficar abaixo de tests/coverage-baseline.json.
+      - name: Comparar cobertura com a baseline
+        run: node scripts/check-coverage.mjs
+      # Roda mesmo se um passo anterior falhou, para o relatório ficar disponível.
+      # Contém apenas código-fonte do repositório e percentuais; sem dados de usuário.
+      - name: Publicar cobertura
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-node${{ matrix.node }}
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 14
+
+  functional:
+    # As imagens de referência de tests/functional/*-snapshots são "-win32":
+    # por isso este job roda em windows-latest. Em Linux seria preciso gerar e
+    # versionar baselines -linux antes de mudar o runner.
+    name: functional (Playwright, windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # playwright.config.ts sobe `npm run build && npm run start` na porta 3001
+      # (CI=true: sem reaproveitar servidor, retries=2, forbidOnly).
+      - run: npm run test:functional
+      # O relatório pode conter traces da primeira repetição; os testes usam apenas
+      # dados sintéticos e API simulada. Não publicar fora do repositório sem revisar.
+      - name: Publicar relatório do Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: error
+          retention-days: 7
+
+  e2e:
+    # E2E real: navegador contra API isolada com dados sintéticos. Só roda quando a
+    # variável de repositório E2E_API_URL está definida. Nunca apontar para produção
+    # (tests/support/e2e.ts rejeita a URL de produção com BLOQUEADO).
+    # Limitação conhecida (FE-06): enquanto o frontend usar URL de API fixa, os
+    # casos reais podem permanecer BLOQUEADOS mesmo com a variável definida.
+    if: ${{ vars.E2E_API_URL != '' }}
+    name: e2e real (API isolada)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      E2E_API_URL: ${{ vars.E2E_API_URL }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Publicar relatório do Playwright (e2e)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-e2e
+          path: playwright-report/
+          if-no-files-found: error
+          retention-days: 7
+
+  e2e-bloqueado:
+    # Visibilidade do bloqueio: sem E2E_API_URL o E2E real NÃO foi executado.
+    # Este job não prova nada sobre o fluxo real e não substitui o job "e2e".
+    if: ${{ vars.E2E_API_URL == '' }}
+    name: e2e real - BLOQUEADO (API isolada não configurada)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Registrar bloqueio do E2E
+        shell: bash
+        run: |
+          echo "E2E BLOQUEADO: API isolada não configurada"
+          echo "::warning title=E2E BLOQUEADO::API isolada não configurada (vars.E2E_API_URL ausente). O fluxo real NÃO foi executado nem aprovado."
+          {
+            echo "## E2E BLOQUEADO: API isolada não configurada"
+            echo
+            echo "- A variável de repositório \`E2E_API_URL\` não está definida; \`npm run test:e2e\` **não foi executado**."
+            echo "- Persistência, isolamento A/B e demais fluxos reais estão **NÃO COMPROVADOS** neste commit."
+            echo "- Os testes funcionais (job \`functional\`) usam API simulada e não substituem o E2E real."
+            echo "- Para executar: defina \`E2E_API_URL\` com uma API isolada, com dados sintéticos e nunca de produção."
+          } >> "$GITHUB_STEP_SUMMARY"
