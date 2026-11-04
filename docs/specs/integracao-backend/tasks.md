@@ -6,10 +6,10 @@ Ativar `tlc-spec-driven` pelo nome numa implementação futura e seguir seu flux
 
 **Spec**: [spec.md](spec.md)
 **Design**: [design.md](design.md)
-**Status**: Draft
+**Status**: Approved — em execução
 **Build**: `npx --no-install eslint .; npx --no-install tsc --noEmit; npm run build`
 
-Não há aprovações de spec/tasks. As duas aprovações reais são pré-condições separadas do Execute. O baseline do frontend ainda não tem scripts de teste e o lint precisa de ajuste já previsto no plano de manutenção. Não omitir o gate inicial caso falhe.
+Aprovação registrada em 2026-11-04 ([README](README.md#approval-state)): "siga as specs deste projeto e finalize elas por favor". O texto original abaixo permanece como histórico do plano. As duas aprovações reais são pré-condições separadas do Execute. O baseline do frontend ainda não tem scripts de teste e o lint precisa de ajuste já previsto no plano de manutenção. Não omitir o gate inicial caso falhe.
 
 ## Test Coverage Matrix
 

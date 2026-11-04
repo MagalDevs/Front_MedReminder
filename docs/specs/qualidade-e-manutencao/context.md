@@ -15,4 +15,18 @@
 
 ## Approval State
 
-A escolha da stack não é aprovação do escopo completo nem das tarefas. `spec.md` e `tasks.md` permanecem em Draft. As aprovações serão registradas separadamente, com data e palavras do usuário, quando ocorrerem. Nenhuma tarefa de implementação foi iniciada.
+**Status**: Approved — em execução, desde 2026-11-04 (America/Sao_Paulo).
+
+| Item | Registro |
+| --- | --- |
+| Data | 2026-11-04 |
+| Palavras do usuário (owner do projeto) | "siga as specs deste projeto e finalize elas por favor" |
+| Escopo aprovado | `spec.md` e `tasks.md` dos pacotes `qualidade-e-manutencao` e `integracao-backend`. |
+| Limites | A aprovação não autoriza push, merge, deploy nem acesso/mutação à API de produção; E2E real continua dependendo de API isolada explícita. |
+
+Observações de protocolo, registradas sem ocultar desvios:
+
+- O usuário deu uma única instrução, que cobre spec e tasks ao mesmo tempo. O protocolo pedia duas aprovações em momentos separados; a instrução foi tratada como aprovação conjunta do spec e das tasks por decisão do owner do projeto.
+- A skill `tlc-spec-driven` não está disponível nesta máquina. O fluxo Execute está sendo seguido manualmente: tarefas em ordem, um commit atômico por tarefa, gates registrados e status atualizado no `tasks.md`.
+- Os validadores Python da skill (`validate_spec.py`, `validate_tasks.py --execute`) não existem nesta máquina e não foram executados. O gate inicial equivalente é o Build do cabeçalho do `tasks.md`; seu resultado é registrado nas evidências de T1/T2, sem ocultar falhas.
+- Execução em curso na branch `feat/executar-specs`, sem push.

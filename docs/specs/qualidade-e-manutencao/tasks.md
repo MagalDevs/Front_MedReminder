@@ -6,11 +6,11 @@ Ativar a skill `tlc-spec-driven` pelo nome para uma futura implementação e seg
 
 **Spec**: [spec.md](spec.md)
 **Design**: [design.md](design.md)
-**Status**: Draft
+**Status**: Approved — em execução
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Build**: `npx --no-install eslint .; npx --no-install tsc --noEmit; npm run build`
 
-Não há aprovação do escopo ou das tarefas registrada. A escolha da stack está em [context.md](context.md). Antes de implementar, obter as duas aprovações em momentos separados, registradas com data e palavras do usuário, e executar `validate_tasks.py docs/specs/qualidade-e-manutencao/tasks.md --execute`. Se o baseline estiver vermelho, interromper e registrar o bloqueio. Não transformar este plano em autorização para push, merge, deploy ou acesso a produção.
+Aprovação registrada em 2026-11-04 (ver [context.md](context.md#approval-state)): "siga as specs deste projeto e finalize elas por favor". Os validadores Python da skill e a própria skill `tlc-spec-driven` não existem nesta máquina; o protocolo é seguido manualmente. O texto original abaixo permanece como histórico do plano. A escolha da stack está em [context.md](context.md). Antes de implementar, obter as duas aprovações em momentos separados, registradas com data e palavras do usuário, e executar `validate_tasks.py docs/specs/qualidade-e-manutencao/tasks.md --execute`. Se o baseline estiver vermelho, interromper e registrar o bloqueio. Não transformar este plano em autorização para push, merge, deploy ou acesso a produção.
 
 O Build usa a CLI ESLint já prevista no plano antigo como alternativa a `next lint`, removido no Next 16. Isso descreve o gate futuro, não um resultado executado. Após T2/T3, `npm run lint` deve produzir o mesmo resultado. Caso o gate inicial falhe, não pular o validador para executar T2/T3; a recuperação do baseline deve ser tratada antes da execução normal.
 

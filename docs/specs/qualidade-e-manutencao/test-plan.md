@@ -1,6 +1,6 @@
 # Quality and Maintenance Test Plan
 
-**Status**: Draft
+**Status**: Approved — em execução
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Baseline**: frontend em `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 **Scope**: plano de testes para manutenção que preserva regras, contratos e design. Nenhum cenário deste documento foi executado nesta elaboração.

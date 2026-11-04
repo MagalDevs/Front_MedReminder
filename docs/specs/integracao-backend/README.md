@@ -1,7 +1,7 @@
 # Backend Integration Review
 
 **Verdict**: há alinhamentos de frontend a implementar. Os documentos foram incrementados; o código das aplicações não foi alterado.
-**Status**: Draft
+**Status**: Approved — em execução
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Frontend**: `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 **Backend**: `b6b63168ba2a092e6e6350c256bfa15483199b4a`.
@@ -69,3 +69,13 @@ Os validadores foram repetidos após os ajustes. Não houve `--execute`, provas 
 - [Contexto e instrução do usuário](../qualidade-e-manutencao/context.md).
 - [Issues e fontes do planejamento anterior](../qualidade-e-manutencao/sources.md): FE-02/03/04/06/07/08/12/15 orientam os alinhamentos, sem alteração das issues.
 - Backend `docs/AUTH_PASSWORD_CORS.md`, controllers, DTOs e serviços no commit informado. Disponibilidade em código local não é garantia da revisão implantada no Render.
+
+## Approval State
+
+**Status**: Approved — em execução, desde 2026-11-04 (America/Sao_Paulo).
+
+- Data: 2026-11-04.
+- Palavras do usuário (owner do projeto): "siga as specs deste projeto e finalize elas por favor".
+- Escopo: `spec.md` e `tasks.md` deste pacote e do pacote [qualidade-e-manutencao](../qualidade-e-manutencao/context.md). O registro completo e as observações de protocolo estão no `context.md` daquele pacote.
+- Limites: sem push, merge, deploy ou acesso/mutação à API de produção. Conexão real só em ambiente isolado identificado.
+- A skill `tlc-spec-driven` e seus validadores Python não estão disponíveis nesta máquina; o protocolo Execute é seguido manualmente.

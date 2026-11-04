@@ -1,6 +1,6 @@
 # Frontend Quality and Maintenance Specification
 
-**Status**: Draft
+**Status**: Approved — em execução
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Baseline**: `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 **Context**: [Decisões do usuário](context.md).

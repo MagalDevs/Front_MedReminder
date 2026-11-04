@@ -1,6 +1,6 @@
 # Backend Integration Specification
 
-**Status**: Draft
+**Status**: Approved — em execução
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Frontend baseline**: `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 **Backend baseline**: `b6b63168ba2a092e6e6350c256bfa15483199b4a`.

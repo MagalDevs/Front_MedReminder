@@ -1,6 +1,6 @@
 # Frontend Quality and Maintenance Plan
 
-**Status**: Draft. Nenhuma tarefa de implementação foi executada.
+**Status**: Approved — em execução (aprovação em 2026-11-04, ver [context.md](context.md)).
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Baseline**: `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 
