@@ -1,0 +1,762 @@
+{
+  "schema": "dependencies-baseline/v1",
+  "execution": "2026-11-04",
+  "timezone": "America/Sao_Paulo",
+  "task": "T1 — docs/specs/qualidade-e-manutencao/tasks.md",
+  "repository": "Front_MedReminder",
+  "branch": "feat/executar-specs",
+  "commit": {
+    "evaluatedHead": "7c0d9d15695ec87fba1832a2aa1950cc5b864898",
+    "note": "HEAD no momento da coleta (commit de aprovação). package.json e package-lock.json são idênticos aos do commit 22f41a6537d97bf10c5e5fa94d116e63876d0b11; os hashes abaixo foram calculados antes de qualquer alteração de T2/T3."
+  },
+  "runtime": {
+    "node": "v26.8.1",
+    "npm": "11.19.0",
+    "os": "Windows 11 Education 10.0.26300 (win32 x64)",
+    "registry": "https://registry.npmjs.org/",
+    "nextRequiredNode": ">=20.9.0 (engines de next@16.3.6)"
+  },
+  "hashes": {
+    "package.json": {
+      "sha256": "c03f92c2072ab2dd1cbbfef39362602e8d75df922fa78d8a378ce3852958a3ab"
+    },
+    "package-lock.json": {
+      "sha256": "1ee8170b2dbfe2e9054b7b864608b5b33dc4533b233743bec9be26acdeac2c4e",
+      "lockfileVersion": 3
+    }
+  },
+  "queries": [
+    {
+      "command": "npm ls --depth=0 --json",
+      "purpose": "versão instalada"
+    },
+    {
+      "command": "npm outdated --json",
+      "purpose": "wanted/latest (exit 1 = há desatualizados, esperado)"
+    },
+    {
+      "command": "npm view <pacote> version",
+      "purpose": "latest do registry por pacote"
+    },
+    {
+      "command": "npm view <pacote>@<resolvida> peerDependencies --json / engines --json",
+      "purpose": "peers e engines da versão resolvida"
+    },
+    {
+      "command": "npm audit --json",
+      "purpose": "advisories (exit 1 = há vulnerabilidades, esperado); contagem:{\"info\":0,\"low\":2,\"moderate\":8,\"high\":3,\"critical\":1,\"total\":14}"
+    }
+  ],
+  "auditSummary": {
+    "counts": {
+      "info": 0,
+      "low": 2,
+      "moderate": 8,
+      "high": 3,
+      "critical": 1,
+      "total": 14
+    },
+    "dependencies": {
+      "prod": 34,
+      "dev": 379,
+      "optional": 87,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 449
+    },
+    "note": "Nenhum pacote foi instalado/atualizado nesta tarefa (somente consultas)."
+  },
+  "baselineGate": {
+    "note": "Gate Build do cabeçalho do tasks.md executado no commit avaliado, sem ocultar falhas.",
+    "results": [
+      {
+        "command": "npx --no-install eslint .",
+        "exit": 2,
+        "result": "FALHA: ESLint 9.25.1 quebra com TypeError \"Converting circular structure to JSON\" ao carregar next/core-web-vitals via FlatCompat (eslint-config-next 16 já é flat config nativa). Corrigido em T2."
+      },
+      {
+        "command": "npx --no-install tsc --noEmit",
+        "exit": 0,
+        "result": "OK"
+      },
+      {
+        "command": "npm run build",
+        "exit": 0,
+        "result": "OK — Next.js 16.3.6 (Turbopack), 11 páginas estáticas geradas"
+      }
+    ]
+  },
+  "externalState": {
+    "dependabotPR53": "NÃO CONSULTADO nesta tarefa (referência do plano); decisão de segurança do Next registrada com base em npm audit."
+  },
+  "packages": [
+    {
+      "name": "@eslint/eslintrc",
+      "kind": "devDependencies",
+      "declared": "^3",
+      "resolvedInLockfile": "3.3.7",
+      "installedInNodeModules": "3.3.7",
+      "wantedWithinRange": "3.3.7",
+      "latestRegistry": "3.3.7",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {
+        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+      },
+      "decision": "manter",
+      "plannedTask": "T22",
+      "rationale": "No latest do registry; usado pelo FlatCompat atual, a dependência será reavaliada em T2/T22.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "kind": "devDependencies",
+      "declared": "^4",
+      "resolvedInLockfile": "4.3.3",
+      "installedInNodeModules": "4.3.3",
+      "wantedWithinRange": "4.3.4",
+      "latestRegistry": "4.3.4",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "atualizar",
+      "plannedTask": "T21",
+      "rationale": "Patch 4.3.4 dentro do intervalo ^4; família com tailwindcss. source-map-js transitivo tem advisory high, correção disponível via lockfile.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": [
+          {
+            "package": "source-map-js",
+            "severity": "high",
+            "range": "1.0.0 - 1.2.1",
+            "advisories": [
+              {
+                "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+                "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+                "range": ">=1.0.0 <1.2.2"
+              }
+            ],
+            "fixAvailable": true,
+            "attribution": "transitivo, via npm ls"
+          }
+        ]
+      }
+    },
+    {
+      "name": "@types/node",
+      "kind": "devDependencies",
+      "declared": "^20",
+      "resolvedInLockfile": "20.17.30",
+      "installedInNodeModules": "20.17.30",
+      "wantedWithinRange": "20.19.43",
+      "latestRegistry": "26.6.6",
+      "latestIsMajorAhead": true,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T22",
+      "rationale": "Declarado ^20 acompanha o mínimo Node 20.9 do Next 16 (engines). Latest 26.x é major; só muda com decisão de runtime em T22.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "@types/papaparse",
+      "kind": "devDependencies",
+      "declared": "^5.5.2",
+      "resolvedInLockfile": "5.5.2",
+      "installedInNodeModules": "5.5.2",
+      "wantedWithinRange": "5.5.2",
+      "latestRegistry": "5.5.2",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T19",
+      "rationale": "No latest do registry.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "@types/react",
+      "kind": "devDependencies",
+      "declared": "^19",
+      "resolvedInLockfile": "19.3.0",
+      "installedInNodeModules": "19.3.0",
+      "wantedWithinRange": "19.3.0",
+      "latestRegistry": "19.3.0",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T15",
+      "rationale": "No latest do registry; família React em T15.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "@types/react-dom",
+      "kind": "devDependencies",
+      "declared": "^19",
+      "resolvedInLockfile": "19.3.0",
+      "installedInNodeModules": "19.3.0",
+      "wantedWithinRange": "19.3.0",
+      "latestRegistry": "19.3.0",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {
+        "@types/react": "^19.3.0"
+      },
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T15",
+      "rationale": "No latest do registry; família React em T15.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "@types/react-input-mask",
+      "kind": "devDependencies",
+      "declared": "^3.0.6",
+      "resolvedInLockfile": "3.0.6",
+      "installedInNodeModules": "3.0.6",
+      "wantedWithinRange": "3.0.6",
+      "latestRegistry": "3.0.6",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T18",
+      "rationale": "No latest do registry; compatibilidade com React 19 verificada em T18.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "eslint",
+      "kind": "devDependencies",
+      "declared": "^9",
+      "resolvedInLockfile": "9.25.1",
+      "installedInNodeModules": "9.25.1",
+      "wantedWithinRange": "9.39.5",
+      "latestRegistry": "10.14.0",
+      "latestIsMajorAhead": true,
+      "peerDependencies": {
+        "jiti": "*"
+      },
+      "engines": {
+        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+      },
+      "decision": "atualizar",
+      "plannedTask": "T22",
+      "rationale": "Dentro de ^9 existe 9.39.5 (inclui @eslint/plugin-kit corrigido, advisory low). Major 10.x fica fora do escopo até avaliação em T22.",
+      "advisories": {
+        "viaAuditEffectsChain": [
+          {
+            "package": "@eslint/plugin-kit",
+            "severity": "low",
+            "isDirect": false,
+            "range": "<0.3.4",
+            "advisories": [
+              {
+                "id": "https://github.com/advisories/GHSA-xffm-g5w8-qvg7",
+                "title": "@eslint/plugin-kit is vulnerable to Regular Expression Denial of Service attacks through ConfigCommentParser",
+                "severity": "low",
+                "range": "<0.3.4",
+                "package": "@eslint/plugin-kit"
+              }
+            ],
+            "viaPackages": [],
+            "fixAvailable": true
+          },
+          {
+            "package": "eslint",
+            "severity": "low",
+            "isDirect": true,
+            "range": "9.10.0 - 9.26.0",
+            "advisories": [],
+            "viaPackages": [
+              "@eslint/plugin-kit"
+            ],
+            "fixAvailable": true
+          }
+        ],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "eslint-config-next",
+      "kind": "devDependencies",
+      "declared": "16.3.6",
+      "resolvedInLockfile": "16.3.6",
+      "installedInNodeModules": "16.3.6",
+      "wantedWithinRange": "16.3.6",
+      "latestRegistry": "16.4.5",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {
+        "eslint": ">=9.0.0",
+        "typescript": ">=3.3.1"
+      },
+      "engines": {},
+      "decision": "atualizar",
+      "plannedTask": "T14",
+      "rationale": "Acompanha o grupo Next (16.4.5). Advisories moderate via typescript-eslint/minimatch; npm audit sugere 15.5.29 (downgrade major), não aplicável — avaliar na versão 16.x em T14.",
+      "advisories": {
+        "viaAuditEffectsChain": [
+          {
+            "package": "@typescript-eslint/eslint-plugin",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": ">=6.16.0",
+            "advisories": [],
+            "viaPackages": [
+              "@typescript-eslint/parser",
+              "@typescript-eslint/type-utils",
+              "@typescript-eslint/utils"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "@typescript-eslint/parser",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": ">=6.16.0",
+            "advisories": [],
+            "viaPackages": [
+              "@typescript-eslint/typescript-estree"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "@typescript-eslint/type-utils",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": ">=6.16.0",
+            "advisories": [],
+            "viaPackages": [
+              "@typescript-eslint/typescript-estree",
+              "@typescript-eslint/utils"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "@typescript-eslint/typescript-estree",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": ">=6.16.0",
+            "advisories": [],
+            "viaPackages": [
+              "minimatch"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "@typescript-eslint/utils",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": ">=6.16.0",
+            "advisories": [],
+            "viaPackages": [
+              "@typescript-eslint/typescript-estree"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "eslint-config-next",
+            "severity": "moderate",
+            "isDirect": true,
+            "range": ">=15.6.0-canary.0",
+            "advisories": [],
+            "viaPackages": [
+              "typescript-eslint"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "minimatch",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": "7.0.0 - 11.0.0",
+            "advisories": [
+              {
+                "id": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+                "title": "minimatch has potential denial of service via globparts amplification",
+                "severity": "moderate",
+                "range": ">=7.0.0 <11.0.1",
+                "package": "minimatch"
+              }
+            ],
+            "viaPackages": [],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          },
+          {
+            "package": "typescript-eslint",
+            "severity": "moderate",
+            "isDirect": false,
+            "range": "*",
+            "advisories": [],
+            "viaPackages": [
+              "@typescript-eslint/eslint-plugin",
+              "@typescript-eslint/parser",
+              "@typescript-eslint/typescript-estree",
+              "@typescript-eslint/utils"
+            ],
+            "fixAvailable": {
+              "name": "eslint-config-next",
+              "version": "15.5.29",
+              "isSemVerMajor": true
+            }
+          }
+        ],
+        "transitiveDirectDependents": [
+          {
+            "package": "zod",
+            "severity": "high",
+            "range": "<4.6.6",
+            "advisories": [
+              {
+                "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+                "title": "Zod can exhaust memory while validating oversized constrained collections",
+                "range": "<4.6.6"
+              }
+            ],
+            "fixAvailable": true,
+            "attribution": "transitivo, via npm ls"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lucide-react",
+      "kind": "dependencies",
+      "declared": "^0.511.0",
+      "resolvedInLockfile": "0.511.0",
+      "installedInNodeModules": "0.511.0",
+      "wantedWithinRange": "0.511.0",
+      "latestRegistry": "1.68.0",
+      "latestIsMajorAhead": true,
+      "peerDependencies": {
+        "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+      },
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T17",
+      "rationale": "Latest 1.x é major; migração e inventário de ícones em T17. Sem advisory.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "next",
+      "kind": "dependencies",
+      "declared": "16.3.6",
+      "resolvedInLockfile": "16.3.6",
+      "installedInNodeModules": "16.3.6",
+      "wantedWithinRange": "16.3.6",
+      "latestRegistry": "16.4.5",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {
+        "sass": "^1.3.0",
+        "react": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0",
+        "react-dom": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0",
+        "@playwright/test": "^1.51.1",
+        "@opentelemetry/api": "^1.1.0",
+        "babel-plugin-react-compiler": "*"
+      },
+      "engines": {
+        "node": ">=20.9.0"
+      },
+      "decision": "atualizar",
+      "plannedTask": "T14",
+      "rationale": "16.3.6 afetado por advisories (npm audit: critical; corrigidos em >=16.3.8 e alguns somente após 16.4.0). Candidato 16.4.5 (patch/minor, fixAvailable sem major). PR de segurança #53 citado em tasks.md não foi consultado nesta tarefa.",
+      "advisories": {
+        "viaAuditEffectsChain": [
+          {
+            "package": "next",
+            "severity": "critical",
+            "isDirect": true,
+            "range": "16.0.0 - 16.4.0",
+            "advisories": [
+              {
+                "id": "https://github.com/advisories/GHSA-3w37-wq28-93x7",
+                "title": "Next.js: Pending `use cache` fill can leak Draft Mode content into regular responses and persisted pages",
+                "severity": "moderate",
+                "range": ">=16.3.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+                "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+                "severity": "moderate",
+                "range": ">=16.0.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-39w2-rjm5-chcv",
+                "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+                "severity": "low",
+                "range": ">=16.0.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-f87g-xv8r-7p7x",
+                "title": "Next.js has information disclosure in App Router metadata image routes via dynamicParams bypass",
+                "severity": "moderate",
+                "range": ">=16.0.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+                "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+                "severity": "moderate",
+                "range": ">=16.0.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-cjq9-62q9-8jv4",
+                "title": "Next.js has Server-Side Request Forgery in Image Optimization",
+                "severity": "high",
+                "range": ">=16.0.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-2464-fhr4-w9xw",
+                "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+                "severity": "critical",
+                "range": ">=16.0.0 <=16.4.0",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-p3m5-59mp-jv5r",
+                "title": "Next.js: Denial of Service in App Router using Server Actions",
+                "severity": "high",
+                "range": ">=16.0.0 <=16.4.0",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-h694-7cp9-m8p3",
+                "title": "next.js cache leak across root param values in nested 'use cache' functions",
+                "severity": "moderate",
+                "range": ">=16.3.0 <16.3.8",
+                "package": "next"
+              },
+              {
+                "id": "https://github.com/advisories/GHSA-673q-mjm6-r5xr",
+                "title": "Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+                "severity": "critical",
+                "range": ">=16.0.0 <=16.4.0",
+                "package": "next"
+              }
+            ],
+            "viaPackages": [],
+            "fixAvailable": {
+              "name": "next",
+              "version": "16.4.5",
+              "isSemVerMajor": false
+            }
+          }
+        ],
+        "transitiveDirectDependents": [
+          {
+            "package": "sharp",
+            "severity": "high",
+            "range": "<0.35.5",
+            "advisories": [
+              {
+                "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w",
+                "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+                "range": "<0.35.5"
+              }
+            ],
+            "fixAvailable": true,
+            "attribution": "transitivo, via npm ls"
+          }
+        ]
+      }
+    },
+    {
+      "name": "papaparse",
+      "kind": "dependencies",
+      "declared": "^5.7.0",
+      "resolvedInLockfile": "5.7.0",
+      "installedInNodeModules": "5.7.0",
+      "wantedWithinRange": "5.7.0",
+      "latestRegistry": "5.7.0",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T19",
+      "rationale": "No latest do registry.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "react",
+      "kind": "dependencies",
+      "declared": "^19.3.0",
+      "resolvedInLockfile": "19.3.0",
+      "installedInNodeModules": "19.3.0",
+      "wantedWithinRange": "19.3.1",
+      "latestRegistry": "19.3.1",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {
+        "node": ">=0.10.0"
+      },
+      "decision": "atualizar",
+      "plannedTask": "T15",
+      "rationale": "Patch 19.3.1 dentro de ^19.3.0; mover com react-dom e tipagens.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "react-datepicker",
+      "kind": "dependencies",
+      "declared": "^8.3.0",
+      "resolvedInLockfile": "8.3.0",
+      "installedInNodeModules": "8.3.0",
+      "wantedWithinRange": "8.10.0",
+      "latestRegistry": "9.1.0",
+      "latestIsMajorAhead": true,
+      "peerDependencies": {
+        "react": "^16.9.0 || ^17 || ^18 || ^19 || ^19.0.0-rc",
+        "react-dom": "^16.9.0 || ^17 || ^18 || ^19 || ^19.0.0-rc"
+      },
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T16",
+      "rationale": "Latest 9.x é major; avaliar migração mínima em T16. Sem advisory.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "react-dom",
+      "kind": "dependencies",
+      "declared": "^19.3.0",
+      "resolvedInLockfile": "19.3.0",
+      "installedInNodeModules": "19.3.0",
+      "wantedWithinRange": "19.3.1",
+      "latestRegistry": "19.3.1",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {
+        "react": "^19.3.0"
+      },
+      "engines": {},
+      "decision": "atualizar",
+      "plannedTask": "T15",
+      "rationale": "Patch 19.3.1 junto com react.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "react-input-mask",
+      "kind": "dependencies",
+      "declared": "^2.0.4",
+      "resolvedInLockfile": "2.0.4",
+      "installedInNodeModules": "2.0.4",
+      "wantedWithinRange": "2.0.4",
+      "latestRegistry": "2.0.4",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {
+        "react": ">=0.14.0",
+        "react-dom": ">=0.14.0"
+      },
+      "engines": {},
+      "decision": "manter",
+      "plannedTask": "T18",
+      "rationale": "No latest do registry; pacote sem atualização recente — verificar peers com React 19 em T18.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "tailwindcss",
+      "kind": "devDependencies",
+      "declared": "^4",
+      "resolvedInLockfile": "4.3.3",
+      "installedInNodeModules": "4.3.3",
+      "wantedWithinRange": "4.3.4",
+      "latestRegistry": "4.3.4",
+      "latestIsMajorAhead": false,
+      "peerDependencies": {},
+      "engines": {},
+      "decision": "atualizar",
+      "plannedTask": "T21",
+      "rationale": "Patch 4.3.4 dentro de ^4.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    },
+    {
+      "name": "typescript",
+      "kind": "devDependencies",
+      "declared": "^5",
+      "resolvedInLockfile": "5.8.3",
+      "installedInNodeModules": "5.8.3",
+      "wantedWithinRange": "5.9.3",
+      "latestRegistry": "7.0.2",
+      "latestIsMajorAhead": true,
+      "peerDependencies": {},
+      "engines": {
+        "node": ">=14.17"
+      },
+      "decision": "manter",
+      "plannedTask": "T20",
+      "rationale": "Latest 7.x é major; avaliar compatibilidade com Next/ferramentas em T20. Instalado 5.8.3 dentro de ^5.",
+      "advisories": {
+        "viaAuditEffectsChain": [],
+        "transitiveDirectDependents": []
+      }
+    }
+  ]
+}

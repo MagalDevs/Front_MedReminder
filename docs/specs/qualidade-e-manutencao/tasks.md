@@ -125,17 +125,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: None
 **Reuses**: FE-01; PRs Dependabot; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Inventário inclui todos os pacotes diretos, hashes e commit; consulta indisponível é BLOQUEADO, sem versão inventada.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Inventário inclui todos os pacotes diretos, hashes e commit; consulta indisponível é BLOQUEADO, sem versão inventada.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documento; conferir manifesto/lockfile e registry sem instalar pacotes.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(docs): record dependency baseline`
+
+**Execution note**: 2026-11-04. Inventário em [dependencies.json](../../evidencias/2026-11-04/dependencies.json) com 18/18 pacotes diretos, hashes de package.json/package-lock.json e commit avaliado. Gate manual: conferido manifesto/lockfile e registry sem instalar pacotes. Baseline do gate Build registrado no JSON: eslint FALHA (TypeError circular em FlatCompat, corrigido em T2), tsc OK, build OK. Nenhum teste aplicável (documento).
 
 ### T2: Adequar configuração do ESLint ao Next 16
 
