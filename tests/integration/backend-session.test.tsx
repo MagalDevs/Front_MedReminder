@@ -23,10 +23,17 @@ function token() { localStorage.setItem('access_token', 'token-a'); localStorage
 describe('BEAPI-03/BEAPI-04 restauração e consultas por identidade', () => {
   it('BEAPI-03 o provider navega ao login e limpa o estado após 401 do cliente real', async () => {
     token();
-    vi.mocked(fetch).mockResolvedValueOnce(json({ data: { id: 1 } })).mockResolvedValueOnce(json({ data: [] }));
+    // Providers may start the dose load before or after the assertion below.
+    // Route by endpoint so its response cannot be consumed by the explicit 401.
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith('/usuario/me')) return json({ data: { id: 1 } });
+      if (url.endsWith('/dose/me')) return json({ data: [] });
+      if (url.endsWith('/fixture-private')) return json({}, 401);
+      throw new Error(`Unexpected test request: ${url}`);
+    });
     mount();
     await waitFor(() => expect(state().authenticated).toBe(true));
-    vi.mocked(fetch).mockResolvedValueOnce(json({}, 401));
     await act(async () => {
       await expect(apiRequest('fixture-private')).rejects.toMatchObject({ status: 401 });
     });
