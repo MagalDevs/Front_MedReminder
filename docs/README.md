@@ -2,6 +2,8 @@
 
 Pacote criado em 01/10/2026 para organizar a evolução do MVP e integrar Computação em Nuvem 2 e Qualidade e Teste de Software.
 
+- [Specs de manutenção, testes e documentação (Draft)](specs/qualidade-e-manutencao/README.md)
+- [Verificação e specs da integração com o backend (Draft)](specs/integracao-backend/README.md)
 - [Inventário e diagnóstico](INVENTARIO.md)
 - [Backlog com prioridades e aceite](BACKLOG.md)
 - [Índice das 15 issues publicadas](ISSUES.md)
