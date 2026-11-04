@@ -33,7 +33,7 @@ const USER = { id: 7, nome: "Ana Teste", email: "ana@example.test" };
 const USER_PASSWORD = "senha-sintetica";
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-headers": "authorization, content-type",
+  "access-control-allow-headers": "authorization, content-type, idempotency-key",
   "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 };
 
@@ -125,6 +125,8 @@ const test = guarded.extend<{ api: FakeApi; dialogs: DialogLog }>({
   api: async ({ page }, provide) => {
     await page.clock.setFixedTime(NOW);
     const api = new FakeApi();
+    api.on("GET", "/usuario/me", { json: { data: USER } });
+    api.on("GET", "/dose/me", { json: { data: [] } });
     await api.install(page);
     await provide(api);
   },
@@ -276,7 +278,7 @@ test("FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o stor
   await expect(menu).toContainText("Olá, Ana");
 
   // Requests: login público (sem Authorization) e perfil com o token recebido.
-  expect(api.sequence()).toEqual(["POST /auth/login", "GET /usuario/me"]);
+  await expect.poll(() => api.sequence()).toEqual(["POST /auth/login", "GET /usuario/me", "GET /dose/me"]);
   const [login] = api.calls("POST", "/auth/login");
   expect(login.body).toEqual({ email: USER.email, senha: USER_PASSWORD });
   expect(login.headers["content-type"]).toContain("application/json");
@@ -295,7 +297,7 @@ test("FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o stor
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
   await expectSemSessao(page);
-  expect(api.requests).toHaveLength(2);
+  expect(api.requests).toHaveLength(3);
 });
 
 // ---------------------------------------------------------------------------
@@ -327,6 +329,8 @@ test("FN-02 TEST-03 rota protegida com sessão sintética preparada exibe o cont
   await expect(page.getByRole("heading", { name: "Meus lembretes" })).toBeVisible();
   await expect(page).toHaveURL(/\/meus-lembretes$/);
   // Leitura autenticada: lista de remédios e doses (provider + página).
+  await expect.poll(() => api.calls("GET", "/remedio/me").length).toBe(1);
+  await expect.poll(() => api.calls("GET", "/dose/me").length).toBeGreaterThanOrEqual(1);
   const remedios = api.calls("GET", "/remedio/me");
   expect(remedios).toHaveLength(1);
   expect(remedios[0].headers["authorization"]).toBe(AUTH_HEADER);
@@ -406,6 +410,11 @@ async function preencherTratamento(
   await page.getByPlaceholder("Tomar após as refeições").fill("Tomar após as refeições");
 }
 
+function respostaTratamento(call: ApiCall, id = 777): Reply {
+  const body = call.body as { remedio: object; doses: string[] };
+  return { json: { data: { remedio: { ...body.remedio, id }, doses: body.doses.map((data_dose, index) => ({ id: index + 1, data_dose })) } } };
+}
+
 const URL_NOVO_TRATAMENTO = "/novo-medicamento?medicamento=FUNED%20LORATADINA";
 
 test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e atualiza os lembretes", async ({
@@ -414,8 +423,7 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   dialogs,
 }) => {
   usarListaVazia(api);
-  api.on("POST", "/remedio", { json: { message: "Criado", data: { id: 777 } } });
-  api.on("POST", "/dose/doses", { json: { message: "Doses criadas", data: [] } });
+  api.on("POST", "/tratamento", call => respostaTratamento(call, 777));
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
@@ -426,10 +434,10 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   await expect.poll(() => dialogs.messages).toEqual(["alert: Lembrete e doses salvos com sucesso!"]);
 
   // Medicamento: método, URL, headers e body.
-  const [criarRemedio] = api.calls("POST", "/remedio");
+  const [criarRemedio] = api.calls("POST", "/tratamento");
   expect(criarRemedio.headers["authorization"]).toBe(AUTH_HEADER);
   expect(criarRemedio.headers["content-type"]).toContain("application/json");
-  expect(criarRemedio.body).toEqual({
+  expect((criarRemedio.body as { remedio: object }).remedio).toEqual({
     nome: "FUNED LORATADINA",
     quantidadeCaixa: 30,
     dataValidade: "2027-01-31",
@@ -446,23 +454,20 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   });
 
   // Doses: ID criado e horários locais 04/11 08:00, 16:00 e 05/11 00:00 (08:00 final exclusivo).
-  const [criarDoses] = api.calls("POST", "/dose/doses");
+  const [criarDoses] = api.calls("POST", "/tratamento");
   expect(criarDoses.headers["authorization"]).toBe(AUTH_HEADER);
   expect(criarDoses.headers["content-type"]).toContain("application/json");
-  expect(criarDoses.body).toEqual({
-    remedioId: 777,
-    doses: [
+  expect((criarDoses.body as { doses: string[] }).doses).toEqual([
       "2026-11-04T11:00:00.000Z",
       "2026-11-04T19:00:00.000Z",
       "2026-11-05T03:00:00.000Z",
-    ],
-  });
+  ]);
 
-  // Ordem: remédio, doses, e só depois a nova consulta de lembretes; formulário limpo.
+  // Perfil confirmado, tratamento atômico e depois recarga; formulário limpo.
   expect(api.sequence()).toEqual([
+    "GET /usuario/me", // restored profile
     "GET /dose/me", // provider no carregamento
-    "POST /remedio",
-    "POST /dose/doses",
+    "POST /tratamento",
     "GET /dose/me", // atualização após gravar
   ]);
   await expect(page.getByPlaceholder("Dipirona")).toHaveValue("");
@@ -492,19 +497,13 @@ test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutaç
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
 });
 
-test("FN-03 TEST-03 [BLOQUEADO ACHADO-T13-01] doses a partir das 21h locais mantêm o dia local correto", async ({
+test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local correto", async ({
   page,
   api,
   dialogs,
 }) => {
-  // Defeito novo (não pertence a FE-02/03/04/05/08): calcularHorariosMedicamento
-  // usa a data UTC (toISOString) com a hora LOCAL (cardCadastrar.tsx:142-153),
-  // então uma dose às 22:00 de 04/11 em America/Sao_Paulo (01:00Z de 05/11) é
-  // reconstruída como 05/11 22:00 local. Passa enquanto o defeito existir.
-  test.fail();
   usarListaVazia(api);
-  api.on("POST", "/remedio", { json: { message: "Criado", data: { id: 778 } } });
-  api.on("POST", "/dose/doses", { json: { message: "Doses criadas", data: [] } });
+  api.on("POST", "/tratamento", call => respostaTratamento(call, 778));
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
@@ -514,44 +513,34 @@ test("FN-03 TEST-03 [BLOQUEADO ACHADO-T13-01] doses a partir das 21h locais mant
   await expect.poll(() => dialogs.messages.length).toBeGreaterThan(0);
 
   // Correto: 04/11 22:00, 05/11 06:00 e 05/11 14:00 locais.
-  const [criarDoses] = api.calls("POST", "/dose/doses");
-  expect(criarDoses.body).toEqual({
-    remedioId: 778,
-    doses: [
+  const [criarDoses] = api.calls("POST", "/tratamento");
+  expect((criarDoses.body as { doses: string[] }).doses).toEqual([
       "2026-11-05T01:00:00.000Z",
       "2026-11-05T09:00:00.000Z",
       "2026-11-05T17:00:00.000Z",
-    ],
-  });
+  ]);
 });
 
-test("FN-03 FN-08 TEST-03 [BLOQUEADO FE-08] retry após falha parcial não duplica o medicamento", async ({
-  page,
-  api,
-  dialogs,
-}) => {
-  // Hoje cada clique em "Salvar lembrete" repete POST /remedio, então a nova
-  // tentativa após a falha das doses duplica o medicamento. Passa enquanto o
-  // defeito existir (test.fail).
-  test.fail();
+test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ page, api, dialogs }) => {
   usarListaVazia(api);
-  api.on("POST", "/remedio", { json: { message: "Criado", data: { id: 779 } } });
-  api.on("POST", "/dose/doses", (_call, index) =>
-    index === 0 ? { status: 500 } : { json: { message: "Doses criadas", data: [] } },
-  );
+  api.on("POST", "/tratamento", (call, index) => index === 0 ? { abort: true } : respostaTratamento(call, 779));
   await seedSession(page);
-
   await page.goto(URL_NOVO_TRATAMENTO);
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
   const salvar = page.getByRole("button", { name: "Salvar lembrete" });
   await salvar.click();
-  await expect.poll(() => dialogs.messages.length).toBeGreaterThanOrEqual(2);
+  await expect.poll(() => dialogs.messages.length).toBe(1);
   await expect(salvar).toBeEnabled();
   await salvar.click();
-  await expect.poll(() => api.calls("POST", "/dose/doses").length).toBe(2);
-
-  expect(api.calls("POST", "/remedio")).toHaveLength(1);
+  await expect.poll(() => dialogs.messages.at(-1)).toBe("alert: Lembrete e doses salvos com sucesso!");
+  const calls = api.calls("POST", "/tratamento");
+  expect(calls).toHaveLength(2);
+  expect(calls[0].headers["idempotency-key"]).toMatch(/^[a-zA-Z0-9._:-]{1,128}$/);
+  expect(calls[1].headers["idempotency-key"]).toBe(calls[0].headers["idempotency-key"]);
+  expect(calls[1].body).toEqual(calls[0].body);
+  expect(api.calls("POST", "/remedio")).toHaveLength(0);
+  expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
 });
 
 // ---------------------------------------------------------------------------
@@ -950,7 +939,7 @@ for (const status of STATUS_DE_ERRO) {
     dialogs,
   }) => {
     usarListaVazia(api);
-    api.on("POST", "/remedio", { status });
+    api.on("POST", "/tratamento", { status });
     await seedSession(page);
     await page.goto(URL_NOVO_TRATAMENTO);
     await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
@@ -959,9 +948,8 @@ for (const status of STATUS_DE_ERRO) {
     await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
     const mensagem = MENSAGEM_POR_STATUS[status];
-    // Hoje há dois avisos em sequência: o do passo e o do catch externo.
+    // Uma falha da operação atômica produz um aviso.
     await expect.poll(() => dialogs.messages).toEqual([
-      `alert: Erro ao salvar o medicamento: ${mensagem}`,
       `alert: ${mensagem}`,
     ]);
     await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
@@ -978,7 +966,7 @@ test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria dose
   dialogs,
 }) => {
   usarListaVazia(api);
-  api.on("POST", "/remedio", { abort: true });
+  api.on("POST", "/tratamento", { abort: true });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
@@ -986,7 +974,7 @@ test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria dose
 
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  await expect.poll(() => dialogs.messages.length).toBe(2);
+  await expect.poll(() => dialogs.messages.length).toBe(1);
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
   expect(dialogs.messages.join("\n")).not.toContain("sucesso");
@@ -997,16 +985,8 @@ test("FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticaç
   api,
   dialogs,
 }) => {
-  // O redirecionamento ao login e a limpeza do storage NÃO são afirmados aqui (a
-  // limpeza de sessão no 401 já é provada nos testes de GET/PUT/DELETE acima):
-  // apiRequest muda window.location
-  // e logo em seguida o cardCadastrar chama alert(), que bloqueia a aba; em ~15%
-  // das execuções a navegação é descartada e o usuário fica no formulário com a
-  // sessão já removida (achado ACHADO-T13-02, utils/api.ts:62-66 + cardCadastrar.tsx:268);
-  // o número de alerts exibidos (1 ou 2) também varia com essa corrida e, em
-  // raras execuções, a aba fica sem resposta e não pode ser inspecionada.
   usarListaVazia(api);
-  api.on("POST", "/remedio", { status: 401, json: { message: "Token expirado" } });
+  api.on("POST", "/tratamento", { status: 401, json: { message: "Token expirado" } });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
@@ -1014,24 +994,20 @@ test("FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticaç
 
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  // O 2º alert do catch externo ("Token expirado") só aparece se a navegação ao
-  // login ainda não tiver descarregado a página; por isso só o 1º é afirmado.
-  await expect
-    .poll(() => dialogs.messages[0])
-    .toBe("alert: Erro ao salvar o medicamento: Token expirado");
+  await expect(page).toHaveURL(/\/login$/);
+  await expectSemSessao(page);
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
   expect(dialogs.messages.join(" | ")).not.toContain("sucesso");
 });
 
-test("FN-07 FN-03 TEST-03 falha parcial: medicamento criado e doses 500 não anunciam sucesso", async ({
+test("FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso", async ({
   page,
   api,
   dialogs,
 }) => {
-  // Apenas caracteriza o que o usuário vê; duplicação no retry é o teste FE-08 acima.
+  // Resposta 500 da operação única: sem sucesso ou recarga.
   usarListaVazia(api);
-  api.on("POST", "/remedio", { json: { message: "Criado", data: { id: 780 } } });
-  api.on("POST", "/dose/doses", { status: 500 });
+  api.on("POST", "/tratamento", { status: 500 });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
@@ -1040,7 +1016,6 @@ test("FN-07 FN-03 TEST-03 falha parcial: medicamento criado e doses 500 não anu
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
   await expect.poll(() => dialogs.messages).toEqual([
-    "alert: Erro ao salvar as doses: Erro interno do servidor",
     "alert: Erro interno do servidor",
   ]);
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
