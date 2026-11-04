@@ -68,7 +68,9 @@ E2E_API_URL=http://localhost:3000 npm run test:e2e
 
 - Sem `E2E_API_URL`, com URL inválida ou apontando para a produção, o teste falha com uma mensagem iniciada por `BLOQUEADO:` (`tests/support/e2e.ts`). Ele não é pulado, e um caso BLOQUEADO nunca é contado como aprovado.
 - Nunca use a API de produção para testes que alteram dados nem para carga.
-- Limitação atual: o frontend ainda usa uma URL de API fixa em `src/app/utils/api.ts`. Enquanto a URL por ambiente (FE-06) não existir, os casos E2E reais não conseguem apontar o navegador para a API isolada; o `E2E_API_URL` hoje só habilita a pré-condição. Os cenários dependentes de FE-02, FE-03, FE-04, FE-05 e FE-08 seguem bloqueados conforme o test-plan.
+- O cliente usa `NEXT_PUBLIC_API_URL`, incorporada no build. Para E2E, defina também `NEXT_PUBLIC_API_ENV=isolated`, `NEXT_PUBLIC_API_URL` igual a `E2E_API_URL`, `E2E_BACKEND_COMMIT` com o SHA completo da API e `E2E_SQLITE_FILE` identificando o banco temporário em arquivo. Ausência de metadados ou configuração divergente falha com BLOQUEADO. Use `NODE_ENV=development` no backend desta revisão: `test` força banco em memória. O frontend continua sendo compilado em produção pelo Playwright.
+- Execute `CI=1 npx playwright test --project=e2e --workers=1 --retries=0` e depois `CI=1 npx playwright test --project=isolated-cors --workers=1 --retries=0` (no PowerShell, atribua `$env:CI='1'` antes do comando). CORS tem projeto próprio para não misturar provas reais com a regressão mockada. O teste 429 consome a janela de login por IP; rode-o depois do E2E ou reinicie somente o servidor descartável entre suítes.
+- [Evidência real de 04/11](../docs/evidencias/2026-11-04/execution-final.md): persistência, idempotência e isolamento aprovados nos fluxos enumerados. Alertas FE-05 e a rota de medicamentos FE-03 ainda impedem aceite integral; nenhum expected failure aprova esses comportamentos.
 - Registre versão e commit da API, contratos usados e dados criados. Remova apenas o que a própria rodada criou.
 
 ## Servidor dos testes Playwright

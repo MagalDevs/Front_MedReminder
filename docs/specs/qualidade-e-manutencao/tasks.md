@@ -1,5 +1,7 @@
 # Frontend Quality and Maintenance Tasks
 
+> Consolidacao de 04/11/2026: [resultados, commits e pendencias](../../evidencias/2026-11-04/execution-final.md). As descricoes de planejamento abaixo permanecem como contexto historico.
+
 ## Execution Protocol
 
 Ativar a skill `tlc-spec-driven` pelo nome para uma futura implementação e seguir seu fluxo Execute. Se ela não estiver disponível, interromper. Este arquivo entrega o planejamento solicitado, sem iniciar suas tarefas.
@@ -668,7 +670,7 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T27
 **Reuses**: FE-09/14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: NF-01
-**Status**: Pending
+**Status**: Parcial - coleta automatizada concluida; percurso manual de leitor de tela/contraste/zoom pendente
 
 **Done when**:
 
@@ -687,13 +689,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T28
 **Reuses**: FE-10/14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: NF-02
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Dez consultas após carga têm amostras, p95 nearest-rank, duração de carga/hash/tamanho do CSV e ambiente; comparar antes/depois; registrar meta p95<500ms como proposta preexistente.
-- [ ] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Dez consultas após carga têm amostras, p95 nearest-rank, duração de carga/hash/tamanho do CSV e ambiente; comparar antes/depois; registrar meta p95<500ms como proposta preexistente.
+- [x] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: nonfunctional: 10 consultas fixas em pelo menos 3 rodadas iguais antes/depois; não afirmar ganho por bundle ou uma medição isolada.
 **Gate**: nf — usar a linha correspondente em Gate Check Commands.
@@ -706,13 +708,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T29
 **Reuses**: FE-14; NF-WEB-04; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: NF-03
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Logs não expõem sentinelas dos fluxos corrigidos; token em storage continua limitação explícita; auditoria indisponível é bloqueio, não zero vulnerabilidades.
-- [ ] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Logs não expõem sentinelas dos fluxos corrigidos; token em storage continua limitação explícita; auditoria indisponível é bloqueio, não zero vulnerabilidades.
+- [x] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: nonfunctional: mínimo 4 cenários de logging/erro/sessão; registrar auditoria direta/transitiva separadamente.
 **Gate**: nf — usar a linha correspondente em Gate Check Commands.
@@ -725,13 +727,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T30
 **Reuses**: FE-12/14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: NF-04
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Registrar volume, amostras, mediana/máximo, duração, erros, CPU/memória disponíveis e limitações; concorrência multiusuário e cloud permanecem NÃO COMPROVADAS sem experimento próprio.
-- [ ] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Registrar volume, amostras, mediana/máximo, duração, erros, CPU/memória disponíveis e limitações; concorrência multiusuário e cloud permanecem NÃO COMPROVADAS sem experimento próprio.
+- [x] Resultado do gate nf registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: nonfunctional: datasets locais de 10/100/1000 registros, cinco execuções por volume, conforme NF-SCALE-01; medir mediana/máximo; não chamar API de produção.
 **Gate**: nf — usar a linha correspondente em Gate Check Commands.
@@ -782,13 +784,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T33
 **Reuses**: Pedido; FE-15; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-01
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Histórico simulado, sessão local, alertas em primeiro plano e contratos ausentes têm indicação clara e links às issues.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Histórico simulado, sessão local, alertas em primeiro plano e contratos ausentes têm indicação clara e links às issues.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; revisão contra fontes do código e fluxos verificados.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -801,13 +803,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T34
 **Reuses**: Pedido; FE-06/12; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-02
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Distinguir App Router/cliente/API, storage, CSV e chamadas diretas; não representar cliente central ou ambiente configurável como já concluído.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Distinguir App Router/cliente/API, storage, CSV e chamadas diretas; não representar cliente central ou ambiente configurável como já concluído.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; conferir diagramas com design.md e código do commit final.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -820,13 +822,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T35
 **Reuses**: Pedido; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-03
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Cada diretório e comando citado existe no commit documentado; testes separados por finalidade, sem renomear estrutura da aplicação.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Cada diretório e comando citado existe no commit documentado; testes separados por finalidade, sem renomear estrutura da aplicação.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; conferir árvore e links locais.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -839,13 +841,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T36
 **Reuses**: Pedido; FE-01; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-04
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Versões derivam do manifesto/lockfile final; Next15 histórico não é versão atual; framework de teste proposto só vira instalado após tarefa correspondente.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Versões derivam do manifesto/lockfile final; Next15 histórico não é versão atual; framework de teste proposto só vira instalado após tarefa correspondente.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; comparar com inventário e comandos reais.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -858,13 +860,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T37
 **Reuses**: Pedido; FE-12/13/14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-05
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Cada alegação aponta para artefato, método e commit ou NÃO COMPROVADO; separar proposta CDN/réplicas de operação real; não inferir escala do banco pelo frontend.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Cada alegação aponta para artefato, método e commit ou NÃO COMPROVADO; separar proposta CDN/réplicas de operação real; não inferir escala do banco pelo frontend.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; revisar escala local e bloqueios externos do experimento T31.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -877,13 +879,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T38
 **Reuses**: Pedido; FE-14/15; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-06
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Cada caso tem aprovado/reprovado/bloqueado, evidência e commit; cobertura não executada fica NÃO MEDIDA; defeitos conhecidos e riscos residuais são explícitos.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Cada caso tem aprovado/reprovado/bloqueado, evidência e commit; cobertura não executada fica NÃO MEDIDA; defeitos conhecidos e riscos residuais são explícitos.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documento de evidências; validar denominadores/LCOV/JSON e reconciliação issue-commit-teste.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -896,13 +898,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T39
 **Reuses**: Pedido; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: CI-01, DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06
-**Status**: Pending
+**Status**: Done (evidencias e limites em execution-final.md)
 
 **Done when**:
 
-- [ ] Todos os links locais resolvem; distinguir specs Draft de entregas executadas; orientações de reprodução e limitações acessíveis.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Todos os links locais resolvem; distinguir specs Draft de entregas executadas; orientações de reprodução e limitações acessíveis.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; revisão de links e navegação do índice.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
@@ -915,7 +917,7 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T40
 **Reuses**: FE-02/03/04/05/08/15 e API isolada; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-04
-**Status**: Pending
+**Status**: Parcial - contratos reais, persistencia e isolamento aprovados; aceite completo dos alertas FE-05 e rota FE-03 pendente
 
 **Done when**:
 

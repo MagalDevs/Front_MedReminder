@@ -1,7 +1,7 @@
 # Backend Integration Review
 
-**Verdict**: há alinhamentos de frontend a implementar. Os documentos foram incrementados; o código das aplicações não foi alterado.
-**Status**: Approved — em execução
+**Verdict**: T1–T12 implementadas e verificadas localmente; 11 E2E e 4 provas CORS passaram contra a revisão backend prevista, com SQLite temporário. [Commits, comandos e limites](../../evidencias/2026-11-04/execution-final.md). O diagnóstico abaixo preserva a baseline original; não descreve o estado do deploy.
+**Status**: Implementado e verificado localmente — produção não atestada
 **Date**: 2026-11-04, America/Sao_Paulo.
 **Frontend**: `43b05890d8a6cca1311969a6ca51a9f9decc2620`.
 **Backend**: `b6b63168ba2a092e6e6350c256bfa15483199b4a`.
@@ -15,6 +15,27 @@
 | [tasks.md](tasks.md) | 12 tarefas com dependências, testes no mesmo commit, gates e 12 checks futuros. |
 
 Este adendo complementa o [plano de manutenção](../qualidade-e-manutencao/README.md). Os 23 requisitos e 41 tarefas daquele pacote mantêm seus IDs e escopo. As correções funcionais de conexão ficam aqui; a restrição de não mudar lógica nas otimizações continua válida.
+
+## Execução do alinhamento — 2026-11-04
+
+O cliente HTTP compartilhado já lê a origem pública e preserva status, mensagens de validação e Retry-After. O trabalho corrente migra cadastro, sessão, perfil/senha, tratamento e histórico. As tabelas de lacunas e a inspeção documental abaixo descrevem a baseline identificada no cabeçalho; não são um relatório de testes da implementação atual.
+
+Configurações consome o usuário dentro de `data` após PATCH, mantém os campos permitidos e separa o resultado do perfil do resultado da senha. Um 401 na operação de senha provoca uma única consulta de perfil para distinguir senha incorreta, sessão inválida e resultado inconclusivo. O histórico lê `dose/me` autenticado sem query (lista completa do contrato legado), normaliza IDs e representa apenas `tomado:true/false`; a API não comprova um estado de adiamento.
+
+**Fronteiras não integradas (T10):** POST `/usuario/foto` permanece sem contrato de backend comprovado. O controle e a chamada legados continuam visíveis no código; nenhum teste ou mock comprova upload/persistência. Implementar, ocultar ou desabilitar essa ação continua decisão de FE-04. Não há fluxo frontend de edição de medicamento; PUT disponível no backend não significa capacidade entregue na interface. Quantidades/intervalos mantêm sua semântica anterior; a migração de transporte não é uma decisão clínica.
+
+As suítes locais de perfil e histórico estão em `tests/integration/backend-profile.test.tsx` e `backend-history.test.tsx`; usam o cliente real com respostas sintéticas. O cenário `tests/functional/backend-history.spec.ts` também usa API controlada e identifica explicitamente esse limite. Nenhuma dessas suítes comprova atomicidade, persistência ou CORS real.
+
+As provas reais estão separadas: `npx playwright test --project=isolated-cors --grep BEAPI-10` executa quatro casos contra a API efetiva, e `npm run test:e2e -- --grep BEAPI-12` executa cadastro A/B, login, perfil, senha, tratamento, replay/conflito, isolamento e confirmação com recarga. Sem ambiente identificado esses gates falham como **BLOQUEADO**, sem skip e sem usar mocks como substituição. O projeto funcional padrão ignora apenas `backend-cors.spec.ts` para preservar a distinção entre regressão controlada e conexão real.
+
+Pré-condições para esses comandos:
+
+- API descartável iniciada com o `configureApp`/CORS do backend, migrações aplicadas e SQLite temporário em arquivo. Destruir o ambiente após a execução; não apontar para produção nem reutilizar dados de pessoas.
+- `E2E_API_URL` e `NEXT_PUBLIC_API_URL` com a mesma origem da API isolada; `NEXT_PUBLIC_API_ENV=isolated`. Essas variáveis precisam existir **antes do build**, inclusive no servidor iniciado pelo Playwright.
+- `E2E_BACKEND_COMMIT` com SHA completo e `E2E_SQLITE_FILE` identificando o arquivo temporário. São metadados declarados pelo operador; os testes não inspecionam o filesystem remoto nem comprovam a revisão implantada por essa declaração isoladamente.
+- A origem frontend `http://localhost:3001` permitida pelo CORS efetivo. O teste de origem negada abre uma origem local efêmera distinta. Configurar o rate limit isolado para produzir 429 em até 30 tentativas sintéticas de login e expor Retry-After; esse caso deve rodar por último para não contaminar os demais fluxos.
+
+Os testes reais não interceptam endpoints da API e desativam traces, que poderiam armazenar credenciais sintéticas. O anexo de revisão contém somente revisões, campos comparados e limites da prova. A comparação não atesta DTOs opacos/paginação não exercitados; esses limites permanecem explícitos até reconciliação completa com as fontes reais.
 
 ## Confirmed Gaps
 

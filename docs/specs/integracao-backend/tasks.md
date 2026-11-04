@@ -1,5 +1,7 @@
 # Backend Integration Tasks
 
+> Consolidacao de 04/11/2026: [resultados, commits e pendencias](../../evidencias/2026-11-04/execution-final.md). As descricoes de planejamento abaixo permanecem como contexto historico.
+
 ## Execution Protocol
 
 Ativar `tlc-spec-driven` pelo nome numa implementação futura e seguir seu fluxo Execute. Este pedido autoriza somente verificação e incremento dos docs. Não iniciar estas tarefas nem criar commits de implementação nesta rodada.
@@ -33,7 +35,7 @@ Comandos `test:*` são planejados no pacote de manutenção, **não disponíveis
 | quick | Cliente e fixtures | `npm run test:unit -- -t BEAPI` |
 | full | Formulários e providers | `npm run test:unit -- -t BEAPI` e `npm run test:integration -- -t BEAPI`, selecionando os casos entregues na tarefa |
 | full-functional | Histórico com integração e navegador | Gate full mais `npm run test:functional -- --grep BEAPI-09` |
-| functional | Smoke de conexão em navegador | `npm run test:functional -- --grep BEAPI-10` com servidor isolado pronto |
+| functional | Smoke de conexão em navegador | `npx playwright test --project=isolated-cors --grep BEAPI-10` com servidor isolado pronto |
 | e2e | Aceite integrado final | `npm run test:e2e -- --grep BEAPI` com API isolada e SQLite temporário em arquivo |
 | manual | Documentação | Conferir fontes, estado, links e evidências; registrar o resultado |
 
@@ -86,7 +88,7 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: None
 **Requirement**: BEAPI-12
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Done (fontes: design.md; backend indisponível localmente — paridade real em T12)
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
@@ -124,13 +126,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T2
 **Requirement**: BEAPI-01, BEAPI-02, BEAPI-12
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Enviar somente os campos existentes do CreateUsuarioDto, dataNasc YYYY-MM-DD, CPF/CEP normalizados e senha sem trim; exibir array de validação/429 sem depender de códigos dentro de strings; sem logs de payload.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Enviar somente os campos existentes do CreateUsuarioDto, dataNasc YYYY-MM-DD, CPF/CEP normalizados e senha sem trim; exibir array de validação/429 sem depender de códigos dentro de strings; sem logs de payload.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration: mínimo 4 cenários de cadastro, validação array, rate limit e indisponibilidade; sem fixture de senha fraca como sucesso.
 **Gate**: full — Gate Check Commands.
@@ -143,13 +145,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T3
 **Requirement**: BEAPI-03
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Token ausente não faz consulta privada; perfil válido preenche usuário; 401 invalida sessão mesmo com corpo ilegível; rede/503 não é apresentado como autenticação confirmada nem token comprovadamente inválido; logout impede resposta atrasada de restaurar a conta.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Token ausente não faz consulta privada; perfil válido preenche usuário; 401 invalida sessão mesmo com corpo ilegível; rede/503 não é apresentado como autenticação confirmada nem token comprovadamente inválido; logout impede resposta atrasada de restaurar a conta.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration: mínimo 6 casos de ausência/válido/expirado/rede/logout/resposta atrasada.
 **Gate**: full — Gate Check Commands.
@@ -162,13 +164,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T4
 **Requirement**: BEAPI-04
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Zero GET dose/me enquanto sessão ausente/carregando; buscar após confirmação; limpar listas e descartar resposta anterior em logout/troca de usuário; consumir campos efetivos de remedio parcial. Não declarar cancelamento de timers do alerta concluído por esta tarefa.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Zero GET dose/me enquanto sessão ausente/carregando; buscar após confirmação; limpar listas e descartar resposta anterior em logout/troca de usuário; consumir campos efetivos de remedio parcial. Não declarar cancelamento de timers do alerta concluído por esta tarefa.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration: mínimo 5 casos de mount público, loading, sessão válida, logout e resposta A após login B.
 **Gate**: full — Gate Check Commands.
@@ -181,13 +183,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T5
 **Requirement**: BEAPI-02, BEAPI-05, BEAPI-06
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Não apagar nome/email/CEP após envelope correto; DTO de perfil não recebe cpf/cuidador/senha; CEP vazio submetido continua recebendo 400 conforme contrato, exibe a validação e não anuncia sucesso. Não omitir nem apagar esse campo por suposição; mudar essa semântica fica fora da tarefa. Distinguir 400/401/409/429 por status. Em senha401, revalidar GET usuario/me antes de classificar a sessão; perfil200 preserva credencial, perfil401 invalida, erro de rede/503 mantém resultado inconclusivo. Resultado parcial perfil/senha não anuncia sucesso integral nem rollback inexistente.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Não apagar nome/email/CEP após envelope correto; DTO de perfil não recebe cpf/cuidador/senha; CEP vazio submetido continua recebendo 400 conforme contrato, exibe a validação e não anuncia sucesso. Não omitir nem apagar esse campo por suposição; mudar essa semântica fica fora da tarefa. Distinguir 400/401/409/429 por status. Em senha401, revalidar GET usuario/me antes de classificar a sessão; perfil200 preserva credencial, perfil401 invalida, erro de rede/503 mantém resultado inconclusivo. Resultado parcial perfil/senha não anuncia sucesso integral nem rollback inexistente.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration: mínimo 8 casos com perfil atualizado, CEP inválido, senha válida/fraca/incorreta, token expirado, 409, 429 e perfil salvo antes de falha na senha.
 **Gate**: full — Gate Check Commands.
@@ -200,13 +202,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T6
 **Requirement**: BEAPI-08
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Null/vazio/1001 doses/duplicidade por instante/data inválida não enviam mutação; 1 e 1000 válidos prosseguem; ISO preserva timezone; validar DTO sem alterar cálculo de horários ou decidir nova semântica de quantidadeDiaria/quantidadeDias.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Null/vazio/1001 doses/duplicidade por instante/data inválida não enviam mutação; 1 e 1000 válidos prosseguem; ISO preserva timezone; validar DTO sem alterar cálculo de horários ou decidir nova semântica de quantidadeDiaria/quantidadeDias.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: unit/integration: mínimo 8 fronteiras; tabela fixa de datas/instantes, incluindo offsets diferentes do mesmo instante.
 **Gate**: full — Gate Check Commands.
@@ -219,13 +221,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T7
 **Requirement**: BEAPI-07, BEAPI-08
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Uma confirmação válida faz uma operação de escrita; resposta confirmada dispara sucesso/recarga; reenvio explícito da mesma intenção conserva chave/conteúdo; alteração de conteúdo exige nova intenção; 409/503 não geram sucesso. Não reutilizar chave entre contas nem fragmentar lote; nenhum retry automático.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Uma confirmação válida faz uma operação de escrita; resposta confirmada dispara sucesso/recarga; reenvio explícito da mesma intenção conserva chave/conteúdo; alteração de conteúdo exige nova intenção; 409/503 não geram sucesso. Não reutilizar chave entre contas nem fragmentar lote; nenhum retry automático.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration: mínimo 6 casos de payload/header, sucesso, resposta incerta, reenvio mesma chave, conflito409 e indisponibilidade503; persistência/atomicidade real só em T12.
 **Gate**: full — Gate Check Commands.
@@ -238,13 +240,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T8
 **Requirement**: BEAPI-01, BEAPI-09
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Registros derivam de id/data_dose/tomado/remedio do usuário; tomado true/false não inventa adiamento; vazio/erro/carregamento preservam resultados honestos; filtros trabalham nos dados reais e IDs são normalizados na fronteira. Se escolher query paginada, consumir todas as páginas necessárias ou declarar a página, sem truncamento oculto.
-- [ ] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Registros derivam de id/data_dose/tomado/remedio do usuário; tomado true/false não inventa adiamento; vazio/erro/carregamento preservam resultados honestos; filtros trabalham nos dados reais e IDs são normalizados na fronteira. Se escolher query paginada, consumir todas as páginas necessárias ou declarar a página, sem truncamento oculto.
+- [x] Gate full aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: integration/functional: mínimo 5 cenários de dados, vazio,401,500, filtros e confirmação/reload; isolamento real em T12.
 **Gate**: full-functional — Gate Check Commands; integração e cenário funcional BEAPI-09 executados antes do commit.
@@ -257,13 +259,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T9
 **Requirement**: BEAPI-11
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Não atestar foto ou edição como integradas; não criar contrato/armazenamento nem retirar controles por decisão implícita. A escolha de implementar/ocultar/desabilitar foto continua em especificação própria de FE-04; resultados existentes permanecem datados.
-- [ ] Gate manual aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Não atestar foto ou edição como integradas; não criar contrato/armazenamento nem retirar controles por decisão implícita. A escolha de implementar/ocultar/desabilitar foto continua em especificação própria de FE-04; resultados existentes permanecem datados.
+- [x] Gate manual aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: none, documentação; conferir controller atual e inventário das chamadas.
 **Gate**: manual — Gate Check Commands.
@@ -276,13 +278,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T10
 **Requirement**: BEAPI-10
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Origem permitida lê respostas/Retry-After e envia Authorization/Content-Type/Idempotency-Key; origem negada recebe bloqueio CORS; Bearer ausente/inválido permanece rejeitado. Não implementar CORS novamente: usar configureApp/corsOptions atuais. O teste existente backend test/m13-cors.browser.cjs pode ser reutilizado como evidência complementar.
-- [ ] Gate functional aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Origem permitida lê respostas/Retry-After e envia Authorization/Content-Type/Idempotency-Key; origem negada recebe bloqueio CORS; Bearer ausente/inválido permanece rejeitado. Não implementar CORS novamente: usar configureApp/corsOptions atuais. O teste existente backend test/m13-cors.browser.cjs pode ser reutilizado como evidência complementar.
+- [x] Gate functional aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: functional: mínimo 4 casos de origem permitida/negada, preflight completo e header exposto; registrar frontend/backend/config.
 **Gate**: functional — Gate Check Commands.
@@ -295,13 +297,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T11
 **Requirement**: BEAPI-10, BEAPI-12
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done (gates locais e evidencia real em execution-final.md)
 
 **Done when**:
 
-- [ ] Cadastro/login/perfil/senha/tratamento/histórico/confirmar/reload e isolamento A/B têm resultados por caso; SQLite em arquivo temporário para tratamento; replay mesma chave não duplica registros e mesma chave/outro conteúdo retorna409; guardar evidências sanitizadas e comparar fixtures com respostas reais. Ambiente/contratos indisponíveis são BLOQUEADO, não aprovação.
-- [ ] Gate e2e aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Cadastro/login/perfil/senha/tratamento/histórico/confirmar/reload e isolamento A/B têm resultados por caso; SQLite em arquivo temporário para tratamento; replay mesma chave não duplica registros e mesma chave/outro conteúdo retorna409; guardar evidências sanitizadas e comparar fixtures com respostas reais. Ambiente/contratos indisponíveis são BLOQUEADO, não aprovação.
+- [x] Gate e2e aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: e2e: mínimo 8 cenários; executar somente com origem isolada verificada e limpar apenas dados da rodada.
 **Gate**: e2e — Gate Check Commands.
@@ -339,7 +341,7 @@ Proof: `npm run test:integration -- -t BEAPI-08`
 Proof: `npm run test:integration -- -t BEAPI-09`
 
 **C10** - Navegador comprova origem, preflight e headers no ambiente identificado. (BEAPI-10, AC 2).
-Proof: `npm run test:functional -- --grep BEAPI-10`
+Proof: `npx playwright test --project=isolated-cors --grep BEAPI-10`
 
 **C11** - Foto sem contrato não aparece como integração aprovada. (BEAPI-11, AC 3).
 Proof: walk - conferir controller de usuário e registro explícito da indisponibilidade em README.md; nenhum resultado de upload aprovado
