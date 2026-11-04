@@ -1,0 +1,4 @@
+/* Screenshot-only normalization: native AM/PM affects intrinsic flex min-width. */
+input[type="time"] {
+  min-width: 7rem !important;
+}

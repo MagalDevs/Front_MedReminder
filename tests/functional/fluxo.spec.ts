@@ -1044,6 +1044,7 @@ for (const viewport of VIEWPORTS) {
         fullPage: true,
         animations: "disabled",
         mask,
+        stylePath: nome === "novo-medicamento" ? "tests/functional/native-controls.css" : undefined,
       });
     }
 
