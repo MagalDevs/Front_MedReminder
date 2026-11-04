@@ -167,17 +167,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T2
 **Reuses**: FE-01/07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, CI-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Instalação limpa respeita peers; lockfile é regenerado pelo npm como parte do mesmo entregável; comandos não permitem sucesso com zero testes e não usam instalação global.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Instalação limpa respeita peers; lockfile é regenerado pelo npm como parte do mesmo entregável; comandos não permitem sucesso com zero testes e não usam instalação global.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, configuração; npm ci e conferência dos scripts/devDependencies/lockfile; a rejeição de seleção vazia pertence aos harnesses que a tornam executável em T4/T5.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(test): declare test toolchain and commands`
+
+**Execution note**: 2026-11-04. Instalado com `npm install -D` (sem --force/--legacy-peer-deps): vitest 5.1.0, @vitest/coverage-v8 5.1.0, @vitejs/plugin-react 6.2.1, jsdom 30.1.3, @testing-library/react 16.3.3, @testing-library/dom 10.4.2, @testing-library/jest-dom 7.0.1, @testing-library/user-event 14.6.8, @playwright/test 1.64.1 (vite 8.3.5 entra como dependência transitiva de vitest/plugin-react; vite-tsconfig-paths não foi necessário, o alias `@/` vai por `resolve.alias` em T4). Decisão de runtime: `engines.node` = `^22.22.2 || ^24.15.0 || >=26.0.0`. O Next 16 exige apenas Node >=20.9 (Context7, docs do Next 16), mas vitest 5 (^22.12 || ^24 || >=26), jsdom 30 (^22.22.2 || ^24.15 || >=26) e jest-dom 7 (>=22) exigem Node 22+; o runtime verificado é Node v26.8.1/npm 11.19.0. Peer conflitante: vitest 5 declara `@types/node` ^22 || >=24 e o projeto tinha ^20, o que gerava ERESOLVE; `@types/node` subiu para ^22 (22.20.5), alinhado ao runtime mínimo e sem force (T22 ainda revisa esse pacote). Lockfile regenerado pelo npm no mesmo commit: 120 pacotes adicionados e 4 mudanças de versão por resolução (@types/node 22.20.5, undici-types 6.21.0, nanoid 3.3.20, source-map-js 1.2.2 — este último fecha o advisory high do inventário). `npm ci` limpo OK (após parar o `next dev` que travava lightningcss com EPERM). Gate build: `tsc --noEmit` OK, `npm run build` OK, `npm run lint` roda e mantém os 10 achados preexistentes (8 erros, 2 avisos; exit 1) de T2. Os scripts `test:*` existem, mas as suítes são criadas em T4/T5; `test:integration` e `test:regression` falham até haver testes de integração (T8), por desenho (sem passWithNoTests). Nenhum teste aplicável.
 
 ### T4: Configurar Vitest e isolamento dos testes
 

@@ -2,11 +2,21 @@
   "name": "front_medreminder",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "test:unit": "vitest run tests/unit --reporter=verbose",
+    "test:integration": "vitest run tests/integration --reporter=verbose",
+    "test:functional": "playwright test --project=functional",
+    "test:e2e": "playwright test --project=e2e",
+    "test:nonfunctional": "playwright test --project=nonfunctional",
+    "test:coverage": "vitest run tests/unit tests/integration --coverage --reporter=verbose",
+    "test:regression": "npm run test:unit && npm run test:integration && npm run test:functional"
   },
   "dependencies": {
     "lucide-react": "^0.511.0",
@@ -19,15 +29,24 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/node": "^22.20.5",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-input-mask": "^3.0.6",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "jsdom": "^30.1.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   }
 }
