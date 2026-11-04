@@ -1,0 +1,226 @@
+Command: npx --no-install vitest run tests/unit/api.test.ts --reporter=verbose
+Exit code: 0
+
+ RUN  v5.1.0 <repo>
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > usa fallback sem mensagem no JSON
+API Error: { endpoint: '/fixture', status: 400, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza message > error > errors
+API Error: {
+  endpoint: '/fixture',
+  status: 400,
+  statusText: '',
+  data: {
+    message: 'Mensagem prioritária',
+    error: 'Erro secundário',
+    errors: [ 'Terceiro' ]
+  }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza error > errors (message inválido)
+API Error: {
+  endpoint: '/fixture',
+  status: 400,
+  statusText: '',
+  data: { message: 42, error: 'Erro prioritário', errors: [ 'Terceiro' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza errors (message/error inválidos)
+API Error: {
+  endpoint: '/fixture',
+  status: 400,
+  statusText: '',
+  data: { message: null, error: {}, errors: [ [Object], 'Outro campo' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > usa fallback sem mensagem no JSON
+API Error: { endpoint: '/fixture', status: 403, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza message > error > errors
+API Error: {
+  endpoint: '/fixture',
+  status: 403,
+  statusText: '',
+  data: {
+    message: 'Mensagem prioritária',
+    error: 'Erro secundário',
+    errors: [ 'Terceiro' ]
+  }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza error > errors (message inválido)
+API Error: {
+  endpoint: '/fixture',
+  status: 403,
+  statusText: '',
+  data: { message: 42, error: 'Erro prioritário', errors: [ 'Terceiro' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza errors (message/error inválidos)
+API Error: {
+  endpoint: '/fixture',
+  status: 403,
+  statusText: '',
+  data: { message: null, error: {}, errors: [ [Object], 'Outro campo' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > usa fallback sem mensagem no JSON
+API Error: { endpoint: '/fixture', status: 404, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza message > error > errors
+API Error: {
+  endpoint: '/fixture',
+  status: 404,
+  statusText: '',
+  data: {
+    message: 'Mensagem prioritária',
+    error: 'Erro secundário',
+    errors: [ 'Terceiro' ]
+  }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza error > errors (message inválido)
+API Error: {
+  endpoint: '/fixture',
+  status: 404,
+  statusText: '',
+  data: { message: 42, error: 'Erro prioritário', errors: [ 'Terceiro' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza errors (message/error inválidos)
+API Error: {
+  endpoint: '/fixture',
+  status: 404,
+  statusText: '',
+  data: { message: null, error: {}, errors: [ [Object], 'Outro campo' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > usa fallback sem mensagem no JSON
+API Error: { endpoint: '/fixture', status: 429, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza message > error > errors
+API Error: {
+  endpoint: '/fixture',
+  status: 429,
+  statusText: '',
+  data: {
+    message: 'Mensagem prioritária',
+    error: 'Erro secundário',
+    errors: [ 'Terceiro' ]
+  }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza error > errors (message inválido)
+API Error: {
+  endpoint: '/fixture',
+  status: 429,
+  statusText: '',
+  data: { message: 42, error: 'Erro prioritário', errors: [ 'Terceiro' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza errors (message/error inválidos)
+API Error: {
+  endpoint: '/fixture',
+  status: 429,
+  statusText: '',
+  data: { message: null, error: {}, errors: [ [Object], 'Outro campo' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > usa fallback sem mensagem no JSON
+API Error: { endpoint: '/fixture', status: 500, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza message > error > errors
+API Error: {
+  endpoint: '/fixture',
+  status: 500,
+  statusText: '',
+  data: {
+    message: 'Mensagem prioritária',
+    error: 'Erro secundário',
+    errors: [ 'Terceiro' ]
+  }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza error > errors (message inválido)
+API Error: {
+  endpoint: '/fixture',
+  status: 500,
+  statusText: '',
+  data: { message: 42, error: 'Erro prioritário', errors: [ 'Terceiro' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza errors (message/error inválidos)
+API Error: {
+  endpoint: '/fixture',
+  status: 500,
+  statusText: '',
+  data: { message: null, error: {}, errors: [ [Object], 'Outro campo' ] }
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 erro em texto usa fallback do status
+API Error: {
+  endpoint: '/fixture',
+  status: 500,
+  statusText: '',
+  data: 'corpo textual'
+}
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-06 TEST-01 401 autenticado limpa sessão e redireciona para /login
+API Error: { endpoint: '/dose/me', status: 401, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-06 TEST-01 401 público rejeita preservando sessão e navegação
+API Error: { endpoint: '/auth/login', status: 401, statusText: '', data: {} }
+
+stderr | tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-07 TEST-01 HTTP 200 com success:false rejeita a mensagem
+Server returned message in successful response: falha
+
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-01 TEST-01 normaliza a barra em dose/me e preserva opções 9ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-01 TEST-01 normaliza a barra em /dose/me e preserva opções 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-02 TEST-01 envia Bearer quando autenticação padrão encontra token 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-02 TEST-01 sem token obrigatório rejeita antes de chamar fetch 2ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-02 TEST-01 chamada pública não adiciona Bearer (token presente: false) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-02 TEST-01 chamada pública não adiciona Bearer (token presente: true) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 Content-Type padrão de GET 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 Content-Type padrão de POST 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 Content-Type padrão de PUT 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 Content-Type padrão de PATCH 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 preserva Content-Type explícito em GET 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 preserva Content-Type explícito em POST 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 preserva Content-Type explícito em PUT 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-03 TEST-01 preserva Content-Type explícito em PATCH 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-04 TEST-01 devolve objeto JSON com charset 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-04 TEST-01 devolve texto sem transformar o conteúdo 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > usa fallback sem mensagem no JSON 2ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza message > error > errors 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza error > errors (message inválido) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 400 (Requisição inválida) > prioriza errors (message/error inválidos) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > usa fallback sem mensagem no JSON 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza message > error > errors 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza error > errors (message inválido) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 403 (Acesso negado) > prioriza errors (message/error inválidos) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > usa fallback sem mensagem no JSON 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza message > error > errors 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza error > errors (message inválido) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 404 (Recurso não encontrado) > prioriza errors (message/error inválidos) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > usa fallback sem mensagem no JSON 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza message > error > errors 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza error > errors (message inválido) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 429 (Muitas requisições. Tente novamente mais tarde) > prioriza errors (message/error inválidos) 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > usa fallback sem mensagem no JSON 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza message > error > errors 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza error > errors (message inválido) 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 HTTP 500 (Erro interno do servidor) > prioriza errors (message/error inválidos) 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-05 TEST-01 erro em texto usa fallback do status 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-06 TEST-01 401 autenticado limpa sessão e redireciona para /login 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-06 TEST-01 401 público rejeita preservando sessão e navegação 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-07 TEST-01 HTTP 200 com success:false rejeita a mensagem 1ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-07 TEST-01 preserva sucesso HTTP 200: {"message":"ok","success":true} 0ms
+ ✓ |unit| tests/unit/api.test.ts > apiRequest real — TEST-01 > UT-07 TEST-01 preserva sucesso HTTP 200: {"message":"Login concluído","access_token":"token-sintetico"} 0ms
+
+ Test Files  1 passed (1)
+      Tests  42 passed (42)
+   Start at  15:39:47
+   Duration  1.73s (environment 78%, setup 17%, tests 3%, transform 1%, import 1%)
+
+

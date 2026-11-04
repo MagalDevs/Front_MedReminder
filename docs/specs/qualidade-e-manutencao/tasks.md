@@ -251,13 +251,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T6
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Cobrir todos os UT de apiRequest do test-plan, incluindo headers, JSON/texto, auth opcional/obrigatória, status e erro em HTTP 200; expectativas são tabelas de entradas/saídas.
-- [ ] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Cobrir todos os UT de apiRequest do test-plan, incluindo headers, JSON/texto, auth opcional/obrigatória, status e erro em HTTP 200; expectativas são tabelas de entradas/saídas.
+- [x] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit: todos os casos API do plano; mínimo 12 asserts de resultados em casos nomeados.
 **Gate**: quick — usar a linha correspondente em Gate Check Commands.
