@@ -22,3 +22,16 @@ Execução: 2026-11-04, America/Sao_Paulo. Base: `537bfaa` (`test(functional): c
 Fontes consultadas: Context7 `/vercel/next.js` (atualização por minor e compatibilidade ESLint 9); [release v16.4.5](https://github.com/vercel/next.js/releases/tag/v16.4.5), com correções de cache, SVG e runtime Edge; advisories de origem no inventário T1, especialmente [RCE em Image Optimization](https://github.com/advisories/GHSA-2464-fhr4-w9xw) e [RCE em use cache](https://github.com/advisories/GHSA-673q-mjm6-r5xr). A versão 16.4.5 fica fora dos intervalos vulneráveis registrados. A resolução normal também elevou `sharp` 0.35.4 → 0.35.5 e seus binários/libvips, corrigindo o [advisory transitivo](https://github.com/advisories/GHSA-wq5f-xc86-pv6w). Somente Next, suas ferramentas/binários e sharp mudaram de versão no lockfile. Nenhuma ação no PR #53.
 
 Gates T14: `npm ci` 0; `eslint .` 1 com os mesmos 10 achados da baseline (saída integral idêntica); `tsc --noEmit` 0; build 0; regressão 0 — 70 unitários, 50 integrações + 8 expected fail e 52 funcionais, 12 snapshots preservados. Tempos: ci 34,4s, lint 5,5s, tipos 4,5s, build 13,3s, regressão 25,6s.
+
+## T15 — React e tipagens
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| react | 19.3.0 | 19.3.1 | Atualizar patch. |
+| react-dom | 19.3.0 | 19.3.1 | Atualizar junto com React. |
+| @types/react | 19.3.0 | 19.3.0 | Manter latest; explicitar a versão mínima já instalada. |
+| @types/react-dom | 19.3.0 | 19.3.0 | Manter latest; explicitar a versão mínima já instalada. |
+
+Fontes: Context7 `/react/react/v19.3.1`; [release 19.3.1](https://github.com/react/react/releases/tag/v19.3.1) (melhoria do protocolo de transporte de Server Components); `npm view` confirmou as quatro versões e os peers. A instalação normal resolveu os peers de Next 16.4.5 sem exceções. Sessão, formulários, hidratação/navegação, busca, dose e capturas permanecem cobertos pelas mesmas suítes.
+
+Gates T15: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.

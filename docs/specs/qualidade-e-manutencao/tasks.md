@@ -405,17 +405,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T14
 **Reuses**: FE-01/07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Peers resolvidos sem force; providers, inputs, hidratação e navegação mantêm o comportamento; lockfile acompanha o manifesto.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Peers resolvidos sem force; providers, inputs, hidratação e navegação mantêm o comportamento; lockfile acompanha o manifesto.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration/functional: sessão, formulários, busca, dose e capturas de regressão.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps): update compatible React group`
+
+**Execution note**: 2026-11-04. Decisão por pacote, fontes e resultado dos gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md). `npm ci`, tipos, build e regressão: exit 0; lint: exit 1, mesmos 10 achados preexistentes, sem aumento. Seleção preservada: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais, 12 snapshots.
 
 ### T16: Atualizar react-datepicker
 

@@ -22,9 +22,9 @@
     "lucide-react": "^0.511.0",
     "next": "16.4.5",
     "papaparse": "^5.7.0",
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "react-datepicker": "^8.3.0",
-    "react-dom": "^19.3.0",
+    "react-dom": "^19.3.1",
     "react-input-mask": "^2.0.4"
   },
   "devDependencies": {
@@ -37,8 +37,8 @@
     "@testing-library/user-event": "^14.6.8",
     "@types/node": "^22.20.5",
     "@types/papaparse": "^5.5.2",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@types/react-input-mask": "^3.0.6",
     "@vitejs/plugin-react": "^6.2.1",
     "@vitest/coverage-v8": "^5.1.0",
