@@ -346,13 +346,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T11
 **Reuses**: FE-05/07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-01, TEST-02
-**Status**: Pending
+**Status**: Done (4 cenários FE-05 registrados como it.fails)
 
 **Done when**:
 
-- [ ] Verificar agora/fim do dia, filtros, PUT tomado e recarga; doses simultâneas/limpeza de timers ficam como achados FE-05 quando falharem, sem alterar lifecycle.
-- [ ] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Verificar agora/fim do dia, filtros, PUT tomado e recarga; doses simultâneas/limpeza de timers ficam como achados FE-05 quando falharem, sem alterar lifecycle.
+- [x] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration: UT-11 e mínimo 7 cenários integrados; timer cleanup no próprio teste, sem skip de falhas do produto.
 **Gate**: full — usar a linha correspondente em Gate Check Commands.
