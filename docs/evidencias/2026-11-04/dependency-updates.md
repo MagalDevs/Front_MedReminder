@@ -47,3 +47,15 @@ Fontes: Context7 `/hacker0x01/react-datepicker`; [release 8.10.0](https://github
 Inspeção de todos os `.ts/.tsx` em `src/`: nenhum import/uso de Datepicker ou CSS do pacote; o formulário usa `input` nativo. Assim, os testes verificam o contrato real das datas, não certificam a API de um calendário inexistente. Cenários existentes preservados: UT-13 início/intervalo/limite exclusivo; IT-05 payload com validade/unidades/cor; IT-05 opcionais vazios; FN-03 payload de tratamento válido e validade `2027-01-31`. O caso noturno `ACHADO-T13-01` continua expected fail, sem alteração. Locale e aparência dos campos nativos permanecem nos snapshots.
 
 Gates T16: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T17 — lucide-react
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| lucide-react | 0.511.0 | 0.511.0 | Mantido; 1.68.0 bloqueado: major exige escopo próprio. |
+
+Fontes: Context7 `/lucide-icons/lucide`, [migração React v0 → v1](https://github.com/lucide-icons/lucide/blob/main/docs/guide/react/migration.md) e [mudanças v1](https://github.com/lucide-icons/lucide/blob/main/docs/guide/version-1.md); `npm view lucide-react version`, `npm view lucide-react@0 version` e `npm view lucide-react@~0.511.0 version`. Não há patch posterior na linha 0.511; 0.577.0 é outra linha pré-1.0, fora de `^0.511.0`, e não foi adotada como atualização compatível implícita. A v1 remove ícones de marcas e altera `aria-hidden` padrão; a avaliação de acessibilidade e da coleção nova fica em migração própria. Não se alega regressão de uma versão não instalada. Sem advisory direto registrado.
+
+Inventário dos imports atuais: `Bell`, `Pill`, `X` em AlarmeDose/Lembrete; `Loader2` em CardCadastrar; `Menu`, `X`, `User`, `LogOut` em Sidebar; `User`, `Settings`, `LogOut` na home. Nenhum ícone de marca é usado, mas a política permite manter a major para escopo próprio. Os rótulos e a geometria atuais ficam preservados; gate da árvore idêntica T16 (`e64cff2`) cobre controles, navegação e os 12 snapshots em 360/768/1440px. Manifesto e lockfile não mudam nesta decisão.
+
+Gates T17 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
