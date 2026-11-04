@@ -64,8 +64,9 @@ export default function BuscaMedicamento({
 
   useEffect(() => {
     if (searchTerm.length > 0) {
+      const lowerTerm = searchTerm.toLowerCase();
       const results = medicamentos.filter((med) =>
-        med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase()),
+        med.NOME_PRODUTO?.toLowerCase().includes(lowerTerm),
       );
       setFiltered(results);
     } else {

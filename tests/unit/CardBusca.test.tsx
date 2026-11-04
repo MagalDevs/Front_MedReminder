@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import Papa from 'papaparse';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import BuscaMedicamento from '@/app/components/CardBusca/cardBusca';
 
@@ -20,11 +21,11 @@ DIP 12,décimo segundo
 Sem Descrição,
 `;
 
-async function mount(medicamentoInicial?: string) {
+async function mount(medicamentoInicial?: string, csv: string = CSV) {
   const onSelect = vi.fn();
   const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
     expect(url).toBe('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv');
-    return new Response(CSV);
+    return new Response(csv);
   });
   vi.stubGlobal('fetch', fetchMock);
   await act(async () => {
@@ -155,5 +156,98 @@ describe('CardBusca — UT-14 CODE-02 TEST-01 DEP-03', () => {
     expect(onSelect).toHaveBeenCalledExactlyOnceWith({
       NOME_PRODUTO: 'Sem Descrição', DESCRIÇÃO: '',
     });
+  });
+});
+
+// IT-09: dataset fixo com entradas que divergiriam se o termo fosse aparado ou sem acentos.
+const CSV_EQUIV = `NOME_PRODUTO,DESCRIÇÃO
+Dipirona Sódica,analgésico
+ dip Espaço ,nome com espaço inicial
+Ácido Fólico,vitamina
+Acido Sintetico,sem acento
+ÁCIDO ÚRICO,maiúsculo
+Cloreto Sintético,sal
+`;
+
+type Row = { NOME_PRODUTO: string; DESCRIÇÃO: string };
+const EQUIV_ROWS = Papa.parse<Row>(CSV_EQUIV, { header: true, skipEmptyLines: true }).data;
+
+// Cópia literal da expressão de filtro anterior à T24 (termo em minúsculas por item).
+function legacyNames(term: string) {
+  return EQUIV_ROWS
+    .filter((med) => med.NOME_PRODUTO?.toLowerCase().includes(term.toLowerCase()))
+    .slice(0, 10)
+    .map((med) => med.NOME_PRODUTO.trim());
+}
+
+describe('CardBusca — IT-09 CODE-02 equivalência da otimização', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-04T12:00:00-03:00'));
+  });
+
+  const CASES: [string, string[]][] = [
+    ['DIP', ['Dipirona Sódica', 'dip Espaço']],
+    ['dip', ['Dipirona Sódica', 'dip Espaço']],
+    [' dip', ['dip Espaço']], // com trim, "Dipirona Sódica" também apareceria
+    ['dip ', ['dip Espaço']], // espaço final continua significativo
+    ['ácido', ['Ácido Fólico', 'ÁCIDO ÚRICO']],
+    ['ÁCIDO', ['Ácido Fólico', 'ÁCIDO ÚRICO']],
+    ['acido', ['Acido Sintetico']], // com accent folding apareceriam três itens
+    ['ACIDO', ['Acido Sintetico']],
+    ['xyz', []],
+  ];
+
+  it.each(CASES)('IT-09 CODE-02 TEST-01 termo %j mantém nomes, ordem e equivale ao filtro anterior', async (term, expected) => {
+    const { input, onSelect } = await mount(undefined, CSV_EQUIV);
+    search(input, term);
+    expect(names()).toEqual(expected);
+    expect(names()).toEqual(legacyNames(term));
+    expect(input).toHaveValue(term); // termo original não é alterado nem aparado
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('IT-09 CODE-02 TEST-01 termos alternados e limpeza não reutilizam resultado anterior', async () => {
+    const { input, onSelect } = await mount(undefined, CSV_EQUIV);
+    search(input, 'dip');
+    expect(names()).toEqual(['Dipirona Sódica', 'dip Espaço']);
+    search(input, 'ACIDO');
+    expect(names()).toEqual(['Acido Sintetico']);
+    search(input, 'dip');
+    expect(names()).toEqual(['Dipirona Sódica', 'dip Espaço']);
+    search(input, '');
+    expect(names()).toEqual([]);
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith({ NOME_PRODUTO: '', DESCRIÇÃO: '' });
+  });
+
+  it('IT-09 CODE-02 TEST-01 seleção emite o objeto original somente após timer zero', async () => {
+    const { input, onSelect } = await mount(undefined, CSV_EQUIV);
+    search(input, 'dip');
+    fireEvent.click(screen.getByText('dip Espaço'));
+    expect(input).toHaveValue('dip Espaço');
+    expect(screen.getByText('Selecionado: dip Espaço')).toBeVisible();
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith({
+      NOME_PRODUTO: ' dip Espaço ', DESCRIÇÃO: 'nome com espaço inicial',
+    });
+  });
+
+  it('IT-09 CODE-02 TEST-01 medicamentoInicial ignora caixa, mas não acentos nem espaço inicial', async () => {
+    const found = await mount('ácido fólico', CSV_EQUIV);
+    expect(found.onSelect).toHaveBeenCalledExactlyOnceWith({
+      NOME_PRODUTO: 'Ácido Fólico', DESCRIÇÃO: 'vitamina',
+    });
+    expect(screen.getByText('Selecionado: Ácido Fólico')).toBeVisible();
+    cleanup();
+
+    const semAcento = await mount('acido fólico', CSV_EQUIV);
+    expect(semAcento.onSelect).not.toHaveBeenCalled();
+    cleanup();
+
+    const comEspaco = await mount(' dip espaço', CSV_EQUIV);
+    expect(comEspaco.input).toHaveValue(' dip espaço');
+    expect(comEspaco.onSelect).not.toHaveBeenCalled();
   });
 });
