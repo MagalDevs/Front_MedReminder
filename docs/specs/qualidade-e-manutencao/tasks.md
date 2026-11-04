@@ -384,17 +384,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T13
 **Reuses**: FE-01; PR #53; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Manifesto e lockfile consistentes; npm ci, lint, tipos, build e regressão passam; release notes e decisão registradas; sem merge do PR nesta tarefa.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Manifesto e lockfile consistentes; npm ci, lint, tipos, build e regressão passam; release notes e decisão registradas; sem merge do PR nesta tarefa.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration/functional: repetir os cenários já definidos; nenhuma exclusão ou atualização automática de snapshots.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps): update compatible Next group`
+
+**Execution note**: 2026-11-04. Next/eslint-config-next 16.3.6 → 16.4.5; instalação limpa, tipos, build e regressão aprovados; lint mantém os 10 achados preexistentes (exit 1), sem novos achados. Contagens: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais com 12 snapshots preservados. Decisão, fontes e gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md#t14--next-e-configuração-do-eslint).
 
 ### T15: Atualizar grupo React e suas tipagens
 
