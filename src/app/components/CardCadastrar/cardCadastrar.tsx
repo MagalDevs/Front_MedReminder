@@ -93,9 +93,10 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const enviando = useRef(false);
   const sessionEpoch = useRef(0);
   useEffect(() => {
-    sessionEpoch.current++;
+    const epoch = sessionEpoch;
+    epoch.current++;
     intencao.current = null;
-    return () => { sessionEpoch.current++; };
+    return () => { epoch.current++; };
   }, [isAuthenticated, user?.id, user?.email]);
   const [erros, setErros] = useState<ErrosForm>({});
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || "");
