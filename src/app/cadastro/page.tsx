@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo/Logo';
+import { ApiError, apiRequest } from '../utils/api';
 
 export default function Cadastro() {
   const [nome, setNome] = useState('');
@@ -14,16 +15,16 @@ export default function Cadastro() {
   const [cep, setCep] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [cuidador, setCuidador] = useState(false);
-  const [erro, setErro] = useState('');
+  const [erros, setErros] = useState<string[]>([]);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErro('');
+    setErros([]);
 
     // Validação básica
     if (senha !== confirmarSenha) {
-      setErro('As senhas não coincidem');
+      setErros(['As senhas não coincidem']);
       return;
     }
 
@@ -42,28 +43,27 @@ export default function Cadastro() {
     };
 
     try {
-      const response = await fetch(
-        'https://medreminder-backend.onrender.com/usuario',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(usuarioParaCadastro),
-        },
-      );
+      await apiRequest('/usuario', {
+        method: 'POST',
+        requireAuth: false,
+        body: JSON.stringify(usuarioParaCadastro),
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErro(errorData.message || 'Erro ao cadastrar. Tente novamente.');
-        return;
-      }
-
-      console.log('Usuário cadastrado com sucesso!');
       router.push('/login');
-    } catch {
-      console.error('Erro na requisição de cadastro');
-      setErro('Erro ao conectar com o servidor. Tente novamente mais tarde.');
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 429) {
+        setErros([
+          error.retryAfter !== undefined
+            ? `Muitas tentativas de cadastro. Tente novamente em ${error.retryAfter} segundos.`
+            : 'Muitas tentativas de cadastro. Tente novamente mais tarde.',
+        ]);
+      } else if (error instanceof ApiError && error.status < 500) {
+        setErros(error.messages.length > 0
+          ? error.messages
+          : ['Erro ao cadastrar. Tente novamente.']);
+      } else {
+        setErros(['Erro ao conectar com o servidor. Tente novamente mais tarde.']);
+      }
     }
   };
 
@@ -113,12 +113,14 @@ export default function Cadastro() {
           </div>
         </div>
 
-        {erro && (
+        {erros.length > 0 && (
           <div
             className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded"
             role="alert"
           >
-            {erro}
+            <ul className="list-disc pl-5">
+              {erros.map((mensagem, index) => <li key={index}>{mensagem}</li>)}
+            </ul>
           </div>
         )}
 

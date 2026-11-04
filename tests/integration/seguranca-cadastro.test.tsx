@@ -38,13 +38,14 @@ function fillAndSubmit(confirm = payload.senha) {
 }
 
 function expectRequest() {
-  expect(fetch).toHaveBeenCalledExactlyOnceWith('https://medreminder-backend.onrender.com/usuario', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  expect(fetch).toHaveBeenCalledExactlyOnceWith('http://cadastro-security.test.invalid/usuario', {
+    method: 'POST', headers: new Headers({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload),
   });
 }
 
 describe('IT-08 SEC-01 — privacidade do cadastro real', () => {
   beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://cadastro-security.test.invalid');
     router.push.mockReset();
     for (const method of methods) vi.spyOn(console, method).mockImplementation(() => {});
   });
@@ -72,7 +73,9 @@ describe('IT-08 SEC-01 — privacidade do cadastro real', () => {
     { body: { message: `Email já cadastrado: ${payload.email}` }, message: `Email já cadastrado: ${payload.email}` },
     { body: {}, message: 'Erro ao cadastrar. Tente novamente.' },
   ])('IT-08 SEC-01 falha HTTP mantém payload e mensagem $message sem log pessoal', async ({ body, message }) => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify(body), { status: 400 }));
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify(body), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    }));
     fillAndSubmit();
     expect(await screen.findByRole('alert')).toHaveTextContent(message);
     expectRequest();
