@@ -230,17 +230,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T5
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: CI-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Cada comando Planned Commands aponta para script/configuração existente; nenhum comando inexistente é apresentado como disponível; registrar limpeza e falhas.
-- [ ] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Cada comando Planned Commands aponta para script/configuração existente; nenhum comando inexistente é apresentado como disponível; registrar limpeza e falhas.
+- [x] Resultado do gate manual registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, documentação; revisar comandos e links após T3/T4/T5.
 **Gate**: manual — usar a linha correspondente em Gate Check Commands.
 **Commit**: `docs(test): describe reproducible test runs`
+
+**Execution note**: 2026-11-04. Gate manual: cada comando de Planned Commands conferido contra `npm pkg get scripts.<nome>` (8/8 existem) e contra a configuração citada (eslint.config.mjs, vitest.config.mts, playwright.config.ts); links locais do README resolvem; nenhum comando inexistente é apresentado como disponível. Falhas registradas no README sem ocultar: `npm run lint` sai com 1 (10 achados preexistentes), `test:integration`/`test:regression` falham até haver testes de integração (T8), `test:coverage` ainda sem comparação de baseline (T32). Limitação documentada: E2E real depende de URL de API por ambiente (FE-06). Pastas vazias tests/integration e tests/nonfunctional ganharam .gitkeep para existirem em clone limpo. Execuções finais da fase: test:unit 8 passed; test:functional 1 passed; tsc OK; filtros inexistentes saem com código 1. Nenhum teste novo (documentação).
 
 ### T7: Caracterizar apiRequest com testes unitários
 
