@@ -365,13 +365,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T12
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-03, DEP-03
-**Status**: Pending
+**Status**: Done (52 testes; 3 test.fail: FE-03, FE-08, ACHADO-T13-01; snapshots win32)
 
 **Done when**:
 
-- [ ] Login/logout, busca/seleção, criação/listagem/exclusão e confirmação têm asserts de UI e requests; estados de erro são exercitados; relatório declara mocks e não persistência real. Não há fluxo frontend de edição de medicamento nesta baseline.
-- [ ] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Login/logout, busca/seleção, criação/listagem/exclusão e confirmação têm asserts de UI e requests; estados de erro são exercitados; relatório declara mocks e não persistência real. Não há fluxo frontend de edição de medicamento nesta baseline.
+- [x] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: functional: mínimo 8 cenários, mais snapshots determinísticos de rotas afetadas em 360/768/1440px.
 **Gate**: full — usar a linha correspondente em Gate Check Commands.
