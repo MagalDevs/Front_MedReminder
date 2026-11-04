@@ -56,10 +56,17 @@ export default defineConfig({
     unstubEnvs: true,
     coverage: {
       provider: "v8",
-      // `include` coloca no denominador também os arquivos de src nunca importados.
+      // `include` coloca no denominador também os arquivos de src nunca importados
+      // (DOC-06): fonte não exercitada conta como 0% em vez de sumir do relatório.
       include: ["src/**/*.{ts,tsx}"],
+      // Exclusões justificadas por arquivo/padrão (nenhuma outra é permitida):
+      // - src/**/*.d.ts: apenas declarações de tipo, sem código executável.
+      // Nenhum arquivo de produto (página, componente, contexto, util) é excluído.
       exclude: ["src/**/*.d.ts"],
-      reporter: ["json", "lcov", "html"],
+      // json-summary alimenta scripts/check-coverage.mjs (comparação com
+      // tests/coverage-baseline.json); json (coverage-final.json), lcov e html
+      // são os relatórios completos; text-summary imprime as 4 métricas no log.
+      reporter: ["text-summary", "json-summary", "json", "lcov", "html"],
       reportsDirectory: "./coverage",
     },
     // Diretórios separados por tipo; `npm run test:unit` e `test:integration`

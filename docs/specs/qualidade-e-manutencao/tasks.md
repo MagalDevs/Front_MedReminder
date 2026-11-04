@@ -726,13 +726,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T31
 **Reuses**: FE-07/14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DOC-06
-**Status**: Pending
+**Status**: Done (baseline 60,41% linhas; ver coverage-baseline.md)
 
 **Done when**:
 
-- [ ] Linhas/branches/funções/statements têm cobertos/total; incluir arquivos não testados; exclusões justificadas por arquivo; nenhum percentual diminui para o mesmo escopo e ambiente.
-- [ ] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Linhas/branches/funções/statements têm cobertos/total; incluir arquivos não testados; exclusões justificadas por arquivo; nenhum percentual diminui para o mesmo escopo e ambiente.
+- [x] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration: testes de produto existentes mais verificação de que fonte não exercitada aparece no denominador; não escolher percentual arbitrário.
 **Gate**: coverage — usar a linha correspondente em Gate Check Commands; unitários e integração instrumentados, não apenas test:unit.

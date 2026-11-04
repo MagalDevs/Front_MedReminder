@@ -1,0 +1,63 @@
+{
+  "description": "Baseline de cobertura (DOC-06/T32). Piso das quatro metricas: nenhuma pode diminuir para o mesmo escopo. Atualizar para cima apenas por revisao; nunca reduzir.",
+  "scope": "vitest run tests/unit tests/integration --coverage; provider v8; include src/**/*.{ts,tsx}; exclude src/**/*.d.ts; arquivos nao importados contam no denominador",
+  "command": "npm run test:coverage",
+  "environment": {
+    "node": "v26.8.1",
+    "npm": "11.19.0",
+    "os": "win32",
+    "tz": "America/Sao_Paulo",
+    "vitest": "5.1"
+  },
+  "measuredAt": "2026-11-04",
+  "baseCommit": "be6a81f (working tree com alteracoes nao commitadas no momento da medicao)",
+  "metrics": {
+    "lines": {
+      "covered": 577,
+      "total": 955,
+      "pct": 60.41
+    },
+    "branches": {
+      "covered": 329,
+      "total": 597,
+      "pct": 55.1
+    },
+    "functions": {
+      "covered": 114,
+      "total": 184,
+      "pct": 61.95
+    },
+    "statements": {
+      "covered": 583,
+      "total": 973,
+      "pct": 59.91
+    }
+  },
+  "files": [
+    "src/app/Configuracoes/ConfiguracoesContent.tsx",
+    "src/app/Configuracoes/page.tsx",
+    "src/app/cadastro/page.tsx",
+    "src/app/components/AlarmeDose/AlertaLembrete.tsx",
+    "src/app/components/AlarmeDose/Lembrete.tsx",
+    "src/app/components/CardBusca/cardBusca.tsx",
+    "src/app/components/CardCadastrar/cardCadastrar.tsx",
+    "src/app/components/Logo/Logo.tsx",
+    "src/app/components/ProtectedRoute/ProtectedRoute.tsx",
+    "src/app/components/SearchBar/SearchBar.tsx",
+    "src/app/components/Sidebar/sidebar.tsx",
+    "src/app/contexts/AuthContext.tsx",
+    "src/app/contexts/SidebarContext.tsx",
+    "src/app/contexts/lembreteContext.tsx",
+    "src/app/historico/HistoricoContent.tsx",
+    "src/app/historico/page.tsx",
+    "src/app/layout.tsx",
+    "src/app/login/page.tsx",
+    "src/app/meus-lembretes/MeusLembretesContent.tsx",
+    "src/app/meus-lembretes/page.tsx",
+    "src/app/meus-medicamentos/MeusMedicamentosContent.tsx",
+    "src/app/meus-medicamentos/page.tsx",
+    "src/app/novo-medicamento/page.tsx",
+    "src/app/page.tsx",
+    "src/app/utils/api.ts"
+  ]
+}
