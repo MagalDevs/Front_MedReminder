@@ -289,13 +289,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T8
 **Reuses**: FE-07/10; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: CODE-01, DEP-03, TEST-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Fixture com mais de dez correspondências, duplicados, acentos, espaços e consulta vazia prova ordem, limite e querystring; registrar capturas da baseline em 360/768/1440px antes de mudanças visuais.
-- [ ] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Fixture com mais de dez correspondências, duplicados, acentos, espaços e consulta vazia prova ordem, limite e querystring; registrar capturas da baseline em 360/768/1440px antes de mudanças visuais.
+- [x] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit: mínimo 8 cenários; assertar nomes/ordem/URL e condição de Cadastrar, sem espelhar filter no teste.
 **Gate**: quick — usar a linha correspondente em Gate Check Commands.
