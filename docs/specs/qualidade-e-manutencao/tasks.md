@@ -593,13 +593,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T24
 **Reuses**: FE-07/14; NF-WEB-04; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: SEC-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Sentinelas de senha/CPF/CEP/email não aparecem em nenhum método console exercitado; sucesso e falha mantêm payload e saída existentes.
-- [ ] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Sentinelas de senha/CPF/CEP/email não aparecem em nenhum método console exercitado; sucesso e falha mantêm payload e saída existentes.
+- [x] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: integration: mínimo 3 casos cadastro válido, inválido e falha HTTP; spies verificam ausência das sentinelas.
 **Gate**: full — usar a linha correspondente em Gate Check Commands.

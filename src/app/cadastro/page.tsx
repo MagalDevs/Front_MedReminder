@@ -41,8 +41,6 @@ export default function Cadastro() {
       senha,
     };
 
-    console.log('Dados de cadastro para API:', usuarioParaCadastro);
-
     try {
       const response = await fetch(
         'https://medreminder-backend.onrender.com/usuario',
@@ -63,8 +61,8 @@ export default function Cadastro() {
 
       console.log('Usuário cadastrado com sucesso!');
       router.push('/login');
-    } catch (error) {
-      console.error('Erro na requisição de cadastro:', error);
+    } catch {
+      console.error('Erro na requisição de cadastro');
       setErro('Erro ao conectar com o servidor. Tente novamente mais tarde.');
     }
   };
