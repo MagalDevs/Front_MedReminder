@@ -108,3 +108,36 @@ Fontes: Context7 `/tailwindlabs/tailwindcss.com` (plugin PostCSS dedicado na v4)
 Prova visual: FN-06 login, home/busca/resultados, novo-medicamento e meus-lembretes nos três viewports 360/768/1440px (12 comparações com as referências originais). Nenhuma autorização para regenerar snapshots foi usada.
 
 Gates T21: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T22 — ESLint e tipos Node
+
+| Pacote | De (HEAD inicial desta fase) | Para | Decisão |
+| --- | --- | --- | --- |
+| eslint | 9.25.1 | 9.39.5 | Atualizar dentro da major 9; 10.14.0 bloqueado: major exige escopo próprio. |
+| @eslint/eslintrc | 3.3.7 | 3.3.7 | Manter latest e explicitar mínimo no manifesto. |
+| @types/node | 22.20.5 | 22.20.5 | Manter latest da major 22, compatível com a menor major do runtime suportado. |
+
+Fontes: Context7 `/eslint/eslint` ([migração v10](https://eslint.org/docs/latest/use/migrate-to-10.0.0), lookup de configuração/regras/APIs alteradas) e `/nodejs/node`; [release ESLint 9.39.5](https://github.com/eslint/eslint/releases/tag/v9.39.5) (backport de require cache e dependências); `npm view` confirmou versões/engines/peers e a última versão `@types/node@22`. ESLint 9.39.5 está fora de suporte, conforme aviso do npm e release notes; a versão 10 não foi instalada nem certificada, mantendo a política patch/minor deste escopo. A próxima migração deve avaliar plugins e o algoritmo de configuração, preservando os diagnósticos. Atualização normal de ESLint também corrige o advisory transitivo de `@eslint/plugin-kit` da baseline, sem audit fix.
+
+O inventário T1 registrava Node types 20.17.30, mas T3 já havia atualizado para **22.20.5** antes desta worktree; a comparação usa o lockfile real de `537bfaa`. Não seguir latest 26.6.6: o manifesto suporta também Node 22 (`^22.22.2 || ^24.15.0 || >=26.0.0`), embora a execução local use 26.8.1. Engines, configuração ESLint e regras não mudam. `@eslint/eslintrc` continua declarado; sua remoção não faz parte desta tarefa.
+
+### Auditoria final
+
+`npm audit --json` após as resoluções de T14–T22: **exit 1**, por vulnerabilidades remanescentes. Resultado por pacotes afetados (não por advisories únicos):
+
+| Severidade | Total | Diretos (`isDirect=true`) | Transitivos |
+| --- | --- | --- | --- |
+| critical | 0 | 0 | 0 |
+| high | 1 | 0 | 1 |
+| moderate | 8 | 1 | 7 |
+| low / info | 0 | 0 | 0 |
+| **Total** | **9** | **1** | **8** |
+
+- **Moderate**: [minimatch: amplificação de globparts](https://github.com/advisories/GHSA-g3hv-75wg-m249). Cadeia confirmada por `npm ls`: `eslint-config-next@16.4.5 → typescript-eslint@8.70.1 → @typescript-eslint/typescript-estree@8.70.1 → minimatch@10.2.6`. O audit propaga o mesmo advisory a `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, `@typescript-eslint/type-utils`, `@typescript-eslint/typescript-estree`, `@typescript-eslint/utils`, `typescript-eslint` e ao direto `eslint-config-next`. A correção automática sugerida é **downgrade de eslint-config-next para 15.5.29**, marcado major pelo audit; não foi aplicada, pois desfaz o alinhamento com Next 16.4.5 e sai da política compatível da fase.
+- **High**: [Zod: memória em coleções excessivas](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), `zod@4.6.5` via `eslint-config-next → eslint-plugin-react-hooks@7.1.1` (também requerido por `zod-validation-error`). O audit informa correção disponível; a faixa afetada é `<4.6.6`. A atualização transitiva explícita deve ser acompanhada em manutenção de segurança própria; não foi introduzido override, dependência direta artificial ou `audit fix` fora dos grupos autorizados.
+
+Comparação com a instalação inicial: **13 → 9 pacotes afetados**, critical **1 → 0**, high **2 → 1**, moderate **8 → 8**, low **2 → 0**. `next`, `sharp`, `eslint` e `@eslint/plugin-kit` deixaram de constar no audit. A fase não equivale a audit sem vulnerabilidades. Remanescentes pertencem à cadeia de ferramentas de lint; isso não reduz sua severidade reportada.
+
+Precisão sobre testes funcionais: o reporter Playwright informa `52 passed` ao satisfazer as expectativas existentes; são **49 casos normais + 3 `test.fail()` preexistentes** (FE-03, FE-08 e ACHADO-T13-01). As 8 falhas esperadas de integração também permanecem defeitos conhecidos. Nenhum deles foi convertido em cobertura funcional aprovada.
+
+Gates T22: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.

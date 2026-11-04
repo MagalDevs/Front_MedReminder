@@ -552,17 +552,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T21
 **Reuses**: FE-01; PR #48/#49; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Não elevar tipos Node acima do runtime por seguir latest; regras mantidas; mudanças de major incompatíveis registradas como bloqueadas; manifesto/lockfile consistentes.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Não elevar tipos Node acima do runtime por seguir latest; regras mantidas; mudanças de major incompatíveis registradas como bloqueadas; manifesto/lockfile consistentes.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, configuração; lint, tipos, build e regressão após resolução dos peers.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps-dev): align lint and runtime types`
+
+**Execution note**: 2026-11-04. Decisão por pacote, fontes e resultado dos gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md). `npm ci`, tipos, build e regressão: exit 0; lint: exit 1, mesmos 10 achados preexistentes, sem aumento. Seleção preservada: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais, 12 snapshots.
 
 ### T23: Reduzir normalização repetida em SearchBar
 
