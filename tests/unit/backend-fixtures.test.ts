@@ -12,11 +12,11 @@ import {
 } from "../fixtures/backend-contracts";
 
 describe("BEAPI-12 contratos documentados do backend (sem prova de API real)", () => {
-  it("BEAPI-12 registra commit, fonte indireta e reconciliação pendente em T12", () => {
+  it("BEAPI-12 registra revisão de código e comparação de respostas em T12", () => {
     expect(BACKEND_CONTRACT_SOURCE).toEqual({
       commit: "b6b63168ba2a092e6e6350c256bfa15483199b4a",
-      checkedAgainst: "docs/specs/integracao-backend/design.md",
-      verifiedAgainstBackendCode: false, requiresRealResponseComparison: true,
+      checkedAgainst: "backend source at b6b63168ba2a092e6e6350c256bfa15483199b4a",
+      verifiedAgainstBackendCode: true, requiresRealResponseComparison: true,
     });
   });
 
@@ -62,7 +62,7 @@ describe("BEAPI-12 contratos documentados do backend (sem prova de API real)", (
   it.each([["string", stringErrorFixture, 401], ["array", arrayErrorFixture, 400]] as const)(
     "BEAPI-12 erro message %s preserva code e statusCode",
     (kind, fixture, status) => {
-      expect(Object.keys(fixture).sort()).toEqual(["code", "message", "statusCode"]);
+      expect(Object.keys(fixture).sort()).toEqual(["code", "error", "message", "statusCode"]);
       expect(fixture.statusCode).toBe(status);
       expect(fixture.code).toEqual(expect.any(String));
       expect(Array.isArray(fixture.message)).toBe(kind === "array");
@@ -79,10 +79,10 @@ describe("BEAPI-12 contratos documentados do backend (sem prova de API real)", (
     expect(emptyDosesFixture).toEqual({ message: "Sem doses", data: [] });
   });
 
-  it("BEAPI-12 doses paginadas mantêm envelope e metadata opaca até T12", () => {
+  it("BEAPI-12 doses paginadas mantêm envelope e metadata do servidor", () => {
     expect(Object.keys(paginatedDosesFixture).sort()).toEqual(["data", "message", "pagination"]);
     expect(paginatedDosesFixture.data).toEqual(legacyDosesFixture.data);
-    expect(paginatedDosesFixture.pagination).toEqual({});
+    expect(paginatedDosesFixture.pagination).toEqual({ page: 1, limit: 20, total: 1, totalPages: 1 });
     expect(DOSE_QUERY_DEFAULTS).toEqual({ page: 1, limit: 20, order: "ASC" });
     expect(DOSE_QUERY_MAX_LIMIT).toBe(100);
   });
@@ -151,4 +151,10 @@ describe("BEAPI-12 contratos documentados do backend (sem prova de API real)", (
   it("BEAPI-12 header Idempotency-Key é obrigatório", () => {
     expect(documentedTreatmentIssues(treatmentRequestFixture, {})).toEqual(["Idempotency-Key"]);
   });
+});
+
+it('BEAPI-12 resposta de erro sem code satisfaz contrato real', () => {
+  const validation: BackendErrorResponse = { statusCode: 400, message: ['Campo invalido'], error: 'Bad Request' };
+  expect(validation).not.toHaveProperty('code');
+  expectTypeOf<BackendErrorResponse['code']>().toEqualTypeOf<string | undefined>();
 });

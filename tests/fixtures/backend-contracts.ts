@@ -1,19 +1,13 @@
 /**
- * BEAPI-12 — backend baseline b6b63168ba2a092e6e6350c256bfa15483199b4a.
- * Conferido contra docs/specs/integracao-backend/design.md e spec.md,
- * NÃO contra o código do backend (checkout indisponível), nem API real.
- * T12 deve reconciliar estes exemplos sintéticos com respostas reais.
- * Mensagens/code são exemplos, não textos/códigos literais comprovados.
- *
- * Lacunas do design: campos/nullability das entidades e da projeção de
- * remedio, estrutura interna de pagination e CreateRemedioDto completo.
- * Tipos opacos abaixo preservam essas lacunas, sem importar tipos de src/.
- * Objetos vazios são placeholders documentais, NÃO entidades reais completas.
+ * BEAPI-12 source parity reviewed against backend b6b63168ba2a092e6e6350c256bfa15483199b4a.
+ * DTOs, controllers, services and api-response.ts inspected on 2026-11-04.
+ * Fixtures remain synthetic; runtime parity is recorded separately by T12.
+ * Messages/codes below are synthetic examples, not required server literals.
  */
 export const BACKEND_CONTRACT_SOURCE = {
   commit: "b6b63168ba2a092e6e6350c256bfa15483199b4a",
-  checkedAgainst: "docs/specs/integracao-backend/design.md",
-  verifiedAgainstBackendCode: false,
+  checkedAgainst: "backend source at b6b63168ba2a092e6e6350c256bfa15483199b4a",
+  verifiedAgainstBackendCode: true,
   requiresRealResponseComparison: true,
 } as const;
 
@@ -22,11 +16,11 @@ export interface DataResponse<T> extends MessageResponse { data: T }
 // B/src/auth/auth.controller.ts:18-33 (via design, Current Contract Matrix).
 export interface LoginRequest { email: string; senha: string }
 export interface LoginResponse extends MessageResponse { access_token: string }
-// Allowlist comprovada; tipos escalares/nullability não são detalhados no design.
+// JSON scalar types checked against UsuarioResponseDto and Usuario entity.
 // B/src/usuario/dto/usuario-response.dto.ts:4-22.
 export interface UsuarioResponse {
-  id: unknown; nome: unknown; email: unknown; dataNasc: unknown;
-  cpf: unknown; cep: unknown; cuidador: unknown;
+  id: number; nome: string; email: string; dataNasc: string;
+  cpf: string; cep: string; cuidador: boolean;
 }
 export interface UpdateProfileRequest {
   nome?: string; dataNasc?: string; email?: string; cep?: string;
@@ -38,7 +32,8 @@ export type DeleteResponse = MessageResponse;
 // B/src/common/api-response.ts:34-39.
 export interface BackendErrorResponse {
   message: string | string[];
-  code: string;
+  code?: string;
+  error: string;
   statusCode: number;
 }
 
@@ -51,7 +46,7 @@ export interface ListedDoseResponse extends DoseResponse {
 // B/src/dose/dose.service.ts:143-189, :84-133.
 export type LegacyDosesResponse = DataResponse<ListedDoseResponse[]>;
 export interface PaginatedDosesResponse extends LegacyDosesResponse {
-  pagination: Record<string, unknown>;
+  pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 export interface ListDosesQuery {
   page?: number; limit?: number; from?: string; to?: string;
@@ -68,7 +63,20 @@ export interface DocumentedRemedioInput {
   quantidadeDiaria: number;
   quantidadeDias: number;
 }
-export interface TreatmentRequest<TRemedio = DocumentedRemedioInput> {
+/** JSON input corresponding to backend CreateRemedioDto (dates serialized). */
+export interface CreateRemedioInput extends DocumentedRemedioInput {
+  nome: string;
+  quantidadeCaixa: number;
+  foto: string;
+  classificacao: string;
+  horaInicio: string;
+  cor: string;
+  unidadeMedida: string;
+  motivo: string;
+  quantidadeDose: string;
+  observacao?: string;
+}
+export interface TreatmentRequest<TRemedio = CreateRemedioInput> {
   remedio: TRemedio;
   doses: string[];
 }
@@ -94,26 +102,33 @@ export const patchProfileFixture: ProfileResponse = {
 export const passwordResponseFixture: PasswordResponse = { message: "Senha atualizada" };
 export const deleteResponseFixture: DeleteResponse = { message: "Remédio excluído" };
 export const stringErrorFixture: BackendErrorResponse = {
-  message: "Senha atual incorreta", code: "SYNTHETIC_PASSWORD_ERROR", statusCode: 401,
+  message: "Senha atual incorreta", error: "Unauthorized", code: "SYNTHETIC_PASSWORD_ERROR", statusCode: 401,
 };
 export const arrayErrorFixture: BackendErrorResponse = {
   message: ["Validade obrigatória", "Lote deve conter de 1 a 1000 doses"],
-  code: "SYNTHETIC_VALIDATION_ERROR", statusCode: 400,
+  error: "Bad Request", code: "SYNTHETIC_VALIDATION_ERROR", statusCode: 400,
 };
-export const legacyDosesFixture: LegacyDosesResponse = { message: "Doses sintéticas", data: [{ remedio: {} }] };
+export const legacyDosesFixture: LegacyDosesResponse = { message: "Doses sintéticas", data: [{ id: 1, tomado: false, usuarioId: 101, data_dose: "2026-11-04T15:00:00.000Z", remedio: {
+  id: 77, nome: "Dipirona", foto: "https://example.com/image.jpg", motivo: "Dor", cor: "Azul",
+  horaInicio: "2026-11-04T15:00:00.000Z", quantidadeDiaria: 1, quantidadeDias: 1, quantidadeDose: "1 comp",
+} }] };
 export const emptyDosesFixture: LegacyDosesResponse = { message: "Sem doses", data: [] };
 export const paginatedDosesFixture: PaginatedDosesResponse = {
-  ...legacyDosesFixture, pagination: {}, // campos internos ausentes no design; T12.
+  ...legacyDosesFixture, pagination: { page: 1, limit: 20, total: 1, totalPages: 1 }, // src/common/api-response.ts
 };
 export const legacyRemediosFixture: LegacyRemediosResponse = [];
 export const myRemediosFixture: MyRemediosResponse = { message: "Sem remédios", data: [] };
 export const treatmentHeadersFixture: TreatmentHeaders = { "Idempotency-Key": "sintetico:tratamento-001" };
 export const treatmentRequestFixture: TreatmentRequest = {
-  remedio: { dataValidade: "2027-12-31", quantidadeDiaria: 1, quantidadeDias: 1 },
+  remedio: {
+    nome: "Dipirona", quantidadeCaixa: 30, dataValidade: "2027-12-31", quantidadeDiaria: 1,
+    foto: "https://example.com/image.jpg", classificacao: "Analgesico", horaInicio: "2026-11-04T15:00:00.000Z",
+    cor: "Azul", unidadeMedida: "comp", motivo: "Dor", quantidadeDias: 1, quantidadeDose: "1 comp", observacao: "",
+  },
   doses: ["2026-11-04T12:00:00-03:00"],
 };
 export const treatmentResponseFixture: TreatmentResponse = {
-  message: "Tratamento sintético", data: { remedio: {}, doses: [{}] },
+  message: "Tratamento sintético", data: { remedio: { ...treatmentRequestFixture.remedio, id: 77, usuarioId: 101 }, doses: [{ id: 1, usuarioId: 101, remedioId: 77, tomado: false, data_dose: "2026-11-04T15:00:00.000Z" }] },
 };
 
 /** Sintaxe documentada em B/src/common/dto-normalization.ts:33-47. */
