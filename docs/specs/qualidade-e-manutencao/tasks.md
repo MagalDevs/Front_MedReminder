@@ -188,17 +188,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T3
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Configuração inclui src não exercitado no denominador de coverage; teste sentinela de infraestrutura executa; filtro inexistente retorna saída não zero.
-- [ ] Resultado do gate bootstrap-unit registrado no commit avaliado; smoke executado e filtro inexistente rejeitado antes do commit.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Configuração inclui src não exercitado no denominador de coverage; teste sentinela de infraestrutura executa; filtro inexistente retorna saída não zero.
+- [x] Resultado do gate bootstrap-unit registrado no commit avaliado; smoke executado e filtro inexistente rejeitado antes do commit.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit: 1 teste sentinela de infraestrutura; não conta como cobertura funcional.
 **Gate**: bootstrap-unit — usar a linha correspondente em Gate Check Commands; não exigir integração ainda inexistente.
 **Commit**: `test: configure Vitest isolation`
+
+**Execution note**: 2026-11-04. `vitest.config.mts`: alias `@` -> src, jsdom, `tests/setup.ts` (jest-dom, cleanup do RTL, restauração de mocks/timers/globals/env/storage após cada teste, fetch global que rejeita chamadas não simuladas), fuso fixo America/Sao_Paulo, projetos `unit` (tests/unit) e `integration` (tests/integration), coverage v8 com `include: src/**/*.{ts,tsx}` (25/25 arquivos de src aparecem em coverage-final.json) e reporters json/lcov/html em `coverage/`. Sem passWithNoTests. Achado: o Vitest 5.1.0 sai com código 0 quando `-t FILTRO_INEXISTENTE` deixa todos os testes skipped; por isso um plugin (`configureVitest` + `onClose`, API pública) define exit 1 se nenhum teste passou ou falhou, independente de `--reporter`. Gate bootstrap-unit: `npm run test:unit` = 1 arquivo, 8 testes passando (tests/unit/infra.test.ts: alias @/, jsdom + jest-dom + cleanup, fetch não simulado rejeitado, storage limpo entre testes, restauração de relógio falso e fetch, fuso); `npm run test:unit -- -t FILTRO_INEXISTENTE` = 8 skipped, exit 1; `npm run test:integration` sem testes = exit 1 (No test files found); `npm run test:coverage` gera json/lcov/html. `tsc --noEmit` OK; `eslint` nos arquivos novos sem achados (os 10 achados de produto de T2 permanecem). O teste de infraestrutura tem 8 casos em vez de 1 para provar o isolamento; não conta como cobertura funcional.
 
 ### T5: Configurar execução Playwright
 
