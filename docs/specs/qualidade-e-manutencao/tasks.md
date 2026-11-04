@@ -631,13 +631,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T26
 **Reuses**: FE-05, apenas logs; FE-14; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: SEC-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Console não contém os dados sintéticos; instante do agendamento e gesto de confirmação permanecem iguais; defeitos FE-05 continuam visíveis.
-- [ ] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Console não contém os dados sintéticos; instante do agendamento e gesto de confirmação permanecem iguais; defeitos FE-05 continuam visíveis.
+- [x] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: integration: mínimo 2 cenários de agendamento com relógio controlado e spies; sem corrigir lifecycle nesta tarefa.
 **Gate**: full — usar a linha correspondente em Gate Check Commands.

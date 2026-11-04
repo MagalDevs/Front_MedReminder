@@ -29,11 +29,6 @@ export default function AlertaLembretes() {
       const agora = new Date();
       const delay = dataAlvo.getTime() - agora.getTime();
 
-      console.log('horaInicio:', lembrete.remedio.horaInicio);
-      console.log('data_dose:', lembrete.data_dose);
-      console.log('dataAlvo:', dataAlvo);
-      console.log('delay calculado:', delay);
-
       if (delay > 0) {
         setTimeout(() => {
           setLembreteVisivel({
