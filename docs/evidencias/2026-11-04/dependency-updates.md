@@ -59,3 +59,16 @@ Fontes: Context7 `/lucide-icons/lucide`, [migração React v0 → v1](https://gi
 Inventário dos imports atuais: `Bell`, `Pill`, `X` em AlarmeDose/Lembrete; `Loader2` em CardCadastrar; `Menu`, `X`, `User`, `LogOut` em Sidebar; `User`, `Settings`, `LogOut` na home. Nenhum ícone de marca é usado, mas a política permite manter a major para escopo próprio. Os rótulos e a geometria atuais ficam preservados; gate da árvore idêntica T16 (`e64cff2`) cobre controles, navegação e os 12 snapshots em 360/768/1440px. Manifesto e lockfile não mudam nesta decisão.
 
 Gates T17 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T18 — react-input-mask e tipagem
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| react-input-mask | 2.0.4 | 2.0.4 | Mantido no latest estável; uso com React 19 bloqueado por API removida. |
+| @types/react-input-mask | 3.0.6 | 3.0.6 | Mantido no latest; tipagem não corrige a implementação runtime. |
+
+Consultas `npm view` confirmaram latest/peers: runtime declara React/ReactDOM `>=0.14.0`, tipagem depende de `@types/react: *`. Context7 foi consultado com os nomes `react-input-mask` e `sanniassin/react-input-mask`, mas não encontrou a biblioteca; nenhum resultado de outra biblioteca foi usado como substituto. Fontes alternativas: [README oficial](https://github.com/sanniassin/react-input-mask/blob/master/README.md), implementação efetivamente instalada em `node_modules/react-input-mask/lib/react-input-mask.development.js:528` (chama `reactDom.findDOMNode`) e [guia React 19: API removida](https://react.dev/blog/2024/04/25/react-19-upgrade-guide#removed-reactdom-finddomnode). `node -p "typeof require('react-dom').findDOMNode"` retornou `undefined` no React DOM 19.3.1. Peers amplos não certificam compatibilidade runtime.
+
+Nenhum import/uso de máscara em todos os `.ts/.tsx` de `src/`; portanto, não existem os três fluxos de máscara/digitação exigidos condicionalmente pelo plano para verificar uma atualização. A biblioteca não foi montada nem habilitada, e não se alega cobertura de máscara ou compatibilidade com React 19. Os cenários reais de campos vazios, valores zero e payload do formulário (UT-12/IT-05) continuam cobertos pela regressão. Proposta separada: avaliar remoção da dependência sem uso ou uma migração de máscara compatível antes de introduzir esse recurso, com testes específicos. Nenhuma troca de biblioteca, alteração de produto ou relaxamento de tipos nesta tarefa. Sem advisory direto no inventário; manifesto/lockfile idênticos ao gate T16 (`e64cff2`).
+
+Gates T18 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
