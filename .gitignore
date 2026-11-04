@@ -43,3 +43,7 @@ next-env.d.ts
 #codex
 .codex
 AGENTS.md
+# playwright e cobertura
+playwright-report/
+test-results/
+coverage/

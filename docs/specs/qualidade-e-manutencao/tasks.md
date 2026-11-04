@@ -209,17 +209,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T4
 **Reuses**: FE-07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Smoke de carregamento executa em Chromium; API real exige URL isolada explícita; traces e storage state não são publicados com credenciais.
-- [ ] Resultado do gate bootstrap-functional registrado no commit avaliado; smoke executado e filtro inexistente rejeitado antes do commit.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Smoke de carregamento executa em Chromium; API real exige URL isolada explícita; traces e storage state não são publicados com credenciais.
+- [x] Resultado do gate bootstrap-functional registrado no commit avaliado; smoke executado e filtro inexistente rejeitado antes do commit.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: functional: 1 smoke de infraestrutura; API isolada é pré-condição dos casos reais.
 **Gate**: bootstrap-functional — usar a linha correspondente em Gate Check Commands; não exigir a suíte de integração criada em T8.
 **Commit**: `test: configure Playwright projects`
+
+**Execution note**: 2026-11-04. `playwright.config.ts`: webServer `npm run build && npm run start -- --port 3001` (`reuseExistingServer: !process.env.CI`), baseURL http://localhost:3001, projetos `functional`, `e2e` e `nonfunctional` (Chromium, `trace: on-first-retry`, sem storageState, relatório html e test-results fora do git). Chromium instalado com `npx playwright install chromium` (@playwright/test 1.64.1). `.gitignore` ganhou playwright-report/, test-results/ e coverage/. Pré-condição E2E em `tests/support/e2e.ts`: sem `E2E_API_URL` ou apontando para a produção o teste FALHA com mensagem BLOQUEADO (não é skip). Guarda de API em `tests/support/api-guard.ts`: toda requisição à API de produção é abortada e reprova o teste. Gate bootstrap-functional: `npm run test:functional` = 1 teste (smoke: a página inicial carrega sem requisições à API), 1 passed; `npm run test:functional -- --grep INEXISTENTE` = 'No tests found', exit 1; `test:e2e` sem env = failed com BLOQUEADO (exit 1), com env de produção = BLOQUEADO, com `E2E_API_URL=http://localhost:4010` = 1 passed (apenas a pré-condição de configuração, não prova persistência nem isolamento); `test:nonfunctional` sem testes = exit 1. Guarda provada com um spec temporário (removido) que chamava a API e reprovava. `tsc --noEmit` OK; eslint nos arquivos novos sem achados. Achado preexistente, não afirmado no smoke: sem sessão a página inicial emite o erro não tratado 'Authentication required but no token found' (consulta de lembretes no mount; FE-03/FE-05). O E2E real contra a API isolada continua dependendo de o frontend aceitar a URL por ambiente (FE-06): hoje a URL é fixa em `src/app/utils/api.ts`.
 
 ### T6: Documentar os comandos e a preparação dos testes
 
