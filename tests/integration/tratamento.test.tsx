@@ -1,26 +1,15 @@
-// T11 - Caracterizar criação do tratamento (TEST-01, TEST-02).
-//
-// Integra o formulário real (`CardCadastrar`), `AuthProvider`, `LembreteProvider`
-// e o cliente real `apiRequest`, com relógio/fuso fixos e `fetch` controlado.
-// Só a fronteira de rede (fetch) e a navegação do Next são simuladas.
-//
-// Casos do test-plan: UT-12, UT-13, IT-05; falhas por etapa e falha parcial
-// (IT-13, FE-08). Testes de caracterização: NÃO alteram nem corrigem `src/`.
-// Defeitos conhecidos usam `it.fails` com a expectativa CORRETA no título
-// "[BLOQUEADO ...]" / "[DEFEITO ...]".
-//
-// Horários esperados são tabelas literais (UTC, fuso -03:00 fixo em 2026),
-// nunca calculados com o algoritmo do código.
-
+// BEAPI-07/BEAPI-08: formulário e providers reais; transporte sintético atômico.
+// Tabelas literais de instantes preservam os horários locais e o fim exclusivo.
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useContext } from "react";
 import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 
 import ConfigurarLembrete from "@/app/components/CardCadastrar/cardCadastrar";
-import { AuthProvider } from "@/app/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/app/contexts/AuthContext";
 import { LembreteContext, LembreteProvider } from "@/app/contexts/lembreteContext";
 import Pagina from "@/app/novo-medicamento/page";
 import { API_URL } from "@/app/utils/api";
+import { treatmentResponseFixture, getProfileFixture, type TreatmentRequest } from "../fixtures/backend-contracts";
 
 // O fuso também é definido em vitest.config.mts; repetir aqui garante o fuso
 // se o arquivo for executado com outra configuração.
@@ -55,7 +44,7 @@ type Chamada = {
 };
 
 type Config = {
-  remedio?: "ok" | "erro500" | "semId" | "idTexto";
+  remedio?: "ok" | "erro500" | "semId" | "incerta";
   doses?: "ok" | "erro500";
   idsRemedio?: number[];
 };
@@ -81,7 +70,8 @@ function criarApi(config: Config = {}) {
   const doses: DoseFake[] = [];
   const idsRemedio = [...(config.idsRemedio ?? [77, 78, 79])];
   let proximaDose = 100;
-  let ultimoRemedioId = 0;
+  const operacoes = new Map<string, { remedio: Record<string, unknown>; doses: DoseFake[] }>();
+  let primeiraResposta = true;
 
   const fetchFake = vi.fn(
     async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -103,44 +93,38 @@ function criarApi(config: Config = {}) {
       if (metodo === "GET" && caminho === "/dose/me") {
         return json({ message: "ok", data: doses });
       }
-      if (metodo === "POST" && caminho === "/remedio") {
-        if (config.remedio === "erro500") {
-          return json({ message: "Falha simulada no remédio" }, 500);
+      if (metodo === "GET" && caminho === "/usuario/me") return json(getProfileFixture);
+      if (metodo === "POST" && caminho === "/tratamento") {
+        if (config.remedio === "erro500" || config.doses === "erro500") {
+          return json({ message: "Falha simulada no tratamento" }, 500);
         }
-        if (config.remedio === "semId") {
-          return json({ message: "criado" });
+        if (config.remedio === "semId") return json({ message: "criado", data: { doses: [] } });
+        const chave = cabecalhos.get("Idempotency-Key")!;
+        const payload = corpo as TreatmentRequest<Record<string, unknown>>;
+        if (!operacoes.has(chave)) {
+          const id = idsRemedio.shift() ?? 999;
+          const remedio = { ...payload.remedio, id };
+          const novasDoses = payload.doses.map((data) => ({
+            id: proximaDose++, tomado: false, data_dose: data, remedioId: id, remedio,
+          }));
+          remedios.push(remedio);
+          doses.push(...novasDoses);
+          operacoes.set(chave, { remedio, doses: novasDoses });
         }
-        ultimoRemedioId = idsRemedio.shift() ?? 999;
-        remedios.push({ id: ultimoRemedioId, ...(corpo as object) });
-        return json({
-          data: {
-            id: config.remedio === "idTexto" ? String(ultimoRemedioId) : ultimoRemedioId,
-          },
-        });
-      }
-      if (metodo === "POST" && caminho === "/dose/doses") {
-        if (config.doses === "erro500") {
-          return json({ message: "Falha simulada nas doses" }, 500);
+        if (config.remedio === "incerta" && primeiraResposta) {
+          primeiraResposta = false;
+          throw new TypeError("Failed to fetch");
         }
-        const payload = corpo as { remedioId: number; doses: string[] };
-        const remedio = remedios.find((r) => r.id === payload.remedioId) ?? {};
-        for (const data of payload.doses) {
-          doses.push({
-            id: proximaDose++,
-            tomado: false,
-            data_dose: data,
-            remedioId: payload.remedioId,
-            remedio,
-          });
-        }
-        return json({ data: payload.doses.length });
+        return json({ ...treatmentResponseFixture, data: operacoes.get(chave) });
       }
       throw new Error(`Rota não simulada: ${metodo} ${caminho}`);
     },
   );
   vi.stubGlobal("fetch", fetchFake);
 
-  const rotulos = () => chamadas.map((c) => `${c.metodo} ${c.caminho}`);
+  // Session restoration is independently covered by BEAPI-03; preserve the
+  // exact treatment mutation/reload sequence after it has completed.
+  const rotulos = () => chamadas.filter((c) => c.caminho !== "/usuario/me").map((c) => `${c.metodo} ${c.caminho}`);
   const posts = (caminho: string) =>
     chamadas.filter((c) => c.metodo === "POST" && c.caminho === caminho);
   return { chamadas, remedios, doses, rotulos, posts };
@@ -149,6 +133,11 @@ function criarApi(config: Config = {}) {
 // ---------------------------------------------------------------------------
 // Montagem e preenchimento
 // ---------------------------------------------------------------------------
+
+function EstadoSessao() {
+  const { loading } = useAuth();
+  return <output data-testid="sessao-pronta">{loading ? "carregando" : "pronta"}</output>;
+}
 
 function ListaLembretes() {
   const contexto = useContext(LembreteContext);
@@ -183,6 +172,7 @@ function montar(
   const formulario = <ConfigurarLembrete medicamentoSelecionado={medicamento} />;
   return render(
     <AuthProvider>
+      <EstadoSessao />
       {comProvider ? (
         <LembreteProvider>
           {formulario}
@@ -213,6 +203,7 @@ type Campos = {
 };
 
 const VALIDOS: Campos = {
+  validade: "2027-12-31",
   dosagem: "500",
   quantidade: "30",
   intervalo: "8",
@@ -255,7 +246,11 @@ function hexParaRgb(hex: string) {
   return `rgb(${n(1)}, ${n(3)}, ${n(5)})`;
 }
 
-const salvar = () => fireEvent.click(screen.getByRole("button", { name: "Salvar lembrete" }));
+const aguardarSessao = () => waitFor(() => expect(screen.getByTestId("sessao-pronta")).toHaveTextContent("pronta"));
+const salvar = async () => {
+  await aguardarSessao();
+  fireEvent.click(screen.getByRole("button", { name: "Salvar lembrete" }));
+};
 
 const formatarLocal = (iso: string) =>
   new Intl.DateTimeFormat("pt-BR", {
@@ -288,15 +283,14 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     montar();
     await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
 
-    salvar();
+    await salvar();
 
     expect(await screen.findByText("Dosagem é obrigatória")).toBeInTheDocument();
     expect(screen.getByText("Quantidade é obrigatória")).toBeInTheDocument();
     expect(screen.getByText("Duração é obrigatória")).toBeInTheDocument();
     expect(screen.getByText("Intervalo é obrigatório")).toBeInTheDocument();
     expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
-    expect(api.posts("/remedio")).toHaveLength(0);
-    expect(api.posts("/dose/doses")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
   it("UT-12 TEST-01 valores zero mostram 'maior que zero' e não enviam mutação", async () => {
@@ -304,15 +298,14 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     const { container } = montar();
     preencher(container, { ...VALIDOS, dosagem: "0", quantidade: "0", duracao: "0", intervalo: "0" });
 
-    salvar();
+    await salvar();
 
     expect(await screen.findByText("Dosagem deve ser maior que zero")).toBeInTheDocument();
     expect(screen.getByText("Quantidade deve ser maior que zero")).toBeInTheDocument();
     expect(screen.getByText("Duração deve ser maior que zero")).toBeInTheDocument();
     expect(screen.getByText("Intervalo deve ser maior que zero")).toBeInTheDocument();
     expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
-    expect(api.posts("/remedio")).toHaveLength(0);
-    expect(api.posts("/dose/doses")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
   it("UT-12 TEST-01 horário inicial ausente mostra a mensagem e não envia mutação", async () => {
@@ -320,14 +313,13 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     const { container } = montar();
     preencher(container, { ...VALIDOS, hora: "" });
 
-    salvar();
+    await salvar();
 
     expect(
       await screen.findByText("Horário da primeira dose é obrigatório"),
     ).toBeInTheDocument();
     expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
-    expect(api.posts("/remedio")).toHaveLength(0);
-    expect(api.posts("/dose/doses")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
   it("UT-12 TEST-01 nome em branco mostra a mensagem e não envia mutação", async () => {
@@ -335,25 +327,24 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     const { container } = montar({ nome: "", tipo: "" });
     preencher(container, VALIDOS);
 
-    salvar();
+    await salvar();
 
     expect(await screen.findByText("Nome do medicamento é obrigatório")).toBeInTheDocument();
-    expect(api.posts("/remedio")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
   it("UT-12 TEST-01 fixture válida prossegue e limpa as mensagens de erro", async () => {
     const api = criarApi();
     const { container } = montar();
-    salvar(); // primeiro com erros
+    await salvar(); // primeiro com erros
     expect(await screen.findByText("Dosagem é obrigatória")).toBeInTheDocument();
 
     preencher(container, VALIDOS);
-    salvar();
+    await salvar();
 
     await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
     expect(screen.queryByText("Dosagem é obrigatória")).not.toBeInTheDocument();
-    expect(api.posts("/remedio")).toHaveLength(1);
-    expect(api.posts("/dose/doses")).toHaveLength(1);
+    expect(api.posts("/tratamento")).toHaveLength(1);
   });
 
   it("UT-12 TEST-01 sem token não envia mutação e pede login", async () => {
@@ -364,12 +355,12 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     const { container } = montar(undefined, { comProvider: false });
     preencher(container, VALIDOS);
 
-    salvar();
+    await salvar();
 
     await waitFor(() =>
       expect(alerta).toHaveBeenCalledWith("Você precisa estar logado para salvar um lembrete"),
     );
-    expect(api.posts("/remedio")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(0);
   });
 });
 
@@ -383,8 +374,8 @@ describe("UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo)", 
     const { container } = montar();
     preencher(container, VALIDOS);
 
-    salvar();
-    await waitFor(() => expect(api.posts("/dose/doses")).toHaveLength(1));
+    await salvar();
+    await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
     // Tabela literal: horário local (-03:00) -> ISO UTC esperado.
     const tabela = [
@@ -392,14 +383,14 @@ describe("UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo)", 
       { local: "04/11/2026, 16:00", iso: "2026-11-04T19:00:00.000Z" },
       { local: "05/11/2026, 00:00", iso: "2026-11-05T03:00:00.000Z" },
     ];
-    const enviado = (api.posts("/dose/doses")[0].corpo as { doses: string[] }).doses;
+    const enviado = (api.posts("/tratamento")[0].corpo as { doses: string[] }).doses;
     expect(enviado).toEqual(tabela.map((l) => l.iso));
     // Offset correto: cada ISO enviado, lido em America/Sao_Paulo, é o horário local da tabela.
     expect(enviado.map(formatarLocal)).toEqual(tabela.map((l) => l.local));
     // Limite final exclusivo: 05/11 08:00 local = 2026-11-05T11:00:00.000Z.
     expect(enviado).not.toContain("2026-11-05T11:00:00.000Z");
     // horaInicio do medicamento = primeira dose.
-    expect((api.posts("/remedio")[0].corpo as { horaInicio: string }).horaInicio).toBe(
+    expect((api.posts("/tratamento")[0].corpo as { remedio: { horaInicio: string } }).remedio.horaInicio).toBe(
       "2026-11-04T11:00:00.000Z",
     );
   });
@@ -436,28 +427,25 @@ describe("UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo)", 
       const { container } = montar();
       preencher(container, campos);
 
-      salvar();
-      await waitFor(() => expect(api.posts("/dose/doses")).toHaveLength(1));
+      await salvar();
+      await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-      expect((api.posts("/dose/doses")[0].corpo as { doses: string[] }).doses).toEqual(esperado);
+      expect((api.posts("/tratamento")[0].corpo as { doses: string[] }).doses).toEqual(esperado);
     },
   );
 
-  // Defeito novo (não é FE-xx): `calcularHorariosMedicamento` obtém a data de
-  // cada dose com `toISOString()` (data em UTC) e a hora com `getHours()` (local).
-  // Em America/Sao_Paulo (-03:00) qualquer dose local >= 21:00 recebe a data do
-  // dia seguinte e é gravada 24h depois (cardCadastrar.tsx:142-149 e 272-285).
-  it.fails(
-    "UT-13 TEST-01 [DEFEITO D-01 data UTC x hora local] doses locais >= 21:00 mantêm o dia local: 10:30, a cada 6h, 1 dia",
+  // Regressão D-01: serializar instantes diretamente conserva o dia local após 21h.
+  it(
+    "UT-13 TEST-01 BEAPI-08 [regressão D-01] doses locais >= 21:00 mantêm o dia local: 10:30, a cada 6h, 1 dia",
     async () => {
       const api = criarApi();
       const { container } = montar();
       preencher(container, { ...VALIDOS, hora: "10:30", intervalo: "6" });
 
-      salvar();
-      await waitFor(() => expect(api.posts("/dose/doses")).toHaveLength(1));
+      await salvar();
+      await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-      expect((api.posts("/dose/doses")[0].corpo as { doses: string[] }).doses).toEqual([
+      expect((api.posts("/tratamento")[0].corpo as { doses: string[] }).doses).toEqual([
         "2026-11-04T13:30:00.000Z", // 04/11 10:30 local
         "2026-11-04T19:30:00.000Z", // 04/11 16:30 local
         "2026-11-05T01:30:00.000Z", // 04/11 22:30 local
@@ -466,22 +454,19 @@ describe("UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo)", 
     },
   );
 
-  // Defeito novo: setFullYear/setMonth/setDate sobre `new Date()` em sequência
-  // transborda o mês quando o dia atual não existe no mês de destino
-  // (hoje 31/10 + destino 30/11: setMonth(10) vira 01/12 e setDate(30) vira 30/12).
-  // cardCadastrar.tsx:178-194.
-  it.fails(
-    "UT-13 TEST-01 [DEFEITO D-02 transbordo de mês] horaInicio de 30/11/2026 08:00 enviada com relógio em 31/10/2026",
+  // Regressão D-02: construir a data completa evita transbordo do mês do relógio.
+  it(
+    "UT-13 TEST-01 BEAPI-08 [regressão D-02] horaInicio de 30/11/2026 08:00 enviada com relógio em 31/10/2026",
     async () => {
       instalarRelogio("2026-10-31T12:00:00-03:00");
       const api = criarApi();
       const { container } = montar();
       preencher(container, { ...VALIDOS, data: "2026-11-30" });
 
-      salvar();
-      await waitFor(() => expect(api.posts("/remedio")).toHaveLength(1));
+      await salvar();
+      await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-      expect((api.posts("/remedio")[0].corpo as { horaInicio: string }).horaInicio).toBe(
+      expect((api.posts("/tratamento")[0].corpo as { remedio: { horaInicio: string } }).remedio.horaInicio).toBe(
         "2026-11-30T11:00:00.000Z",
       );
     },
@@ -493,23 +478,22 @@ describe("UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo)", 
 // ---------------------------------------------------------------------------
 
 describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real)", () => {
-  it("IT-05 TEST-02 ordem POST remédio -> POST doses -> GET lista; cada dose usa o ID criado e o horário esperado; recarga exibe os dados persistidos", async () => {
+  it("IT-05 TEST-02 BEAPI-07 ordem POST tratamento -> GET lista; cada dose usa o ID criado e o horário esperado; recarga exibe os dados persistidos", async () => {
     const api = criarApi({ idsRemedio: [77] });
     const { container } = montar();
     preencher(container, VALIDOS);
     await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
 
-    salvar();
+    await salvar();
 
     await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
     expect(api.rotulos()).toEqual([
       "GET /dose/me", // carga inicial do provider
-      "POST /remedio",
-      "POST /dose/doses",
+      "POST /tratamento",
       "GET /dose/me", // recarga depois da gravação
     ]);
-    expect(api.posts("/dose/doses")[0].corpo).toEqual({
-      remedioId: 77,
+    expect(api.posts("/tratamento")[0].corpo).toEqual({
+      remedio: expect.objectContaining({ nome: "Dipirona", horaInicio: "2026-11-04T11:00:00.000Z" }),
       doses: [
         "2026-11-04T11:00:00.000Z",
         "2026-11-04T19:00:00.000Z",
@@ -542,10 +526,10 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
       observacoes: "Tomar após as refeições",
     });
 
-    salvar();
-    await waitFor(() => expect(api.posts("/remedio")).toHaveLength(1));
+    await salvar();
+    await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-    expect(api.posts("/remedio")[0].corpo).toEqual({
+    expect((api.posts("/tratamento")[0].corpo as TreatmentRequest).remedio).toEqual({
       nome: "Dipirona",
       quantidadeCaixa: 30,
       dataValidade: "2027-03-15",
@@ -560,7 +544,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
       quantidadeDose: "1.5 ml",
       observacao: "Tomar após as refeições",
     });
-    const req = api.posts("/remedio")[0];
+    const req = api.posts("/tratamento")[0];
     expect(req.cabecalhos.get("Authorization")).toBe("Bearer token-sintetico");
     expect(req.cabecalhos.get("Content-Type")).toBe("application/json");
   });
@@ -581,24 +565,24 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     const { container } = montar();
     preencher(container, { ...VALIDOS, corHex: hex });
 
-    salvar();
-    await waitFor(() => expect(api.posts("/remedio")).toHaveLength(1));
+    await salvar();
+    await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-    expect((api.posts("/remedio")[0].corpo as { cor: string }).cor).toBe(nomeCor);
+    expect((api.posts("/tratamento")[0].corpo as { remedio: { cor: string } }).remedio.cor).toBe(nomeCor);
   });
 
-  it("IT-05 TEST-02 campos opcionais vazios usam os padrões atuais (motivo, classificação, validade, observação)", async () => {
+  it("IT-05 TEST-02 campos opcionais vazios usam os padrões atuais (motivo, classificação, observação)", async () => {
     const api = criarApi();
     const { container } = montar({ nome: "Dipirona", tipo: "" });
     preencher(container, VALIDOS);
 
-    salvar();
-    await waitFor(() => expect(api.posts("/remedio")).toHaveLength(1));
+    await salvar();
+    await waitFor(() => expect(api.posts("/tratamento")).toHaveLength(1));
 
-    expect(api.posts("/remedio")[0].corpo).toMatchObject({
+    expect((api.posts("/tratamento")[0].corpo as TreatmentRequest).remedio).toMatchObject({
       motivo: "Não especificado",
       classificacao: "Não classificado",
-      dataValidade: null,
+      dataValidade: "2027-12-31",
       observacao: "",
       unidadeMedida: "mg",
       quantidadeDose: "500 mg",
@@ -606,30 +590,19 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     });
   });
 
-  it("IT-05 TEST-02 ID de remédio textual na resposta é convertido para número nas doses", async () => {
-    const api = criarApi({ remedio: "idTexto", idsRemedio: [42] });
-    const { container } = montar();
-    preencher(container, VALIDOS);
-
-    salvar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
-
-    expect((api.posts("/dose/doses")[0].corpo as { remedioId: unknown }).remedioId).toBe(42);
-  });
-
   it("IT-05 TEST-02 após o sucesso o formulário volta aos valores iniciais", async () => {
     const api = criarApi();
     const { container } = montar();
     preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
 
-    salvar();
+    await salvar();
     await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
 
     expect(screen.getByPlaceholderText("Dipirona")).toHaveValue("");
     expect(screen.getByPlaceholderText("500")).toHaveValue(null);
     expect(screen.getByPlaceholderText("Dor de cabeça")).toHaveValue("");
     expect(container.querySelector('input[type="time"]')).toHaveValue("10:00");
-    expect(api.posts("/remedio")).toHaveLength(1);
+    expect(api.posts("/tratamento")).toHaveLength(1);
   });
 
   it("IT-05 TEST-02 enquanto grava, o botão mostra 'Salvando...' e fica desabilitado; duplo clique envia um único cadastro", async () => {
@@ -640,13 +613,14 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        if (init?.method === "POST" && String(input).endsWith("/remedio")) await portao;
+        if (init?.method === "POST" && String(input).endsWith("/tratamento")) await portao;
         return original(input, init);
       }),
     );
     const { container } = montar();
     preencher(container, VALIDOS);
 
+    await aguardarSessao();
     const botaoSalvar = screen.getByRole("button", { name: "Salvar lembrete" });
     fireEvent.click(botaoSalvar);
     fireEvent.click(botaoSalvar); // segundo clique no mesmo botão, já desabilitado
@@ -656,8 +630,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     expect(screen.getByRole("button", { name: "Limpar formulário" })).toBeDisabled();
     liberar();
     await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
-    expect(api.posts("/remedio")).toHaveLength(1);
-    expect(api.posts("/dose/doses")).toHaveLength(1);
+    expect(api.posts("/tratamento")).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   });
 
@@ -666,6 +639,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     const api = criarApi();
     const { container } = render(
       <AuthProvider>
+      <EstadoSessao />
         <LembreteProvider>
           <Pagina />
         </LembreteProvider>
@@ -677,10 +651,10 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     expect(screen.getByPlaceholderText("Analgésico")).toHaveValue("Analgésico");
 
     preencher(container, { ...VALIDOS, nome: undefined });
-    salvar();
+    await salvar();
 
     await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
-    expect(api.posts("/remedio")[0].corpo).toMatchObject({
+    expect((api.posts("/tratamento")[0].corpo as TreatmentRequest).remedio).toMatchObject({
       nome: "DIPIRONA",
       classificacao: "Analgésico",
     });
@@ -688,98 +662,52 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
 });
 
 // ---------------------------------------------------------------------------
-// Falhas por etapa
-// ---------------------------------------------------------------------------
+// Falhas do cadastro atômico e reenvio manual.
+describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
+  it.each([{ remedio: "erro500" as const }, { doses: "erro500" as const }])(
+    "IT-05 BEAPI-07 falha transacional %j não cria nada, não recarrega e preserva o formulário",
+    async (config) => {
+      const api = criarApi(config);
+      const { container } = montar();
+      preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
+      await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
+      await salvar();
+      await waitFor(() => expect(alerta).toHaveBeenCalledWith("Falha simulada no tratamento"));
+      expect(alerta).toHaveBeenCalledTimes(1);
+      expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
+      expect(api.rotulos()).toEqual(["GET /dose/me", "POST /tratamento"]);
+      expect(api.remedios).toHaveLength(0);
+      expect(api.doses).toHaveLength(0);
+      expect(screen.getByPlaceholderText("500")).toHaveValue(500);
+      expect(screen.getByPlaceholderText("Dor de cabeça")).toHaveValue("Dor de cabeça");
+    },
+  );
 
-describe("IT-05 TEST-02 falha em cada etapa do cadastro", () => {
-  it("IT-05 TEST-02 POST remédio falha (500): informa o erro, não envia doses, não recarrega e mantém o formulário", async () => {
-    const api = criarApi({ remedio: "erro500" });
-    const { container } = montar();
-    preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
-    await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
-
-    salvar();
-
-    await waitFor(() =>
-      expect(alerta).toHaveBeenCalledWith("Erro ao salvar o medicamento: Falha simulada no remédio"),
-    );
-    await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
-    expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
-    expect(api.rotulos()).toEqual(["GET /dose/me", "POST /remedio"]);
-    expect(api.doses).toHaveLength(0);
-    expect(screen.getByPlaceholderText("Dor de cabeça")).toHaveValue("Dor de cabeça");
-    expect(screen.getByPlaceholderText("500")).toHaveValue(500);
-  });
-
-  it("IT-05 TEST-02 resposta do remédio sem data.id: erro explícito, nenhuma dose enviada", async () => {
+  it("IT-05 BEAPI-07 envelope sem data.remedio não confirma sucesso", async () => {
     const api = criarApi({ remedio: "semId" });
     const { container } = montar();
     preencher(container, VALIDOS);
-
-    salvar();
-
-    await waitFor(() =>
-      expect(alerta).toHaveBeenCalledWith(
-        "Erro ao salvar o medicamento: Não foi possível obter o ID do remédio criado",
-      ),
-    );
+    await salvar();
+    await waitFor(() => expect(alerta).toHaveBeenCalledWith("Não foi possível confirmar o tratamento criado. Tente novamente."));
     expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
-    expect(api.posts("/dose/doses")).toHaveLength(0);
+    expect(api.posts("/tratamento")).toHaveLength(1);
   });
 
-  it("IT-05 TEST-02 POST doses falha após medicamento criado: não anuncia sucesso, não recarrega, não limpa o formulário", async () => {
-    const api = criarApi({ doses: "erro500", idsRemedio: [77] });
-    const { container } = montar();
-    preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
-    await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
-
-    salvar();
-
-    await waitFor(() =>
-      expect(alerta).toHaveBeenCalledWith("Erro ao salvar as doses: Falha simulada nas doses"),
-    );
-    await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
-    expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
-    // Evidência FE-08: o medicamento ficou gravado sem doses e não há compensação.
-    expect(api.rotulos()).toEqual(["GET /dose/me", "POST /remedio", "POST /dose/doses"]);
-    expect(api.remedios).toHaveLength(1);
-    expect(api.doses).toHaveLength(0);
-    expect(screen.getByPlaceholderText("Dor de cabeça")).toHaveValue("Dor de cabeça");
-  });
-
-  it("IT-05 TEST-02 falha parcial (evidência FE-08): o usuário recebe dois alertas de erro seguidos, nenhum informa que o medicamento já foi criado", async () => {
-    const api = criarApi({ doses: "erro500" });
+  it("IT-13 BEAPI-07 FE-08 reenvio após resposta incerta não duplica o medicamento", async () => {
+    const api = criarApi({ remedio: "incerta", idsRemedio: [77, 78] });
     const { container } = montar();
     preencher(container, VALIDOS);
-
-    salvar();
-
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(2));
-    // Caracterização do comportamento atual: dois alertas consecutivos
-    // (cardCadastrar.tsx:334 e :352) sem informar que o medicamento foi criado.
-    expect(alerta.mock.calls.map((c) => c[0])).toEqual([
-      "Erro ao salvar as doses: Falha simulada nas doses",
-      "Falha simulada nas doses",
-    ]);
+    await salvar();
+    await waitFor(() => expect(alerta).toHaveBeenCalledWith("Failed to fetch"));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
+    expect(api.posts("/tratamento")).toHaveLength(1);
+    await salvar();
+    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    const posts = api.posts("/tratamento");
+    expect(posts).toHaveLength(2);
+    expect(posts[0].cabecalhos.get("Idempotency-Key")).toBe(posts[1].cabecalhos.get("Idempotency-Key"));
+    expect(posts[0].corpo).toEqual(posts[1].corpo);
     expect(api.remedios).toHaveLength(1);
+    expect(api.doses).toHaveLength(3);
   });
-
-  it.fails(
-    "IT-13 TEST-02 [BLOQUEADO FE-08] nova tentativa após falha parcial não duplica o medicamento",
-    async () => {
-      const api = criarApi({ doses: "erro500", idsRemedio: [77, 78] });
-      const { container } = montar();
-      preencher(container, VALIDOS);
-
-      salvar();
-      await waitFor(() => expect(alerta).toHaveBeenCalledTimes(2));
-      await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
-      salvar(); // recuperação do usuário: tenta de novo
-      await waitFor(() => expect(alerta).toHaveBeenCalledTimes(4));
-
-      // Esperado (contrato a aprovar): no máximo um medicamento criado.
-      // Atual: cada tentativa cria outro (POST /remedio duas vezes).
-      expect(api.remedios).toHaveLength(1);
-    },
-  );
 });
