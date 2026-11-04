@@ -35,3 +35,15 @@ Gates T14: `npm ci` 0; `eslint .` 1 com os mesmos 10 achados da baseline (saída
 Fontes: Context7 `/react/react/v19.3.1`; [release 19.3.1](https://github.com/react/react/releases/tag/v19.3.1) (melhoria do protocolo de transporte de Server Components); `npm view` confirmou as quatro versões e os peers. A instalação normal resolveu os peers de Next 16.4.5 sem exceções. Sessão, formulários, hidratação/navegação, busca, dose e capturas permanecem cobertos pelas mesmas suítes.
 
 Gates T15: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T16 — react-datepicker
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| react-datepicker | 8.3.0 | 8.10.0 | Atualizar minor compatível; 9.1.0 bloqueado: major exige escopo próprio. |
+
+Fontes: Context7 `/hacker0x01/react-datepicker`; [release 8.10.0](https://github.com/Hacker0x01/react-datepicker/releases/tag/v8.10.0) (exports, teclado/foco e atributos ARIA); [release major 9.0.0](https://github.com/Hacker0x01/react-datepicker/releases/tag/v9.0.0); `npm view react-datepicker@8.10.0 peerDependencies` aceita React 19. Nenhum advisory direto no inventário. A instalação atualizou também dependências transitivas da família floating-ui, via resolução npm.
+
+Inspeção de todos os `.ts/.tsx` em `src/`: nenhum import/uso de Datepicker ou CSS do pacote; o formulário usa `input` nativo. Assim, os testes verificam o contrato real das datas, não certificam a API de um calendário inexistente. Cenários existentes preservados: UT-13 início/intervalo/limite exclusivo; IT-05 payload com validade/unidades/cor; IT-05 opcionais vazios; FN-03 payload de tratamento válido e validade `2027-01-31`. O caso noturno `ACHADO-T13-01` continua expected fail, sem alteração. Locale e aparência dos campos nativos permanecem nos snapshots.
+
+Gates T16: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.

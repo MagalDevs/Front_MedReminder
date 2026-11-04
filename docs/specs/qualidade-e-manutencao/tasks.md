@@ -426,17 +426,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T15
 **Reuses**: FE-01/07; PR #51; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Seleção de datas, locale, formato enviado e limites atuais permanecem iguais; major só é aceita após leitura de migração e regressão.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Seleção de datas, locale, formato enviado e limites atuais permanecem iguais; major só é aceita após leitura de migração e regressão.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: integration/functional: datas e tratamento; mínimo 3 cenários específicos de data.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps): update datepicker compatibly`
+
+**Execution note**: 2026-11-04. Decisão por pacote, fontes e resultado dos gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md). `npm ci`, tipos, build e regressão: exit 0; lint: exit 1, mesmos 10 achados preexistentes, sem aumento. Seleção preservada: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais, 12 snapshots.
 
 ### T17: Atualizar lucide-react
 
