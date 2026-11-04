@@ -489,17 +489,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T18
 **Reuses**: FE-01/10; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, DEP-03
-**Status**: Pending
+**Status**: Done — mantido: pacotes ja no latest
 
 **Done when**:
 
-- [ ] Headers acentuados, linhas vazias, aspas e ordem preservados; nenhuma edição de conteúdo do catálogo como parte da atualização.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Headers acentuados, linhas vazias, aspas e ordem preservados; nenhuma edição de conteúdo do catálogo como parte da atualização.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration: fixture de parser e cenários T9/T10; mínimo 3 casos CSV específicos.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(deps): update CSV parser compatibly`
+
+**Execution note**: 2026-11-04. Decisão por pacote, fontes e resultado dos gates em [dependency-updates.md](../../evidencias/2026-11-04/dependency-updates.md). `npm ci`, tipos, build e regressão: exit 0; lint: exit 1, mesmos 10 achados preexistentes, sem aumento. Seleção preservada: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais, 12 snapshots.
 
 ### T20: Atualizar TypeScript
 

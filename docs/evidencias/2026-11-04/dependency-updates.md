@@ -72,3 +72,16 @@ Consultas `npm view` confirmaram latest/peers: runtime declara React/ReactDOM `>
 Nenhum import/uso de máscara em todos os `.ts/.tsx` de `src/`; portanto, não existem os três fluxos de máscara/digitação exigidos condicionalmente pelo plano para verificar uma atualização. A biblioteca não foi montada nem habilitada, e não se alega cobertura de máscara ou compatibilidade com React 19. Os cenários reais de campos vazios, valores zero e payload do formulário (UT-12/IT-05) continuam cobertos pela regressão. Proposta separada: avaliar remoção da dependência sem uso ou uma migração de máscara compatível antes de introduzir esse recurso, com testes específicos. Nenhuma troca de biblioteca, alteração de produto ou relaxamento de tipos nesta tarefa. Sem advisory direto no inventário; manifesto/lockfile idênticos ao gate T16 (`e64cff2`).
 
 Gates T18 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T19 — PapaParse e tipagem
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| papaparse | 5.7.0 | 5.7.0 | Manter: já no latest do registry. |
+| @types/papaparse | 5.5.2 | 5.5.2 | Manter: já no latest do registry. |
+
+Fontes: Context7 `/mholt/papaparse` (configuração de header, quoting e skipEmptyLines); [release 5.7.0](https://github.com/mholt/PapaParse/releases/tag/5.7.0); [API oficial](https://www.papaparse.com/docs); `npm view` confirmou os latest acima. Nenhum advisory direto registrado. Manifesto/lockfile e catálogo não mudam; não foi necessária instalação de versões idênticas.
+
+Os testes reais SearchBar/CardBusca usam o parser sem mock: UT-09 substring/acento e distinção de acentos; UT-09/UT-10 ordem/duplicados/limite dez; UT-14 nome inicial e seleção; descrição vazia e cabeçalho `DESCRIÇÃO`. Verificação complementar descartável com `node -` e `node:assert/strict`, PapaParse 5.7.0 e a configuração real `{header:true, skipEmptyLines:true}`: **3/3** aprovadas, exit 0 — cabeçalhos/conteúdo Unicode; linhas vazias e descrição vazia; aspas escapadas/vírgula em campo com ordem/duplicados preservados. Nenhuma alteração de testes para aprovar os gates. Gate amplo T16 reutilizado sobre árvore executável idêntica.
+
+Gates T19 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
