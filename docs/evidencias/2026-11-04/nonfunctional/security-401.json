@@ -1,0 +1,20 @@
+{
+  "measuredAt": "2026-11-04T19:55:15.930Z",
+  "frontendCommit": "8d8e92fa3ab9225ed5c4259a61b60f0583ef91fc",
+  "measuredBuildCommit": "current working tree",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v26.8.1",
+  "browser": "chromium",
+  "browserVersion": "156.0.8078.4",
+  "os": "win32 10.0.26300",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor             ",
+  "memoryBytes": 34269614080,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "tokenRemoved": true,
+    "profileRemoved": true,
+    "loginRedirect": true,
+    "backend": "Simulated 401; JWT validation not tested"
+  }
+}

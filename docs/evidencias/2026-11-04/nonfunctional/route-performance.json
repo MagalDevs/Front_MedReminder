@@ -1,0 +1,298 @@
+{
+  "measuredAt": "2026-11-04T19:55:09.350Z",
+  "frontendCommit": "8d8e92fa3ab9225ed5c4259a61b60f0583ef91fc",
+  "measuredBuildCommit": "current working tree",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v26.8.1",
+  "browser": "chromium",
+  "browserVersion": "156.0.8078.4",
+  "os": "win32 10.0.26300",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor             ",
+  "memoryBytes": 34269614080,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "routes": [
+      {
+        "route": "/",
+        "coldMs": {
+          "samples": [
+            120.63580000000002,
+            121.17630000000008,
+            147.6123000000007,
+            131.64729999999963,
+            138.39990000000034
+          ],
+          "median": 131.64729999999963,
+          "p95NearestRank": 147.6123000000007,
+          "maximum": 147.6123000000007
+        },
+        "warmMs": {
+          "samples": [
+            88.61470000000008,
+            84.5597000000007,
+            60.91119999999955,
+            98.95799999999963,
+            82.8048000000008
+          ],
+          "median": 84.5597000000007,
+          "p95NearestRank": 98.95799999999963,
+          "maximum": 98.95799999999963
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          }
+        ]
+      },
+      {
+        "route": "/login",
+        "coldMs": {
+          "samples": [
+            115.32150000000001,
+            122.29529999999977,
+            121.63259999999991,
+            114.65560000000005,
+            115.33830000000034
+          ],
+          "median": 115.33830000000034,
+          "p95NearestRank": 122.29529999999977,
+          "maximum": 122.29529999999977
+        },
+        "warmMs": {
+          "samples": [
+            76.3088000000007,
+            83.18409999999949,
+            64.28210000000036,
+            73.00860000000011,
+            58.434799999999996
+          ],
+          "median": 73.00860000000011,
+          "p95NearestRank": 83.18409999999949,
+          "maximum": 83.18409999999949
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          }
+        ]
+      },
+      {
+        "route": "/novo-medicamento",
+        "coldMs": {
+          "samples": [
+            126.83420000000024,
+            131.71349999999984,
+            119.18289999999979,
+            126.07930000000033,
+            124.67259999999987
+          ],
+          "median": 126.07930000000033,
+          "p95NearestRank": 131.71349999999984,
+          "maximum": 131.71349999999984
+        },
+        "warmMs": {
+          "samples": [
+            85.0605999999998,
+            77.11819999999989,
+            67.28129999999965,
+            82.9332000000004,
+            67.80370000000039
+          ],
+          "median": 77.11819999999989,
+          "p95NearestRank": 85.0605999999998,
+          "maximum": 85.0605999999998
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          }
+        ]
+      },
+      {
+        "route": "/meus-lembretes",
+        "coldMs": {
+          "samples": [
+            123.36130000000048,
+            126.23509999999987,
+            120.53389999999854,
+            119.6195000000007,
+            122.46700000000055
+          ],
+          "median": 122.46700000000055,
+          "p95NearestRank": 126.23509999999987,
+          "maximum": 126.23509999999987
+        },
+        "warmMs": {
+          "samples": [
+            73.65949999999975,
+            70.3173999999999,
+            82.88240000000042,
+            81.23919999999998,
+            82.07210000000123
+          ],
+          "median": 81.23919999999998,
+          "p95NearestRank": 82.88240000000042,
+          "maximum": 82.88240000000042
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          },
+          {
+            "requests": 0,
+            "jsDecodedBytes": 0
+          }
+        ]
+      }
+    ],
+    "cache": "cold=new browser context; warm=second navigation same context. Route interception disables HTTP cache in Playwright; no claim of browser-cache benefit.",
+    "scope": "Navigation load and fonts, not LCP/INP/CLS or interactive readiness; requests and decoded JS per observed route, not complete bundle inventory",
+    "target": "http://localhost:3001",
+    "comparison": "Same runner supports historical/current builds via NF_TARGET_URL and NF_BUILD_COMMIT; compare dated artifacts without claiming causality from one run"
+  }
+}

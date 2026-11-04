@@ -1,0 +1,762 @@
+{
+  "measuredAt": "2026-11-04T19:57:43.670Z",
+  "frontendCommit": "8d8e92fa3ab9225ed5c4259a61b60f0583ef91fc",
+  "measuredBuildCommit": "537bfaafe13bb0132f25a3c5e75e4fad0ef68624",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v26.8.1",
+  "browser": "chromium",
+  "browserVersion": "156.0.8078.4",
+  "os": "win32 10.0.26300",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor             ",
+  "memoryBytes": 34269614080,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "routes": [
+      {
+        "route": "/",
+        "coldMs": {
+          "samples": [
+            133.26810000000023,
+            125.31940000000031,
+            132.35460000000012,
+            126.41879999999992,
+            122.29709999999977
+          ],
+          "median": 126.41879999999992,
+          "p95NearestRank": 133.26810000000023,
+          "maximum": 133.26810000000023
+        },
+        "warmMs": {
+          "samples": [
+            69.1944999999996,
+            69.19979999999987,
+            91.15329999999994,
+            67.11850000000004,
+            81.24089999999978
+          ],
+          "median": 69.19979999999987,
+          "p95NearestRank": 91.15329999999994,
+          "maximum": 91.15329999999994
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 665787
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 628142
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 665787
+          }
+        ]
+      },
+      {
+        "route": "/login",
+        "coldMs": {
+          "samples": [
+            120.10529999999926,
+            115.56880000000001,
+            120.20959999999923,
+            117.24189999999999,
+            119.55670000000009
+          ],
+          "median": 119.55670000000009,
+          "p95NearestRank": 120.20959999999923,
+          "maximum": 120.20959999999923
+        },
+        "warmMs": {
+          "samples": [
+            54.505599999999504,
+            67.11740000000009,
+            66.07229999999981,
+            74.13630000000012,
+            65.04309999999987
+          ],
+          "median": 66.07229999999981,
+          "p95NearestRank": 74.13630000000012,
+          "maximum": 74.13630000000012
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/167ntx310656_.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 687149
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/167ntx310656_.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 687149
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/167ntx310656_.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 687149
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1k5gyna3k7lvi.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 604210
+          }
+        ]
+      },
+      {
+        "route": "/novo-medicamento",
+        "coldMs": {
+          "samples": [
+            143.5118999999995,
+            138.52889999999934,
+            137.5544,
+            134.26720000000023,
+            136.0543000000007
+          ],
+          "median": 137.5544,
+          "p95NearestRank": 143.5118999999995,
+          "maximum": 143.5118999999995
+        },
+        "warmMs": {
+          "samples": [
+            79.0608000000002,
+            73.4400999999998,
+            72.82350000000042,
+            81.29910000000018,
+            87.10199999999895
+          ],
+          "median": 79.0608000000002,
+          "p95NearestRank": 87.10199999999895,
+          "maximum": 87.10199999999895
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 639213
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 710015
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 701842
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 639213
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 639213
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 639213
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 639213
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/43uksqdzbqc2-.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 719901
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 691631
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/1yi8adh2l3n6r.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3c4teuh0ontlh.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/43uksqdzbqc2-.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 719901
+          }
+        ]
+      },
+      {
+        "route": "/meus-lembretes",
+        "coldMs": {
+          "samples": [
+            131.0004000000008,
+            122.20730000000003,
+            223.13580000000002,
+            138.3070000000007,
+            128.57060000000092
+          ],
+          "median": 131.0004000000008,
+          "p95NearestRank": 223.13580000000002,
+          "maximum": 223.13580000000002
+        },
+        "warmMs": {
+          "samples": [
+            82.41300000000047,
+            84.85460000000057,
+            105.64550000000054,
+            68.81259999999929,
+            84.07999999999993
+          ],
+          "median": 84.07999999999993,
+          "p95NearestRank": 105.64550000000054,
+          "maximum": 105.64550000000054
+        },
+        "resources": [
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3mvi-n63ibf8y.js",
+              "http://localhost:3002/_next/static/chunks/2xr38v7gd7kfd.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 663749
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          },
+          {
+            "requests": 0,
+            "jsUrls": [
+              "http://localhost:3002/_next/static/chunks/2mmpezlrfmbu5.js",
+              "http://localhost:3002/_next/static/chunks/196x_tfexoucg.js",
+              "http://localhost:3002/_next/static/chunks/2e_lrwr-bf1eq.js",
+              "http://localhost:3002/_next/static/chunks/turbopack-16157-fov14rm.js",
+              "http://localhost:3002/_next/static/chunks/1oy0819gx9chj.js",
+              "http://localhost:3002/_next/static/chunks/19an_uu2t2xo4.js",
+              "http://localhost:3002/_next/static/chunks/07e72-4f8_iv2.js",
+              "http://localhost:3002/_next/static/chunks/0cz1d0mv5g_q7.js",
+              "http://localhost:3002/_next/static/chunks/3s6nzrbk-8mnv.js"
+            ],
+            "jsDecodedBytes": 611331
+          }
+        ]
+      }
+    ],
+    "cache": "cold=new browser context; warm=second navigation same context. Route interception disables HTTP cache in Playwright; no claim of browser-cache benefit.",
+    "scope": "Navigation load and fonts, not LCP/INP/CLS or interactive readiness; requests and decoded JS per observed route, not complete bundle inventory. JS body bytes read with same-origin APIRequestContext outside timed navigation because intercepted ResourceTiming can report zero sizes.",
+    "target": "http://localhost:3002",
+    "comparison": "Same runner supports historical/current builds via NF_TARGET_URL and NF_BUILD_COMMIT; compare dated artifacts without claiming causality from one run"
+  }
+}

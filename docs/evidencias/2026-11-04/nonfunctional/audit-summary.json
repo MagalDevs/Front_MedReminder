@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-04",
+  "frontendCommit": "84b5ae706ea2ef9bd13ed2a8892f4e8000bb01a8",
+  "command": "npm audit --json",
+  "exitCode": 1,
+  "metadata": { "info": 0, "low": 0, "moderate": 8, "high": 1, "critical": 0, "totalAffectedPackageEntries": 9 },
+  "directAffectedEntries": ["eslint-config-next"],
+  "transitiveAffectedEntries": ["@typescript-eslint/eslint-plugin", "@typescript-eslint/parser", "@typescript-eslint/type-utils", "@typescript-eslint/typescript-estree", "@typescript-eslint/utils", "minimatch", "typescript-eslint", "zod"],
+  "rootAdvisories": [
+    { "package": "minimatch", "severity": "moderate", "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249", "range": ">=7.0.0 <11.0.1" },
+    { "package": "zod", "severity": "high", "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5", "range": "<4.6.6" }
+  ],
+  "decision": "No automatic force/downgrade. npm suggests eslint-config-next 15.5.29 for the minimatch chain, incompatible with selected Next 16 scope. Track compatible upstream update; zod fix remains for reviewed dependency resolution.",
+  "interpretation": "Nine affected package entries, not nine independent advisories; one direct tooling dependency, eight transitive entries. No claim of zero vulnerabilities. See dependency-updates.md for package decisions."
+}

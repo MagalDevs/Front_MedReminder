@@ -1,0 +1,372 @@
+{
+  "measuredAt": "2026-11-04T19:57:35.292Z",
+  "frontendCommit": "8d8e92fa3ab9225ed5c4259a61b60f0583ef91fc",
+  "measuredBuildCommit": "537bfaafe13bb0132f25a3c5e75e4fad0ef68624",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v26.8.1",
+  "browser": "chromium",
+  "browserVersion": "156.0.8078.4",
+  "os": "win32 10.0.26300",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor             ",
+  "memoryBytes": 34269614080,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "csvBytes": 819990,
+    "csvSha256": "05dd7279126e11616ce304050cbc048a1848bcbaa27182a6a499f85d496f17ce",
+    "rows": 19035,
+    "queries": [
+      "",
+      "xyz-inexistente-999",
+      "a",
+      "dip",
+      "DIP",
+      "ácido",
+      "ÁCIDO",
+      "funed",
+      "FUNED LORATADINA",
+      " dip"
+    ],
+    "warmupPasses": 20,
+    "rounds": [
+      [
+        {
+          "round": 0,
+          "query": "",
+          "beforeMs": 0,
+          "afterMs": 0,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "xyz-inexistente-999",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "a",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 13573,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "dip",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "DIP",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "ácido",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "ÁCIDO",
+          "beforeMs": 0,
+          "afterMs": 2,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "funed",
+          "beforeMs": 1,
+          "afterMs": 2,
+          "count": 47,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": "FUNED LORATADINA",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 1,
+          "equivalent": true
+        },
+        {
+          "round": 0,
+          "query": " dip",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 50,
+          "equivalent": true
+        }
+      ],
+      [
+        {
+          "round": 1,
+          "query": "",
+          "beforeMs": 0,
+          "afterMs": 0,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "xyz-inexistente-999",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "a",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 13573,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "dip",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "DIP",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "ácido",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "ÁCIDO",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "funed",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 47,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": "FUNED LORATADINA",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 1,
+          "equivalent": true
+        },
+        {
+          "round": 1,
+          "query": " dip",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 50,
+          "equivalent": true
+        }
+      ],
+      [
+        {
+          "round": 2,
+          "query": "",
+          "beforeMs": 0,
+          "afterMs": 0,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "xyz-inexistente-999",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 0,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "a",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 13573,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "dip",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "DIP",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 223,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "ácido",
+          "beforeMs": 2,
+          "afterMs": 1,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "ÁCIDO",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 59,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "funed",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 47,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": "FUNED LORATADINA",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 1,
+          "equivalent": true
+        },
+        {
+          "round": 2,
+          "query": " dip",
+          "beforeMs": 1,
+          "afterMs": 1,
+          "count": 50,
+          "equivalent": true
+        }
+      ]
+    ],
+    "downloads": [],
+    "browserParsingMs": {
+      "samples": [
+        14,
+        13,
+        12,
+        12,
+        10
+      ],
+      "median": 12,
+      "p95NearestRank": 14,
+      "maximum": 14
+    },
+    "explicitNoStoreDownloadMs": 21,
+    "parser": "PapaParse 5.7.0 minified browser distribution, same header/skipEmptyLines options as application, five parses",
+    "before": {
+      "samples": [
+        0,
+        1,
+        1,
+        1,
+        2,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        2,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "median": 1,
+      "p95NearestRank": 2,
+      "maximum": 2
+    },
+    "after": {
+      "samples": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "median": 1,
+      "p95NearestRank": 2,
+      "maximum": 2
+    },
+    "clock": "Chromium performance.now for download, parsing and filtering",
+    "limitations": "Parser is injected from installed browser distribution, measured separately from application mount/render. Microbenchmark compares original and optimized expressions on identical rows in browser. Ten samples/round give nearest-rank p95 equal to maximum; not robust tail estimation.",
+    "proposedTarget": "p95 < 500 ms in PLANO_TESTES, proposal only; no field or production performance claim"
+  }
+}

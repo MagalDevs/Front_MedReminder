@@ -1,0 +1,444 @@
+{
+  "measuredAt": "2026-11-04T19:55:02.282Z",
+  "frontendCommit": "8d8e92fa3ab9225ed5c4259a61b60f0583ef91fc",
+  "measuredBuildCommit": "current working tree",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v26.8.1",
+  "browser": "chromium",
+  "browserVersion": "156.0.8078.4",
+  "os": "win32 10.0.26300",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor             ",
+  "memoryBytes": 34269614080,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "screens": [
+      {
+        "route": "/",
+        "lang": "pt-BR",
+        "viewportWidth": 768,
+        "documentWidth": 768,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "User menu",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "text",
+            "name": "",
+            "placeholder": "Buscar medicamento...",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Meu painel",
+            "placeholder": null,
+            "tabIndex": 0
+          }
+        ],
+        "unnamedControls": [
+          {
+            "tag": "INPUT",
+            "placeholder": "Buscar medicamento..."
+          },
+          {
+            "tag": "BUTTON",
+            "placeholder": null
+          }
+        ],
+        "focus": [
+          {
+            "tag": "BUTTON",
+            "text": "User menu",
+            "outline": "rgb(255, 255, 255) auto 3px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px"
+          },
+          {
+            "tag": "INPUT",
+            "text": "",
+            "outline": "rgb(16, 16, 16) none 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Meu painel",
+            "outline": "rgb(3, 127, 140) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BODY",
+            "text": "Olá, PessoaMedReminder Meu painel(globalThis[\"TURBOPACK\"] || (globalThis[\"TURBOPACK\"] = []",
+            "outline": "rgb(23, 23, 23) none 3px",
+            "boxShadow": "none"
+          }
+        ],
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/login",
+        "lang": "pt-BR",
+        "viewportWidth": 768,
+        "documentWidth": 768,
+        "controls": [
+          {
+            "tag": "INPUT",
+            "type": "email",
+            "name": "E-mail",
+            "placeholder": "Digite seu e-mail",
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "password",
+            "name": "Senha",
+            "placeholder": "Digite sua senha",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": "submit",
+            "name": "Entrar",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Cadastre-se",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Voltar para a página inicial",
+            "placeholder": null,
+            "tabIndex": 0
+          }
+        ],
+        "unnamedControls": [],
+        "focus": [
+          {
+            "tag": "INPUT",
+            "text": "",
+            "outline": "rgb(16, 16, 16) none 1px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(3, 127, 140) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+          },
+          {
+            "tag": "INPUT",
+            "text": "",
+            "outline": "rgb(16, 16, 16) none 1px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(3, 127, 140) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "Entrar",
+            "outline": "rgb(255, 255, 255) auto 3px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Cadastre-se",
+            "outline": "rgb(3, 127, 140) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Voltar para a página inicial",
+            "outline": "rgb(3, 127, 140) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BODY",
+            "text": "MedReminderE-mail Senha EntrarCadastre-seVoltar para a página inicial(globalThis[\"TURBOPAC",
+            "outline": "rgb(23, 23, 23) none 3px",
+            "boxShadow": "none"
+          }
+        ],
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/novo-medicamento",
+        "lang": "pt-BR",
+        "viewportWidth": 768,
+        "documentWidth": 768,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Meus medicamentos",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Meus lembretes",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Configurações",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "Sair",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "INPUT",
+            "type": "text",
+            "name": "",
+            "placeholder": "Buscar medicamento...",
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          }
+        ],
+        "unnamedControls": [
+          {
+            "tag": "BUTTON",
+            "placeholder": null
+          },
+          {
+            "tag": "A",
+            "placeholder": null
+          },
+          {
+            "tag": "INPUT",
+            "placeholder": "Buscar medicamento..."
+          },
+          {
+            "tag": "BUTTON",
+            "placeholder": null
+          }
+        ],
+        "focus": [
+          {
+            "tag": "BUTTON",
+            "text": "",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Meus medicamentos",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Meus lembretes",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Configurações",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "Sair",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "INPUT",
+            "text": "",
+            "outline": "rgb(16, 16, 16) none 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BODY",
+            "text": "Meus medicamentosMeus lembretesConfiguraçõesPessoaSairAdicionar medicamentoCadastre lembre",
+            "outline": "rgb(23, 23, 23) none 3px",
+            "boxShadow": "none"
+          }
+        ],
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/meus-lembretes",
+        "lang": "pt-BR",
+        "viewportWidth": 768,
+        "documentWidth": 768,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Meus medicamentos",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Meus lembretes",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "A",
+            "type": null,
+            "name": "Configurações",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "Sair",
+            "placeholder": null,
+            "tabIndex": 0
+          },
+          {
+            "tag": "BUTTON",
+            "type": null,
+            "name": "Adicionar medicamento",
+            "placeholder": null,
+            "tabIndex": 0
+          }
+        ],
+        "unnamedControls": [
+          {
+            "tag": "BUTTON",
+            "placeholder": null
+          },
+          {
+            "tag": "A",
+            "placeholder": null
+          }
+        ],
+        "focus": [
+          {
+            "tag": "BUTTON",
+            "text": "",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Meus medicamentos",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Meus lembretes",
+            "outline": "rgb(224, 221, 221) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "A",
+            "text": "Configurações",
+            "outline": "rgb(4, 77, 85) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "Sair",
+            "outline": "rgb(16, 16, 16) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BUTTON",
+            "text": "Adicionar medicamento",
+            "outline": "rgb(255, 255, 255) auto 1px",
+            "boxShadow": "none"
+          },
+          {
+            "tag": "BODY",
+            "text": "Meus medicamentosMeus lembretesConfiguraçõesPessoaSairMeus lembretesVisualize seus lembret",
+            "outline": "rgb(23, 23, 23) none 3px",
+            "boxShadow": "none"
+          }
+        ],
+        "horizontalOverflow": false
+      }
+    ],
+    "scope": "DOM names, Tab path, computed focus styles, horizontal overflow; observations, not WCAG certification",
+    "issue": "FE-09 https://github.com/MagalDevs/Front_MedReminder/issues/33",
+    "manual": {
+      "screenReader": "BLOCKED: no identified screen reader session",
+      "contrast": "NOT ASSESSED manually",
+      "zoomAndModalFocus": "NOT ASSESSED; requires manual flow review"
+    }
+  }
+}
