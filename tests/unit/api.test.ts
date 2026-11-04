@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiRequest, API_URL } from '@/app/utils/api';
 
 function respond(body: unknown, status = 200, contentType = 'application/json') {
@@ -145,5 +145,63 @@ describe('apiRequest real — TEST-01', () => {
   ])('UT-07 TEST-01 preserva sucesso HTTP 200: %j', async (body) => {
     respond(body);
     await expect(apiRequest('/fixture', { requireAuth: false })).resolves.toEqual(body);
+  });
+});
+
+describe('IT-08 SEC-02 — diagnósticos HTTP sem conteúdo arbitrário', () => {
+  const methods = ['log', 'info', 'warn', 'error', 'debug'] as const;
+  const sensitive = 'senha-SEC02! cpf-98765432109 cep-87654321 sentinela-api@example.test';
+
+  beforeEach(() => {
+    for (const method of methods) vi.spyOn(console, method).mockImplementation(() => {});
+  });
+
+  function expectPrivateConsole() {
+    for (const method of methods) {
+      const output = JSON.stringify(vi.mocked(console[method]).mock.calls);
+      for (const sentinel of sensitive.split(' ')) expect(output).not.toContain(sentinel);
+    }
+  }
+
+  it.each([
+    { format: 'message', body: { message: sensitive }, status: 400, expected: sensitive, contentType: 'application/json' },
+    { format: 'error', body: { error: sensitive }, status: 403, expected: sensitive, contentType: 'application/json' },
+    { format: 'errors', body: { errors: [{ message: sensitive }, 'Outro campo'] }, status: 422, expected: `${sensitive}, Outro campo`, contentType: 'application/json' },
+    { format: 'texto', body: sensitive, status: 500, expected: 'Erro interno do servidor', contentType: 'text/plain' },
+  ])('UT-05 IT-08 SEC-02 preserva erro $format / HTTP $status sem corpo no console', async ({ body, status, expected, contentType }) => {
+    respond(body, status, contentType);
+    await expect(apiRequest('/fixture', { requireAuth: false })).rejects.toThrow(expected);
+    expect(console.error).toHaveBeenCalledExactlyOnceWith('API Error:', { status });
+    expectPrivateConsole();
+  });
+
+  it.each([
+    { error: true }, { status: 'error' }, { success: false },
+  ])('UT-07 IT-08 SEC-02 HTTP 200 mantém rejeição com indicador %j sem log da mensagem', async (indicator) => {
+    respond({ message: sensitive, ...indicator });
+    await expect(apiRequest('/fixture', { requireAuth: false })).rejects.toThrow(sensitive);
+    expect(console.warn).toHaveBeenCalledExactlyOnceWith('Server returned message in successful response');
+    expectPrivateConsole();
+  });
+
+  it('UT-07 IT-08 SEC-02 HTTP 200 informativo mantém retorno sem log da mensagem', async () => {
+    const body = { message: sensitive, data: { nome: sensitive } };
+    respond(body);
+    await expect(apiRequest('/fixture', { requireAuth: false })).resolves.toEqual(body);
+    expectPrivateConsole();
+  });
+
+  it.each([true, false])('UT-06 IT-08 SEC-02 401 mantém sessão/navegação conforme requireAuth=%s sem corpo no console', async (requireAuth) => {
+    const location = controlledLocation();
+    localStorage.setItem('access_token', 'token-sintetico');
+    localStorage.setItem('user_data', sensitive);
+    localStorage.setItem('preferencia', 'preservada');
+    respond({ message: sensitive }, 401);
+    await expect(apiRequest('/fixture', { requireAuth })).rejects.toThrow(sensitive);
+    expect(localStorage.getItem('access_token')).toBe(requireAuth ? null : 'token-sintetico');
+    expect(localStorage.getItem('user_data')).toBe(requireAuth ? null : sensitive);
+    expect(localStorage.getItem('preferencia')).toBe('preservada');
+    expect(location.href).toBe(requireAuth ? '/login' : 'http://localhost/area-protegida');
+    expectPrivateConsole();
   });
 });

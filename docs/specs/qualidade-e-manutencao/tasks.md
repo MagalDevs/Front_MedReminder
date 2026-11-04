@@ -612,13 +612,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T25
 **Reuses**: FE-07/14; NF-WEB-04; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: SEC-02
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Corpo JSON/texto e mensagens de HTTP 200 não vazam sentinelas no console; status, throw e tratamento de 401 são equivalentes à baseline.
-- [ ] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Corpo JSON/texto e mensagens de HTTP 200 não vazam sentinelas no console; status, throw e tratamento de 401 são equivalentes à baseline.
+- [x] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit: mínimo 4 casos de erro com sentinelas; atualizar T7 junto com a alteração.
 **Gate**: quick — usar a linha correspondente em Gate Check Commands.

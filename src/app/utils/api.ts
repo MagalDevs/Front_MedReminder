@@ -65,13 +65,8 @@ export async function apiRequest<T = unknown>(
       window.location.href = '/login';
     }
     
-    // More detailed logging for debugging
-    console.error('API Error:', { 
-      endpoint, 
-      status: response.status, 
-      statusText: response.statusText,
-      data 
-    });
+    // Keep diagnostics independent of arbitrary response content.
+    console.error('API Error:', { status: response.status });
     
     // Type guard to handle error messages properly
     let errorMessage = '';
@@ -127,7 +122,7 @@ export async function apiRequest<T = unknown>(
       'message' in data && typeof data.message === 'string' &&
       !('access_token' in data) &&
       !('success' in data && data.success === true)) {
-    console.warn('Server returned message in successful response:', data.message);
+    console.warn('Server returned message in successful response');
     
     // Check for specific error indicators despite 200 status
     if ('error' in data || 
