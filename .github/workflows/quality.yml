@@ -124,7 +124,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      # Os testes usam Chromium headless padrão, sem channel: não baixar o
+      # navegador headed que o job não executa.
+      - run: npx playwright install --with-deps --only-shell chromium
       # playwright.config.ts sobe `npm run build && npm run start` na porta 3001
       # (CI=true: sem reaproveitar servidor, retries=2, forbidOnly).
       - run: npm run test:functional

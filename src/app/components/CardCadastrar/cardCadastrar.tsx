@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useLayoutEffect, useContext, useRef } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiRequest, ApiError } from "../../utils/api";
 import { LembreteContext } from "@/app/contexts/lembreteContext";
@@ -92,7 +92,9 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const intencao = useRef<{ identidade: string; chave: string } | null>(null);
   const enviando = useRef(false);
   const sessionEpoch = useRef(0);
-  useEffect(() => {
+  // Invalidate the prior identity before a newly committed form can be used.
+  // A deferred effect could otherwise revoke a request submitted just after login.
+  useLayoutEffect(() => {
     const epoch = sessionEpoch;
     epoch.current++;
     intencao.current = null;
