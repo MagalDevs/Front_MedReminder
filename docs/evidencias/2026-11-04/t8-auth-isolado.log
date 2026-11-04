@@ -1,0 +1,32 @@
+Command: npx --no-install vitest run tests/integration/auth.test.tsx --reporter=verbose
+Exit code: 0
+
+ RUN  v5.1.0 <repo>
+
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido Usuário 57ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido Ana 26ms
+stderr | tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-01 TEST-02 login envia credenciais, busca perfil com Bearer e disponibiliza sessão
+Server returned message in successful response: ok
+
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido ana 16ms
+stderr | tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-02 TEST-02 falha no perfil apresenta erro e executa logout limpando sessão prévia
+API Error: {
+  endpoint: 'usuario/me',
+  status: 500,
+  statusText: '',
+  data: { message: 'Perfil indisponível' }
+}
+
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-01 TEST-02 login envia credenciais, busca perfil com Bearer e disponibiliza sessão 269ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-02 TEST-02 falha no perfil apresenta erro e executa logout limpando sessão prévia 61ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 sem token mostra loading, bloqueia conteúdo e navega ao login 13ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 restaura sessão preparada após loading e renderiza conteúdo protegido 23ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 logout remove token/perfil e revoga conteúdo já renderizado 36ms
+ ✓ |integration| tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-10 TEST-02 [BLOQUEADO FE-03] token inválido não deve habilitar dados protegidos 21ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed | 1 expected fail (9)
+   Start at  15:39:47
+   Duration  2.25s (environment 57%, tests 26%, setup 12%, import 3%, transform 2%)
+
+

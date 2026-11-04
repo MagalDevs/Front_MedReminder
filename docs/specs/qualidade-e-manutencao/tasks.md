@@ -270,13 +270,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T7
 **Reuses**: FE-03/07; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: TEST-01, TEST-02
-**Status**: Pending
+**Status**: Done (FE-03 registrado como it.fails)
 
 **Done when**:
 
-- [ ] Loading, restauração, login e logout atuais têm asserts; token inválido sem consulta remota permanece defeito FE-03, sem teste verde que o legitime.
-- [ ] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Loading, restauração, login e logout atuais têm asserts; token inválido sem consulta remota permanece defeito FE-03, sem teste verde que o legitime.
+- [x] Resultado do gate full registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit/integration: mínimo 6 cenários, incluindo UT-08, ausência de token e falha no perfil; teste unitário do nome acompanha a caracterização do AuthContext.
 **Gate**: full — usar a linha correspondente em Gate Check Commands.
