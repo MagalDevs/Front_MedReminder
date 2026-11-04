@@ -85,3 +85,13 @@ Fontes: Context7 `/mholt/papaparse` (configuração de header, quoting e skipEmp
 Os testes reais SearchBar/CardBusca usam o parser sem mock: UT-09 substring/acento e distinção de acentos; UT-09/UT-10 ordem/duplicados/limite dez; UT-14 nome inicial e seleção; descrição vazia e cabeçalho `DESCRIÇÃO`. Verificação complementar descartável com `node -` e `node:assert/strict`, PapaParse 5.7.0 e a configuração real `{header:true, skipEmptyLines:true}`: **3/3** aprovadas, exit 0 — cabeçalhos/conteúdo Unicode; linhas vazias e descrição vazia; aspas escapadas/vírgula em campo com ordem/duplicados preservados. Nenhuma alteração de testes para aprovar os gates. Gate amplo T16 reutilizado sobre árvore executável idêntica.
 
 Gates T19 (reutiliza a rodada T16 sobre manifesto/lockfile e fontes de produto/testes identicos): `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
+
+## T20 — TypeScript
+
+| Pacote | De | Para | Decisão |
+| --- | --- | --- | --- |
+| typescript | 5.8.3 | 5.9.3 | Atualizar minor; latest 7.0.2 bloqueado: major exige escopo próprio. |
+
+Fontes: Context7 `/microsoft/typescript` (mudanças do compilador nativo TS7 e defaults) e [notas oficiais 5.9](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-9.html). Atenção às mudanças de `lib.d.ts`, ArrayBuffer/TypedArray/Buffer e inferência de argumentos; nenhuma mudança de produto foi necessária. A migração de compilador TS7 não foi instalada nem certificada nesta manutenção. `npm view typescript@5 version` confirmou 5.9.3 como último 5.x; `npm view typescript version` confirmou 7.0.2. Sem advisory direto registrado. `tsconfig.json` permanece idêntico, incluindo strict/noEmit e resolução bundler; não há relaxamento de tipos, exclusões ou alterações de harness.
+
+Gates T20: `npm ci` exit 0; `npx --no-install eslint .` exit 1 (10 achados preexistentes, saída idêntica à baseline); `npx --no-install tsc --noEmit`, `npm run build` e `npm run test:regression` exit 0. Mesma seleção: 70 unitários, 50 integrações + 8 expected fail, 52 funcionais; 12 snapshots preservados.
