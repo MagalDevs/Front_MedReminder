@@ -146,17 +146,19 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T1
 **Reuses**: FE-01; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: DEP-02, CI-01
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] CLI lê a configuração sem erro; zero regras desativadas para ocultar achados; avisos e falhas preexistentes são relacionados ao backlog.
-- [ ] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] CLI lê a configuração sem erro; zero regras desativadas para ocultar achados; avisos e falhas preexistentes são relacionados ao backlog.
+- [x] Resultado do gate build registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: none, configuração; executar lint sem --fix e revisar saída completa.
 **Gate**: build — usar a linha correspondente em Gate Check Commands.
 **Commit**: `chore(lint): align config with Next 16`
+
+**Execution note**: 2026-11-04. Config flat nativa (defineConfig + eslint-config-next/core-web-vitals + /typescript, conforme documentação do Next 16.2 via Context7); FlatCompat removido. Ignora .next, node_modules, coverage, playwright-report, test-results (e out/build/next-env.d.ts). Gate build: `eslint .` lê a configuração sem erro e reporta 10 achados preexistentes (8 erros, 2 avisos; exit 1) registrados em [lint-baseline.log](../../evidencias/2026-11-04/lint-baseline.log) e em docs/BACKLOG.md; o exit 1 permanece visível, nenhuma regra foi desativada. `tsc --noEmit` OK (exit 0). Nenhum teste aplicável (configuração).
 
 ### T3: Configurar runtime e comandos de qualidade
 

@@ -1,0 +1,161 @@
+# lint-baseline.log — T2 (chore(lint): align config with Next 16)
+# Data: 2026-11-04 America/Sao_Paulo | Node v26.8.1 | npm 11.19.0 | ESLint 9.25.1 | eslint-config-next 16.3.6
+# Base: HEAD 73f5b94 + eslint.config.mjs de T2 | comando: npx --no-install eslint . (sem --fix)
+# Caminhos absolutos substituídos por caminhos relativos ao repositório (sanitizado).
+# Antes de T2 (config FlatCompat): exit 2, TypeError 'Converting circular structure to JSON' (ver dependencies.json, baselineGate).
+# Resultado: 10 problemas (8 erros, 2 avisos), todos em código de produto preexistente; nenhuma regra desativada, nenhum código corrigido.
+# Erros: react-hooks/set-state-in-effect (regra nova do eslint-plugin-react-hooks 7 incluída no eslint-config-next 16) x8.
+# Avisos: react-hooks/exhaustive-deps x1 (MeusLembretesContent.tsx:68), @next/next/no-location-assign-relative-destination x1 (utils/api.ts:65).
+
+## Saída completa
+
+
+src/app/components/CardBusca/cardBusca.tsx
+  38:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/components/CardBusca/cardBusca.tsx:38:9
+  36 |
+  37 |       if (foundMed) {
+> 38 |         setSelectedMedicamento(foundMed);
+     |         ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  39 |         onSelect(foundMed);
+  40 |       }
+  41 |     }                                      react-hooks/set-state-in-effect
+  70:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/components/CardBusca/cardBusca.tsx:70:7
+  68 |         med.NOME_PRODUTO?.toLowerCase().includes(searchTerm.toLowerCase()),
+  69 |       );
+> 70 |       setFiltered(results);
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  71 |     } else {
+  72 |       setFiltered([]);
+  73 |     }  react-hooks/set-state-in-effect
+
+src/app/components/CardCadastrar/cardCadastrar.tsx
+  70:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/components/CardCadastrar/cardCadastrar.tsx:70:5
+  68 |
+  69 |   useEffect(() => {
+> 70 |     setNome(medicamentoSelecionado?.nome || "");
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  71 |     setTipo(medicamentoSelecionado?.tipo || "");
+  72 |   }, [medicamentoSelecionado]);
+  73 |  react-hooks/set-state-in-effect
+
+src/app/components/SearchBar/SearchBar.tsx
+  37:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/components/SearchBar/SearchBar.tsx:37:7
+  35 |   useEffect(() => {
+  36 |     if (searchQuery.length > 0) {
+> 37 |       setFiltered(
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |         medicamentos.filter((med) =>
+  39 |           med.NOME_PRODUTO?.toLowerCase().includes(searchQuery.toLowerCase()),
+  40 |         ),  react-hooks/set-state-in-effect
+  52:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/components/SearchBar/SearchBar.tsx:52:7
+  50 |       searchQuery === filtered[0].NOME_PRODUTO.trim()
+  51 |     ) {
+> 52 |       setShowCadastrar(true);
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |     } else {
+  54 |       setShowCadastrar(false);
+  55 |     }                                                       react-hooks/set-state-in-effect
+
+src/app/contexts/lembreteContext.tsx
+  61:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/contexts/lembreteContext.tsx:61:9
+  59 |
+  60 |     useEffect(() => {
+> 61 |         getLembretes();
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  62 |     }, []);
+  63 |
+  64 |     const lembretesHoje = lembretes.filter((lembrete) => {  react-hooks/set-state-in-effect
+
+src/app/meus-lembretes/MeusLembretesContent.tsx
+  68:6  warning  React Hook useEffect has a missing dependency: 'getLembretes'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src/app/novo-medicamento/page.tsx
+  23:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/novo-medicamento/page.tsx:23:7
+  21 |
+  22 |     if (medicamento) {
+> 23 |       setMedicamentoSelecionado({
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |         NOME_PRODUTO: medicamento,
+  25 |         DESCRIÇÃO: '',
+  26 |       });  react-hooks/set-state-in-effect
+
+src/app/page.tsx
+  17:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+src/app/page.tsx:17:5
+  15 |   // Handle hydration mismatch with client/server
+  16 |   useEffect(() => {
+> 17 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |   }, []);
+  19 |   // Close dropdown when clicking outside
+  20 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+src/app/utils/api.ts
+  65:7  warning  Do not use `window.location.href` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+✖ 10 problems (8 errors, 2 warnings)
+
+EXIT_CODE=1

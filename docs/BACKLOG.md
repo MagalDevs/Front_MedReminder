@@ -18,6 +18,16 @@ Todos ABERTOS. P0 bloqueia entrega; P1 completa confiabilidade; P2 evolução. D
 
 Prioridade de produto: fluxo correto e dados reais antes de expansão de recursos. Histórico simulado é bloqueio para apresentar histórico como parte do MVP; se excluído da demonstração, declarar a limitação.
 
+## Achados de lint preexistentes (2026-11-04)
+
+Registrados no T2 do plano de manutenção, com ESLint CLI e `eslint-config-next` 16.3.6, sem desativar regras nem alterar código de produto. Saída completa em [lint-baseline.log](evidencias/2026-11-04/lint-baseline.log): 8 erros e 2 avisos. Relacionados ao aceite de [FE-01](https://github.com/MagalDevs/Front_MedReminder/issues/25) ("lint sem erro"), que permanece ABERTO até a correção em tarefa própria.
+
+| Regra | Severidade | Local | Observação |
+| --- | --- | --- | --- |
+| `react-hooks/set-state-in-effect` | erro | `CardBusca/cardBusca.tsx:38,70`; `CardCadastrar/cardCadastrar.tsx:70`; `SearchBar/SearchBar.tsx:37,52`; `contexts/lembreteContext.tsx:61`; `novo-medicamento/page.tsx:23`; `page.tsx:17` | `setState` síncrono dentro de `useEffect`. Corrigir pode alterar renderização e ciclo de vida; exige testes de caracterização (T7–T12) antes e decisão própria, fora das otimizações que preservam lógica. |
+| `react-hooks/exhaustive-deps` | aviso | `meus-lembretes/MeusLembretesContent.tsx:68` | Dependência `getLembretes` ausente; relacionado ao ciclo de vida dos lembretes ([FE-05](https://github.com/MagalDevs/Front_MedReminder/issues/29)). |
+| `@next/next/no-location-assign-relative-destination` | aviso | `utils/api.ts:65` | `window.location.href` para rota interna no 401; relacionado a [FE-03](https://github.com/MagalDevs/Front_MedReminder/issues/27)/[FE-06](https://github.com/MagalDevs/Front_MedReminder/issues/30). |
+
 ## Tarefas derivadas de cloud, qualidade e apresentação
 
 | ID | Prioridade | Atividade | Aceite | Dependência | Estimativa / papel |
