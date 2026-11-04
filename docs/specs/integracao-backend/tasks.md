@@ -105,13 +105,13 @@ T11 e T12 são marcos condicionados à API isolada; ausência de ambiente impede
 **Depends on**: T1
 **Requirement**: BEAPI-01, BEAPI-02
 **Reuses**: Contratos e fontes de `design.md`; stack do plano de manutenção.
-**Status**: Pending
+**Status**: Done
 
 **Done when**:
 
-- [ ] Sem fallback silencioso para produção no ambiente isolado; JSON/texto/vazio/inválido cobertos; mensagens array preservadas; Content-Type não forçado em FormData; opção explícita de invalidação em 401 permite tratar senha como operação. Não registrar corpo sensível.
-- [ ] Gate quick aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
-- [ ] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
+- [x] Sem fallback silencioso para produção no ambiente isolado; JSON/texto/vazio/inválido cobertos; mensagens array preservadas; Content-Type não forçado em FormData; opção explícita de invalidação em 401 permite tratar senha como operação. Não registrar corpo sensível.
+- [x] Gate quick aprovado com nomes/contagem dos testes e commit registrados; falhas mantidas visíveis.
+- [x] Testes do resultado acompanham a alteração, sem skip, remoção ou relaxamento de expectativas.
 
 **Tests**: unit: mínimo 10 casos, incluindo duas origens, barras, headers, 400 array, 401 inválido, 429 com Retry-After e 503.
 **Gate**: quick — Gate Check Commands.
