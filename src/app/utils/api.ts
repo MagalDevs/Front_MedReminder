@@ -45,6 +45,8 @@
  * Origem de produção legada. Só é usada como fallback explícito (ver `getApiBaseUrl`);
  * nunca em testes nem em ambientes marcados como isolados.
  */
+export const SESSION_INVALIDATED_EVENT = 'medreminder:session-invalidated';
+
 export const PRODUCTION_API_URL = 'https://medreminder-backend.onrender.com';
 
 /**
@@ -287,9 +289,11 @@ export async function apiRequest<T = unknown>(
     headers.set('Content-Type', 'application/json');
   }
 
+  const requestToken = requireAuth ? localStorage.getItem('access_token') : null;
+
   // Add auth token if required and available
   if (requireAuth) {
-    const token = localStorage.getItem('access_token');
+    const token = requestToken;
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     } else {
@@ -315,9 +319,11 @@ export async function apiRequest<T = unknown>(
 
   if (!response.ok) {
     // Token inválido/expirado: limpa a sessão (a menos que o chamador peça o contrário).
-    if (response.status === 401 && requireAuth && onUnauthorized === 'invalidate') {
+    if (response.status === 401 && requireAuth && onUnauthorized === 'invalidate' &&
+        localStorage.getItem('access_token') === requestToken) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('user_data');
+      window.dispatchEvent(new Event(SESSION_INVALIDATED_EVENT));
       window.location.href = '/login';
     }
 

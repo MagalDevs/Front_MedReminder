@@ -1,7 +1,9 @@
 'use client'
 
-import { createContext, ReactNode, useEffect, useState } from "react";
-import { apiRequest } from "../utils/api";
+import { createContext, ReactNode, useEffect, useState, useCallback } from "react";
+import { apiRequest, ApiError } from "../utils/api";
+
+import { useAuth } from "./AuthContext";
 
 interface Lembrete {
     id: number;
@@ -37,29 +39,43 @@ interface LembreteContextType {
 export const LembreteContext = createContext<LembreteContextType | null>(null)
 
 export const LembreteProvider = ({ children }: { children: ReactNode }) => {
-    const [lembretes, setLembretes] = useState<Lembrete[]>([]);
+    const { user, isAuthenticated, loading, logout } = useAuth();
+    const identity = !loading && isAuthenticated ? String(user?.id ?? user?.email ?? '') : '';
+    const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; doses: Lembrete[] }>({ identity: '', token: null, doses: [] });
+    const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+    const lembretes = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.doses : [];
 
-    const getLembretes = async () => {
-        const dosesResponse = await apiRequest<{
-            message: string;
-            data: Lembrete[];
-            }>('dose/me', {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            },
-        });        
-
-        if (dosesResponse && dosesResponse.data) {
-            setLembretes(dosesResponse.data); 
-        } else {
-            console.error('Erro ao buscar lembretes:', dosesResponse?.message);
+    const getLembretes = useCallback(async () => {
+        if (!identity || !token) return;
+        try {
+            const response = await apiRequest<{ data: Lembrete[] }>('dose/me', {
+                method: 'GET', onUnauthorized: 'throw',
+            });
+            if (localStorage.getItem('access_token') !== token) return;
+            if (!Array.isArray(response.data)) throw new Error('Resposta de doses inv?lida');
+            setSnapshot({ identity, token, doses: response.data });
+        } catch (error) {
+            if (localStorage.getItem('access_token') !== token) return;
+            if (error instanceof ApiError && error.status === 401) logout();
+            // Never publish stale private data or reject an unattended mount effect.
         }
-    }
+    }, [identity, token, logout]);
 
     useEffect(() => {
-        getLembretes();
-    }, []);
+        let active = true;
+        if (!identity || !token) return;
+        const load = async () => {
+            try {
+                const response = await apiRequest<{ data: Lembrete[] }>('dose/me', { method: 'GET', onUnauthorized: 'throw' });
+                if (!active || localStorage.getItem('access_token') !== token) return;
+                if (Array.isArray(response.data)) setSnapshot({ identity, token, doses: response.data });
+            } catch (error) {
+                if (active && localStorage.getItem('access_token') === token && error instanceof ApiError && error.status === 401) logout();
+            }
+        };
+        void load();
+        return () => { active = false; };
+    }, [identity, token, logout]);
 
     const lembretesHoje = lembretes.filter((lembrete) => {
         const agora = new Date();

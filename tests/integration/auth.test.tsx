@@ -66,18 +66,18 @@ function ProtectedConsumer({ snapshots }: { snapshots: LoadingSnapshot[] }) {
 }
 
 describe('sessão real — TEST-01 TEST-02', () => {
-  beforeEach(() => router.push.mockReset());
+  beforeEach(() => { router.push.mockReset(); vi.mocked(fetch).mockResolvedValue(json({ data: profile })); });
 
   it.each([
     { user: null, expected: 'Usuário' },
     { user: { nome: 'Ana Teste' }, expected: 'Ana' },
     { user: { email: 'ana@example.test' }, expected: 'ana' },
   ])('UT-08 TEST-01 nome exibido $expected', async ({ user, expected }) => {
-    if (user) restoreSession(user);
+    if (user) { restoreSession(user); vi.mocked(fetch).mockResolvedValueOnce(json({ data: { id: 7, ...user } })); }
     render(<AuthProvider><SessionConsumer /></AuthProvider>);
     await waitFor(() => expect(screen.getByLabelText('Loading')).toHaveTextContent('false'));
     expect(screen.getByLabelText('Nome exibido')).toHaveTextContent(new RegExp(`^${expected}$`));
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledTimes(user ? 1 : 0);
   });
 
   it('IT-01 TEST-02 login envia credenciais, busca perfil com Bearer e disponibiliza sessão', async () => {
@@ -115,6 +115,7 @@ describe('sessão real — TEST-01 TEST-02', () => {
   it('IT-02 TEST-02 falha no perfil apresenta erro e executa logout limpando sessão prévia', async () => {
     restoreSession({ id: 8, nome: 'Bruna Sintética' }, 'token-anterior-sintetico');
     vi.mocked(fetch)
+      .mockResolvedValueOnce(json({ data: profile }))
       .mockResolvedValueOnce(json({ access_token: token }))
       .mockResolvedValueOnce(json({ message: 'Perfil indisponível' }, 500));
     mountLogin();
@@ -126,7 +127,7 @@ describe('sessão real — TEST-01 TEST-02', () => {
     expect(screen.getByLabelText('Perfil')).toHaveTextContent('null');
     expect(screen.getByLabelText('Nome exibido')).toHaveTextContent('Usuário');
     expect(router.push).toHaveBeenCalledExactlyOnceWith('/login');
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(3);
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled();
   });
 
@@ -168,10 +169,10 @@ describe('sessão real — TEST-01 TEST-02', () => {
     expect(screen.getByLabelText('Autenticado')).toHaveTextContent('false');
     expect(screen.getByLabelText('Perfil')).toHaveTextContent('null');
     expect(router.push).toHaveBeenCalledWith('/login');
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it.fails('IT-10 TEST-02 [BLOQUEADO FE-03] token inválido não deve habilitar dados protegidos', async () => {
+  it('IT-10 TEST-02 BEAPI-03 token inválido não deve habilitar dados protegidos', async () => {
     restoreSession(profile, 'token-invalido-sintetico');
     // Any attempted remote validation receives 401; unanticipated calls remain
     // blocked by setup.ts. Today AuthProvider never consults this boundary.

@@ -384,3 +384,28 @@ describe('BEAPI-02 erro HTTP estruturado', () => {
 afterEach(() => {
   vi.resetModules();
 });
+
+
+describe('BEAPI-03 invalida??o da identidade em mem?ria', () => {
+  it('BEAPI-03 401 autenticado notifica providers da sessão corrente', async () => {
+    const api = await loadApi(); controlledLocation();
+    localStorage.setItem('access_token', 'token-a');
+    const notified = vi.fn(); window.addEventListener(api.SESSION_INVALIDATED_EVENT, notified);
+    respondJson({}, 401);
+    await expect(api.apiRequest('usuario/me')).rejects.toMatchObject({ status: 401 });
+    expect(notified).toHaveBeenCalledTimes(1);
+    window.removeEventListener(api.SESSION_INVALIDATED_EVENT, notified);
+  });
+  it('BEAPI-03 401 atrasado de A preserva token B e não invalida nem redireciona', async () => {
+    const api = await loadApi(); const location = controlledLocation();
+    localStorage.setItem('access_token', 'token-a');
+    let resolve!: (r: Response) => void;
+    vi.mocked(fetch).mockReturnValueOnce(new Promise<Response>(r => { resolve = r; }));
+    const request = api.apiRequest('usuario/me');
+    localStorage.setItem('access_token', 'token-b');
+    resolve(new Response('{}', { status: 401, headers: { 'content-type': 'application/json' } }));
+    await expect(request).rejects.toMatchObject({ status: 401 });
+    expect(localStorage.getItem('access_token')).toBe('token-b');
+    expect(location.href).toBe('http://localhost/area-protegida');
+  });
+});

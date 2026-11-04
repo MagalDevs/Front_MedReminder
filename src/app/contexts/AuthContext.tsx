@@ -6,8 +6,11 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useRef,
+  useCallback,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiRequest, ApiError, SESSION_INVALIDATED_EVENT } from '../utils/api';
 
 interface User {
   id?: string | number;
@@ -52,63 +55,75 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  // Each explicit login/logout revokes outstanding restoration responses.
+  const generation = useRef(0);
 
-  // Check if user is authenticated on component mount
   useEffect(() => {
+    const invalidate = () => {
+      generation.current++;
+      setUser(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+    };
+    window.addEventListener(SESSION_INVALIDATED_EVENT, invalidate);
+    return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, invalidate);
+  }, []);
+
+  // Each explicit login/logout revokes outstanding restoration responses.
+
+  useEffect(() => {
+    let active = true;
+    const version = generation.current;
+    const token = localStorage.getItem('access_token');
+    const current = () => active && generation.current === version &&
+      localStorage.getItem('access_token') === token;
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-
-        if (!token) {
-          setIsAuthenticated(false);
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        // Retrieve user data from localStorage
-        const storedUserData = localStorage.getItem('user_data');
-        if (storedUserData) {
-          try {
-            const userData = JSON.parse(storedUserData) as User;
-            setUser(userData);
-          } catch (e) {
-            console.error('Failed to parse stored user data', e);
-          }
-        }
-
-        // For now, just assume token presence means authenticated
+        if (!token) return;
+        const response = await apiRequest<{ data: User }>('usuario/me', {
+          method: 'GET', onUnauthorized: 'throw',
+        });
+        if (!current()) return;
+        if (!response.data || !response.data.id) throw new Error('Perfil inválido');
+        setUser(response.data);
+        localStorage.setItem('user_data', JSON.stringify(response.data));
         setIsAuthenticated(true);
-        setLoading(false);
       } catch (error) {
-        console.error('Auth check error:', error);
+        if (!current()) return;
         setIsAuthenticated(false);
         setUser(null);
-        setLoading(false);
+        // Network/server failures leave the credential available for a later attempt.
+        if (error instanceof ApiError && error.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_data');
+        }
+      } finally {
+        if (active && generation.current === version) setLoading(false);
       }
     };
-
-    checkAuth();
+    void checkAuth();
+    return () => { active = false; };
   }, []);
-  
-  const login = (token: string, userData?: User) => {
+
+  const login = useCallback((token: string, userData?: User) => {
+    generation.current++;
     localStorage.setItem('access_token', token);
-
-    if (userData) {
-      localStorage.setItem('user_data', JSON.stringify(userData));
-    }
-
+    if (userData) localStorage.setItem('user_data', JSON.stringify(userData));
+    else localStorage.removeItem('user_data');
     setIsAuthenticated(true);
     setUser(userData || null);
-  };
+    setLoading(false);
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    generation.current++;
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_data');
     setIsAuthenticated(false);
     setUser(null);
+    setLoading(false);
     router.push('/login');
-  };
+  }, [router]);
 
   const getUserDisplayName = () => formatUserDisplayName(user);
 

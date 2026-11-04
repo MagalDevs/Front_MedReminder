@@ -1,3 +1,5 @@
+vi.mock('@/app/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 1 }, isAuthenticated: true, loading: false, logout: sessionLogout }) }));
+const { sessionLogout } = vi.hoisted(() => ({ sessionLogout: vi.fn() }));
 import {
   act,
   render,
