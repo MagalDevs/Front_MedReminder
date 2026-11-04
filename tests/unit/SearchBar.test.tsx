@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import Papa from 'papaparse';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SearchBar from '@/app/components/SearchBar/SearchBar';
 
@@ -24,10 +25,10 @@ DIP 12,décimo segundo
 Sem Descrição,
 `;
 
-async function mount() {
+async function mount(csv: string = CSV) {
   const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
     expect(url).toBe('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv');
-    return new Response(CSV);
+    return new Response(csv);
   });
   vi.stubGlobal('fetch', fetchMock);
   await act(async () => { render(<SearchBar />); });
@@ -145,6 +146,83 @@ describe('SearchBar — CODE-01 TEST-01 DEP-03', () => {
     const input = await mount();
     search(input, 'Sem Descrição');
     expect(names()).toEqual(['Sem Descrição']);
+    expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeVisible();
+  });
+});
+
+// IT-09: dataset fixo com entradas que divergiriam se a consulta fosse aparada ou sem acentos.
+const CSV_EQUIV = `NOME_PRODUTO,DESCRIÇÃO
+Dipirona Sódica,analgésico
+ dip Espaço ,nome com espaço inicial
+Ácido Fólico,vitamina
+Acido Sintetico,sem acento
+ÁCIDO ÚRICO,maiúsculo
+Cloreto Sintético,sal
+`;
+
+type Row = { NOME_PRODUTO: string; DESCRIÇÃO: string };
+const EQUIV_ROWS = Papa.parse<Row>(CSV_EQUIV, { header: true, skipEmptyLines: true }).data;
+
+// Cópia literal da expressão de filtro anterior à T23 (consulta em minúsculas por item).
+function legacyNames(query: string) {
+  return EQUIV_ROWS
+    .filter((med) => med.NOME_PRODUTO?.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 10)
+    .map((med) => med.NOME_PRODUTO.trim());
+}
+
+describe('SearchBar — IT-09 CODE-01 equivalência da otimização', () => {
+  beforeEach(() => { push.mockReset(); });
+
+  const CASES: [string, string[]][] = [
+    ['DIP', ['Dipirona Sódica', 'dip Espaço']],
+    ['dip', ['Dipirona Sódica', 'dip Espaço']],
+    [' dip', ['dip Espaço']], // com trim, "Dipirona Sódica" também apareceria
+    ['dip ', ['dip Espaço']], // espaço final continua significativo
+    ['ácido', ['Ácido Fólico', 'ÁCIDO ÚRICO']],
+    ['ÁCIDO', ['Ácido Fólico', 'ÁCIDO ÚRICO']],
+    ['acido', ['Acido Sintetico']], // com accent folding apareceriam três itens
+    ['ACIDO', ['Acido Sintetico']],
+    ['xyz', []],
+  ];
+
+  it.each(CASES)('IT-09 CODE-01 TEST-01 consulta %j mantém nomes, ordem e equivale ao filtro anterior', async (query, expected) => {
+    const input = await mount(CSV_EQUIV);
+    search(input, query);
+    expect(names()).toEqual(expected);
+    expect(names()).toEqual(legacyNames(query));
+    expect(input).toHaveValue(query); // consulta original não é alterada nem aparada
+  });
+
+  it('IT-09 CODE-01 TEST-01 consultas repetidas e alternadas não reutilizam resultado anterior', async () => {
+    const input = await mount(CSV_EQUIV);
+    search(input, 'dip');
+    expect(names()).toEqual(['Dipirona Sódica', 'dip Espaço']);
+    search(input, 'ACIDO');
+    expect(names()).toEqual(['Acido Sintetico']);
+    search(input, 'dip');
+    expect(names()).toEqual(['Dipirona Sódica', 'dip Espaço']);
+    search(input, '');
+    expect(names()).toEqual([]);
+    expect(screen.getByText('Digite para buscar um medicamento')).toBeVisible();
+  });
+
+  it('IT-09 CODE-01 TEST-01 seleção e navegação mantêm a URL codificada da baseline', async () => {
+    const input = await mount(CSV_EQUIV);
+    search(input, 'ácido');
+    fireEvent.click(screen.getByText('Ácido Fólico'));
+    expect(input).toHaveValue('Ácido Fólico');
+    expect(names()).toEqual(['Ácido Fólico']);
+    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
+    expect(push).toHaveBeenCalledExactlyOnceWith('/novo-medicamento?medicamento=%C3%81cido%20F%C3%B3lico');
+  });
+
+  it('IT-09 CODE-01 TEST-01 consulta com espaço inicial não habilita Cadastrar; nome exato sim', async () => {
+    const input = await mount(CSV_EQUIV);
+    search(input, ' dip');
+    expect(names()).toEqual(['dip Espaço']);
+    expect(screen.queryByRole('button', { name: 'Cadastrar' })).not.toBeInTheDocument();
+    search(input, 'dip Espaço');
     expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeVisible();
   });
 });

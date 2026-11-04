@@ -34,9 +34,10 @@ export default function SearchBar() {
 
   useEffect(() => {
     if (searchQuery.length > 0) {
+      const lowerQuery = searchQuery.toLowerCase();
       setFiltered(
         medicamentos.filter((med) =>
-          med.NOME_PRODUTO?.toLowerCase().includes(searchQuery.toLowerCase()),
+          med.NOME_PRODUTO?.toLowerCase().includes(lowerQuery),
         ),
       );
     } else {

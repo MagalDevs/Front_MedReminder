@@ -555,13 +555,13 @@ T41 é o marco condicionado de E2E real. A indisponibilidade de ambiente ou das 
 **Depends on**: T22
 **Reuses**: FE-10; contratos atuais de `design.md` e cenários de `test-plan.md`.
 **Requirement**: CODE-01
-**Status**: Pending
+**Status**: Done (ganho de 6–15% na mediana; ver benchmark-busca.md)
 
 **Done when**:
 
-- [ ] Todos os cenários T9 passam sem alterar expectativas; arrays/ordem e captura permanecem iguais; benchmark antes/depois demonstra benefício ou a otimização é descartada.
-- [ ] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
-- [ ] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
+- [x] Todos os cenários T9 passam sem alterar expectativas; arrays/ordem e captura permanecem iguais; benchmark antes/depois demonstra benefício ou a otimização é descartada.
+- [x] Resultado do gate quick registrado no commit avaliado; falha/bloqueio permanece visível.
+- [x] Contagem e nomes dos testes informados quando aplicável, sem redução, skip ou relaxamento de assertivas para aprovar a tarefa.
 
 **Tests**: unit: atualizar no mesmo commit os testes de equivalência de T9; incluir entradas que divergiriam com trim/accent folding.
 **Gate**: quick — usar a linha correspondente em Gate Check Commands.
