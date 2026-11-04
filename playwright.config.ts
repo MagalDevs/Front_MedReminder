@@ -33,7 +33,15 @@ export default defineConfig({
       name: "functional",
       testDir: "./tests/functional",
       testMatch: "**/*.spec.ts",
+      testIgnore: "**/backend-cors.spec.ts",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // Provas CORS reais, separadas da regressão funcional com API simulada.
+      name: "isolated-cors",
+      testDir: "./tests/functional",
+      testMatch: "**/backend-cors.spec.ts",
+      use: { ...devices["Desktop Chrome"], trace: "off" },
     },
     {
       // Navegador real contra API isolada. Exige E2E_API_URL; sem ela os
@@ -41,7 +49,7 @@ export default defineConfig({
       name: "e2e",
       testDir: "./tests/e2e",
       testMatch: "**/*.spec.ts",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], trace: "off" },
     },
     {
       name: "nonfunctional",

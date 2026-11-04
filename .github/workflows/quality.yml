@@ -146,14 +146,17 @@ jobs:
     # E2E real: navegador contra API isolada com dados sintéticos. Só roda quando a
     # variável de repositório E2E_API_URL está definida. Nunca apontar para produção
     # (tests/support/e2e.ts rejeita a URL de produção com BLOQUEADO).
-    # Limitação conhecida (FE-06): enquanto o frontend usar URL de API fixa, os
-    # casos reais podem permanecer BLOQUEADOS mesmo com a variável definida.
+    # A origem pública é incorporada no build servido pelo Playwright.
     if: ${{ vars.E2E_API_URL != '' }}
     name: e2e real (API isolada)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       E2E_API_URL: ${{ vars.E2E_API_URL }}
+      NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL }}
+      NEXT_PUBLIC_API_ENV: isolated
+      E2E_BACKEND_COMMIT: ${{ vars.E2E_BACKEND_COMMIT }}
+      E2E_SQLITE_FILE: ${{ vars.E2E_SQLITE_FILE }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -163,6 +166,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npx playwright test --project=isolated-cors --grep BEAPI-10
       - name: Publicar relatório do Playwright (e2e)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
