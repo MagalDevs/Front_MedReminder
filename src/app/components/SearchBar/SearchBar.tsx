@@ -3,6 +3,9 @@
 import Papa, { ParseResult } from 'papaparse';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ApiError, parseRetryAfter } from '../../utils/api';
+import { RequestContractError, requestErrorMessage } from '../../utils/request-errors';
+import RequestFeedback from '../RequestFeedback/RequestFeedback';
 
 type Medicamento = { NOME_PRODUTO: string; DESCRIÇÃO: string };
 
@@ -11,25 +14,41 @@ export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedResult, setSelectedResult] = useState<{
     medicamento: Medicamento;
     catalog: Medicamento[];
   } | null>(null);
 
   useEffect(() => {
-    fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv')
-      .then((response) => response.text())
-      .then((csvText) => {
-        Papa.parse<{ NOME_PRODUTO: string; DESCRIÇÃO: string }>(csvText, {
+    let active = true;
+    const controller = new AbortController();
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv', { signal: controller.signal });
+        if (!response.ok) throw new ApiError({ status: response.status, message: 'Falha no catálogo', retryAfter: parseRetryAfter(response.headers.get('Retry-After')) });
+        const csvText = await response.text();
+        if (!active || controller.signal.aborted) return;
+        Papa.parse<Medicamento>(csvText, {
           header: true,
           skipEmptyLines: true,
-          complete: (
-            results: ParseResult<{ NOME_PRODUTO: string; DESCRIÇÃO: string }>,
-          ) => {
+          complete: (results: ParseResult<Medicamento>) => {
+            if (!active || controller.signal.aborted) return;
+            if (results.errors.length || !['NOME_PRODUTO', 'DESCRIÇÃO'].every(field => results.meta.fields?.includes(field)) || !results.data.every(row => typeof row.NOME_PRODUTO === 'string' && typeof row.DESCRIÇÃO === 'string')) throw new RequestContractError();
             setMedicamentos(results.data);
           },
         });
-      });
+      } catch (err) {
+        if (active && !controller.signal.aborted) setError(requestErrorMessage(err));
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void load();
+    return () => { active = false; controller.abort(); };
   }, []);
 
   const filtered = useMemo(() => {
@@ -120,7 +139,9 @@ export default function SearchBar() {
         </div>
       </div>
 
-      {isOpen && (
+      {loading && <p role="status">Carregando catálogo...</p>}
+      {error && <RequestFeedback context="Ao carregar catálogo de medicamentos" message={error} />}
+      {isOpen && !loading && !error && (
         <div className="absolute mt-1 w-full rounded-md bg-white border border-[#037F8C] shadow-lg z-10 max-h-72 overflow-y-auto">
           <div className="flex flex-col">
             {searchQuery && filtered.length > 0 ? (

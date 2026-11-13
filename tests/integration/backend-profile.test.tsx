@@ -36,7 +36,7 @@ describe('BEAPI-05 BEAPI-06 perfil e senha', () => {
     fireEvent.change(screen.getByPlaceholderText('00000-000'), { target: { value: '' } });
     vi.mocked(fetch).mockResolvedValueOnce(json({ message: ['CEP deve ter oito dígitos'] }, 400));
     submit();
-    await screen.findByText('CEP deve ter oito dígitos');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ao salvar perfil: CEP deve ter oito dígitos');
     expect(JSON.parse(String(vi.mocked(fetch).mock.calls[1][1]?.body)).cep).toBe('');
     expect(screen.queryByText('Dados atualizados com sucesso!')).not.toBeInTheDocument();
   });
@@ -50,14 +50,14 @@ describe('BEAPI-05 BEAPI-06 perfil e senha', () => {
   });
   it.each([
     [400, ['Nova senha precisa de símbolo'], 'Nova senha precisa de símbolo'],
-    [409, 'conflict', 'Conflito ao atualizar'],
+    [409, 'conflict', 'Não foi possível concluir a operação porque os dados foram alterados ou já existem. Verifique e tente novamente.'],
     [429, 'limit', 'Muitas tentativas'],
-    [503, 'offline', 'Não foi possível atualizar'],
+    [503, 'offline', 'O serviço está temporariamente indisponível. Tente novamente mais tarde.'],
   ])('perfil salvo antes de falha %s na senha permanece visível', async (status, message, expected) => {
     await mount();
     vi.mocked(fetch).mockResolvedValueOnce(profile()).mockResolvedValueOnce(json({ message }, status));
     submit(true);
-    await screen.findByText(new RegExp(`Perfil atualizado. Senha não atualizada: ${expected}`));
+    expect(await screen.findByRole('alert')).toHaveTextContent(`Perfil atualizado. Senha não atualizada: ${expected}`);
     expect(screen.getByDisplayValue('Ana Atualizada')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledTimes(3);
   });

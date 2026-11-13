@@ -1,10 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3001;
+const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
-// Build de produção servido na porta 3001. Em CI nunca reutiliza um servidor
-// existente (evita testar um build desatualizado).
+// Build próprio servido na porta 3000, sem reutilizar processos desconhecidos.
 export default defineConfig({
   testDir: "./tests",
   outputDir: "./test-results",
@@ -14,15 +13,16 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
     baseURL: BASE_URL,
+    channel: "chrome",
     // Trace só na primeira repetição. Traces e relatórios ficam fora do git e
     // podem conter dados da sessão; não publicar sem sanitizar.
     trace: "on-first-retry",
     // Sem storageState: cada teste usa um contexto novo e sem credenciais.
   },
   webServer: {
-    command: `npm run build && npm run start -- --port ${PORT}`,
+    command: `npm run build -- --webpack && npm run start -- --port ${PORT}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 300_000,
     stdout: "pipe",
     stderr: "pipe",

@@ -674,8 +674,9 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
       preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
       await waitFor(() => expect(api.rotulos()).toEqual(["GET /dose/me"]));
       await salvar();
-      await waitFor(() => expect(alerta).toHaveBeenCalledWith("Falha simulada no tratamento"));
-      expect(alerta).toHaveBeenCalledTimes(1);
+      expect(await screen.findByRole('alert')).toHaveTextContent('Ao salvar tratamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
+      expect(screen.getAllByRole('alert')).toHaveLength(1);
+      expect(alerta).not.toHaveBeenCalled();
       expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
       expect(api.rotulos()).toEqual(["GET /dose/me", "POST /tratamento"]);
       expect(api.remedios).toHaveLength(0);
@@ -690,7 +691,7 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
     const { container } = montar();
     preencher(container, VALIDOS);
     await salvar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith("Não foi possível confirmar o tratamento criado. Tente novamente."));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível interpretar a resposta do serviço. Tente novamente.');
     expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
     expect(api.posts("/tratamento")).toHaveLength(1);
   });
@@ -700,7 +701,7 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
     const { container } = montar();
     preencher(container, VALIDOS);
     await salvar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith("Failed to fetch"));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
     await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
     expect(api.posts("/tratamento")).toHaveLength(1);
     await salvar();

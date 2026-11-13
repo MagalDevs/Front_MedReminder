@@ -1,4 +1,6 @@
-'use client';
+"use client";
+
+import { RequestContractError } from './request-errors';
 
 /**
  * Cliente HTTP único do frontend para o backend MedReminder.
@@ -45,29 +47,30 @@
  * Origem de produção legada. Só é usada como fallback explícito (ver `getApiBaseUrl`);
  * nunca em testes nem em ambientes marcados como isolados.
  */
-export const SESSION_INVALIDATED_EVENT = 'medreminder:session-invalidated';
+export const SESSION_INVALIDATED_EVENT = "medreminder:session-invalidated";
 
-export const PRODUCTION_API_URL = 'https://medreminder-backend.onrender.com';
+export const PRODUCTION_API_URL = "https://medreminder-backend.onrender.com";
+export const DEVELOPMENT_API_URL = "http://localhost:3001";
 
 /**
  * Origem de marcador usada SOMENTE quando `NODE_ENV === 'test'` e `NEXT_PUBLIC_API_URL`
  * não está definida. O TLD `.invalid` (RFC 2606) nunca resolve, então um teste que
  * esqueça de simular o `fetch` falha em vez de alcançar produção.
  */
-export const TEST_PLACEHOLDER_API_URL = 'http://api.test.invalid';
+export const TEST_PLACEHOLDER_API_URL = "http://api.test.invalid";
 
 /** Falha de configuração da origem da API (variável ausente ou inválida). */
 export class ApiConfigError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ApiConfigError';
+    this.name = "ApiConfigError";
   }
 }
 
 function isValidHttpOrigin(value: string): boolean {
   try {
     const { protocol } = new URL(value);
-    return protocol === 'http:' || protocol === 'https:';
+    return protocol === "http:" || protocol === "https:";
   } catch {
     return false;
   }
@@ -84,19 +87,22 @@ function resolveApiBaseUrl(): string | ApiConfigError {
   if (configured) {
     if (!isValidHttpOrigin(configured)) {
       return new ApiConfigError(
-        'NEXT_PUBLIC_API_URL deve ser uma URL absoluta http(s), por exemplo http://localhost:3000.',
+        "NEXT_PUBLIC_API_URL deve ser uma URL absoluta http(s), por exemplo http://localhost:3001.",
       );
     }
-    return configured.replace(/\/+$/, '');
+    return configured.replace(/\/+$/, "");
   }
 
-  if (process.env.NEXT_PUBLIC_API_ENV === 'isolated') {
+  if (process.env.NEXT_PUBLIC_API_ENV === "isolated") {
     return new ApiConfigError(
-      'NEXT_PUBLIC_API_URL é obrigatória quando NEXT_PUBLIC_API_ENV=isolated: não há fallback para a API de produção.',
+      "NEXT_PUBLIC_API_URL é obrigatória quando NEXT_PUBLIC_API_ENV=isolated: não há fallback para a API de produção.",
     );
   }
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === "test") {
     return TEST_PLACEHOLDER_API_URL;
+  }
+  if (process.env.NODE_ENV === "development") {
+    return DEVELOPMENT_API_URL;
   }
   return PRODUCTION_API_URL;
 }
@@ -106,7 +112,8 @@ function resolveApiBaseUrl(): string | ApiConfigError {
  *
  * Ordem: (1) `NEXT_PUBLIC_API_URL` (valor incorporado no build; barra final removida);
  * (2) se `NEXT_PUBLIC_API_ENV === 'isolated'`, lança `ApiConfigError` (sem fallback);
- * (3) se `NODE_ENV === 'test'`, `TEST_PLACEHOLDER_API_URL`; (4) nos demais casos,
+ * (3) se `NODE_ENV === 'test'`, `TEST_PLACEHOLDER_API_URL`;
+ * (4) em desenvolvimento, `DEVELOPMENT_API_URL` (localhost:3001); (5) nos demais casos,
  * `PRODUCTION_API_URL` (compatibilidade de deploy existente). Variável definida mas
  * inválida sempre lança. Lido a cada chamada.
  *
@@ -127,7 +134,7 @@ export function getApiBaseUrl(): string {
  * @throws ApiConfigError
  */
 export function buildApiUrl(endpoint: string): string {
-  return `${getApiBaseUrl()}/${endpoint.replace(/^\/+/, '')}`;
+  return `${getApiBaseUrl()}/${endpoint.replace(/^\/+/, "")}`;
 }
 
 const initialOrigin = resolveApiBaseUrl();
@@ -136,16 +143,19 @@ const initialOrigin = resolveApiBaseUrl();
  * @deprecated Calculada uma vez na importação; use `getApiBaseUrl()`/`buildApiUrl()`.
  * Vazia quando a origem é inválida/ausente em ambiente isolado.
  */
-export const API_URL: string = typeof initialOrigin === 'string' ? initialOrigin : '';
+export const API_URL: string =
+  typeof initialOrigin === "string" ? initialOrigin : "";
 
 /** Política para HTTP 401 em chamadas autenticadas. Ver o cabeçalho do módulo. */
-export type UnauthorizedPolicy = 'invalidate' | 'throw';
+export type UnauthorizedPolicy = "invalidate" | "throw";
 
 export interface ApiRequestOptions extends RequestInit {
   /** Anexa o Bearer e exige token armazenado. Padrão `true`. */
   requireAuth?: boolean;
   /** Comportamento em HTTP 401 autenticado. Padrão `'invalidate'`. */
   onUnauthorized?: UnauthorizedPolicy;
+  /** Quando presente, exige o status de sucesso definido pelo contrato da operação. */
+  expectedStatus?: number;
 }
 
 export interface ApiErrorInit {
@@ -178,19 +188,30 @@ export class ApiError extends Error {
   readonly retryAfter?: number;
   declare readonly body?: unknown;
 
-  constructor({ status, message, code, messages = [], retryAfter, body }: ApiErrorInit) {
+  constructor({
+    status,
+    message,
+    code,
+    messages = [],
+    retryAfter,
+    body,
+  }: ApiErrorInit) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.messages = messages;
     this.retryAfter = retryAfter;
-    Object.defineProperty(this, 'body', { value: body, enumerable: false, writable: false });
+    Object.defineProperty(this, "body", {
+      value: body,
+      enumerable: false,
+      writable: false,
+    });
   }
 }
 
 /** Lê `Retry-After` (segundos inteiros ou HTTP-date) e devolve segundos, ou undefined. */
-function parseRetryAfter(value: string | null | undefined): number | undefined {
+export function parseRetryAfter(value: string | null | undefined): number | undefined {
   const text = value?.trim();
   if (!text) return undefined;
   if (/^\d+$/.test(text)) return Number(text);
@@ -202,23 +223,27 @@ function parseRetryAfter(value: string | null | undefined): number | undefined {
 }
 
 function nonEmptyStrings(values: unknown[]): string[] {
-  return values.filter((v): v is string => typeof v === 'string' && v !== '');
+  return values.filter((v): v is string => typeof v === "string" && v !== "");
 }
 
 /** Extrai as mensagens do backend: message (string|string[]) > error (string) > errors[]. */
 function extractMessages(data: unknown): string[] {
-  if (typeof data !== 'object' || data === null) return [];
+  if (typeof data !== "object" || data === null) return [];
   const body = data as Record<string, unknown>;
 
-  if (typeof body.message === 'string' && body.message !== '') return [body.message];
+  if (typeof body.message === "string" && body.message !== "")
+    return [body.message];
   if (Array.isArray(body.message)) {
     const list = nonEmptyStrings(body.message);
     if (list.length > 0) return list;
   }
-  if (typeof body.error === 'string' && body.error !== '') return [body.error];
+  if (typeof body.error === "string" && body.error !== "") return [body.error];
   if (Array.isArray(body.errors) && body.errors.length > 0) {
     return body.errors.map((e: unknown) =>
-      typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string'
+      typeof e === "object" &&
+      e !== null &&
+      "message" in e &&
+      typeof e.message === "string"
         ? e.message
         : String(e),
     );
@@ -229,17 +254,17 @@ function extractMessages(data: unknown): string[] {
 function fallbackMessage(status: number): string {
   switch (status) {
     case 400:
-      return 'Requisição inválida';
+      return "Requisição inválida";
     case 401:
-      return 'Não autorizado';
+      return "Não autorizado";
     case 403:
-      return 'Acesso negado';
+      return "Acesso negado";
     case 404:
-      return 'Recurso não encontrado';
+      return "Recurso não encontrado";
     case 429:
-      return 'Muitas requisições. Tente novamente mais tarde';
+      return "Muitas requisições. Tente novamente mais tarde";
     case 500:
-      return 'Erro interno do servidor';
+      return "Erro interno do servidor";
     default:
       return `API request failed with status ${status}`;
   }
@@ -248,15 +273,21 @@ function fallbackMessage(status: number): string {
 function buildApiError(response: Response, data: unknown): ApiError {
   const messages = extractMessages(data);
   const code =
-    typeof data === 'object' && data !== null && 'code' in data && typeof data.code === 'string'
+    typeof data === "object" &&
+    data !== null &&
+    "code" in data &&
+    typeof data.code === "string"
       ? data.code
       : undefined;
   return new ApiError({
     status: response.status,
-    message: messages.length > 0 ? messages.join(', ') : fallbackMessage(response.status),
+    message:
+      messages.length > 0
+        ? messages.join(", ")
+        : fallbackMessage(response.status),
     code,
     messages,
-    retryAfter: parseRetryAfter(response.headers.get('retry-after')),
+    retryAfter: parseRetryAfter(response.headers.get("retry-after")),
     body: data,
   });
 }
@@ -275,7 +306,12 @@ export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const { requireAuth = true, onUnauthorized = 'invalidate', ...fetchOptions } = options;
+  const {
+    requireAuth = true,
+    onUnauthorized = "invalidate",
+    expectedStatus,
+    ...fetchOptions
+  } = options;
 
   const url = buildApiUrl(endpoint);
 
@@ -284,70 +320,99 @@ export async function apiRequest<T = unknown>(
 
   // Content-Type padrão ao enviar dados, exceto FormData (o navegador define o boundary).
   const method = fetchOptions.method?.toUpperCase();
-  const isFormData = typeof FormData !== 'undefined' && fetchOptions.body instanceof FormData;
-  if (!headers.has('Content-Type') && !isFormData && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-    headers.set('Content-Type', 'application/json');
+  const isFormData =
+    typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
+  if (
+    !headers.has("Content-Type") &&
+    !isFormData &&
+    (method === "POST" || method === "PUT" || method === "PATCH")
+  ) {
+    headers.set("Content-Type", "application/json");
   }
 
-  const requestToken = requireAuth ? localStorage.getItem('access_token') : null;
+  const requestToken = requireAuth
+    ? localStorage.getItem("access_token")
+    : null;
 
   // Add auth token if required and available
   if (requireAuth) {
     const token = requestToken;
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     } else {
-      throw new Error('Authentication required but no token found');
+      throw new Error("Authentication required but no token found");
     }
   }
 
   const response = await fetch(url, { ...fetchOptions, headers });
+
+  fetchOptions.signal?.throwIfAborted();
 
   // Interpreta o corpo. Em falha HTTP, um corpo ilegível nunca impede o ApiError.
   let data: unknown;
   let parseError: unknown;
   let parseFailed = false;
   try {
-    const contentType = response.headers.get('content-type');
-    data = contentType && contentType.includes('application/json')
-      ? await response.json()
-      : await response.text();
+    const contentType = response.headers.get("content-type");
+    data = response.status === 204 ? undefined :
+      contentType && contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
   } catch (error) {
     parseFailed = true;
     parseError = error;
   }
 
+  fetchOptions.signal?.throwIfAborted();
+
   if (!response.ok) {
     // Token inválido/expirado: limpa a sessão (a menos que o chamador peça o contrário).
-    if (response.status === 401 && requireAuth && onUnauthorized === 'invalidate' &&
-        localStorage.getItem('access_token') === requestToken) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user_data');
+    if (
+      response.status === 401 &&
+      requireAuth &&
+      onUnauthorized === "invalidate" &&
+      localStorage.getItem("access_token") === requestToken
+    ) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_data");
       window.dispatchEvent(new Event(SESSION_INVALIDATED_EVENT));
     }
 
     // Keep diagnostics independent of arbitrary response content.
-    console.error('API Error:', { status: response.status });
+    console.error("API Error:", { status: response.status });
 
     throw buildApiError(response, parseFailed ? undefined : data);
   }
 
-  // Sucesso com corpo ilegível: mantém o comportamento anterior (propaga o erro de parsing).
-  if (parseFailed) throw parseError;
+  if (expectedStatus !== undefined && response.status !== expectedStatus) throw new RequestContractError();
+  // Parsing failures are public contract failures; cancellation/network failures
+  // keep their identity so the operation can distinguish abort from timeout.
+  if (parseFailed) {
+    if (parseError instanceof SyntaxError) throw new RequestContractError();
+    throw parseError;
+  }
 
   // Even if response is OK, check if there's an error message in the response
   // Some APIs return error messages with 200 status codes
-  if (typeof data === 'object' && data !== null &&
-      'message' in data && typeof data.message === 'string' &&
-      !('access_token' in data) &&
-      !('success' in data && data.success === true)) {
-    console.warn('Server returned message in successful response');
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "message" in data &&
+    typeof data.message === "string" &&
+    !("access_token" in data) &&
+    !("success" in data && data.success === true)
+  ) {
+    console.warn("Server returned message in successful response");
 
     // Check for specific error indicators despite 200 status
-    if ('error' in data ||
-        ('status' in data && data.status === 'error') ||
-        ('success' in data && data.success === false)) {
-      throw new Error(typeof data.message === 'string' ? data.message : 'API request failed');
+    if (
+      "error" in data ||
+      ("status" in data && data.status === "error") ||
+      ("success" in data && data.success === false)
+    ) {
+      throw new Error(
+        typeof data.message === "string" ? data.message : "API request failed",
+      );
     }
   }
   return data as T;

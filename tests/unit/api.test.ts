@@ -124,6 +124,22 @@ describe('apiRequest real — TEST-01', () => {
     expect(window.dispatchEvent).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ type: 'medreminder:session-invalidated' }));
   });
 
+  it('ERR-19 transporte abortado descarta401 tardio preservando credenciais', async () => {
+    controlledLocation();
+    localStorage.setItem('access_token', 'token-sintetico');
+    localStorage.setItem('user_data', 'usuario-sintetico');
+    const controller = new AbortController();
+    let finish!: (response: Response) => void;
+    vi.mocked(fetch).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+    const result = apiRequest('/dose/me', { signal: controller.signal });
+    controller.abort();
+    finish(new Response('{}', { status: 401, headers: { 'content-type': 'application/json' } }));
+    await expect(result).rejects.toBe(controller.signal.reason);
+    expect(localStorage.getItem('access_token')).toBe('token-sintetico');
+    expect(localStorage.getItem('user_data')).toBe('usuario-sintetico');
+    expect(window.dispatchEvent).not.toHaveBeenCalled();
+  });
+
   it('UT-06 TEST-01 401 público rejeita preservando sessão e navegação', async () => {
     const location = controlledLocation();
     const storedUser = JSON.stringify({ nome: 'Ana Teste' });

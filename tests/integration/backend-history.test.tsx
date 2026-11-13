@@ -43,7 +43,7 @@ describe('BEAPI-09 histórico persistido', () => {
   it.each([401, 500])('falha%s permanece erro explícito', async (status) => {
     vi.mocked(fetch).mockResolvedValueOnce(json({ message: 'falha' }, status));
     render(<HistoricoContent />);
-    await screen.findByText(status === 401 ? /Sessão expirada/ : /Não foi possível carregar o histórico/);
+    expect(await screen.findByRole('alert')).toHaveTextContent(status === 401 ? 'Sessão expirada. Entre novamente.' : 'O serviço está temporariamente indisponível. Tente novamente mais tarde.');
     expect(screen.queryByText('Nenhum histórico encontrado')).not.toBeInTheDocument();
   });
   it.each([true, false])('não consulta enquanto sessão loading=%s ausente ou carregando', async (loading) => {

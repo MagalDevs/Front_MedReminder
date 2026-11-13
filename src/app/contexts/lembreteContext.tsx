@@ -1,7 +1,11 @@
 'use client'
 
-import { createContext, ReactNode, useEffect, useState, useCallback } from "react";
+import { createContext, ReactNode, useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { apiRequest, ApiError } from "../utils/api";
+import RequestFeedback from "../components/RequestFeedback/RequestFeedback";
+import { requestErrorMessage, RequestContractError } from "../utils/request-errors";
+import { publishNavigationFeedback } from "../utils/navigation-feedback";
 
 import { useAuth } from "./AuthContext";
 
@@ -33,7 +37,10 @@ interface Lembrete {
 interface LembreteContextType {
     lembretes: Lembrete[];
     lembretesHoje: Lembrete[];
-    getLembretes: () => Promise<void>;
+    getLembretes: () => Promise<boolean | void>;
+    lembretesError?: string | null;
+    lembretesLoading?: boolean;
+    setLembretesFeedbackHost?: (host: HTMLElement | null) => void;
 }
 
 export const LembreteContext = createContext<LembreteContextType | null>(null)
@@ -41,41 +48,54 @@ export const LembreteContext = createContext<LembreteContextType | null>(null)
 export const LembreteProvider = ({ children }: { children: ReactNode }) => {
     const { user, isAuthenticated, loading, logout } = useAuth();
     const identity = !loading && isAuthenticated ? String(user?.id ?? user?.email ?? '') : '';
-    const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; doses: Lembrete[] }>({ identity: '', token: null, doses: [] });
+    const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; doses: Lembrete[]; error: string | null; loading: boolean }>({ identity: '', token: null, doses: [], error: null, loading: false });
     const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-    const lembretes = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.doses : [];
+    const current = Boolean(identity && snapshot.identity === identity && snapshot.token === token);
+    const lembretes = current ? snapshot.doses : [];
+    const lembretesError = current ? snapshot.error : null;
+    const lembretesLoading = Boolean(identity && token && (!current || snapshot.loading));
+    const [feedbackHost, setLembretesFeedbackHost] = useState<HTMLElement | null>(null);
+    const version = useRef(0);
+    const controller = useRef<AbortController | null>(null);
 
     const getLembretes = useCallback(async () => {
-        if (!identity || !token) return;
+        if (!identity || !token) return false;
+        controller.current?.abort();
+        const request = new AbortController();
+        controller.current = request;
+        const attempt = ++version.current;
+        const active = () => attempt === version.current && !request.signal.aborted && localStorage.getItem('access_token') === token;
+        setSnapshot(previous => ({ identity, token, doses: previous.identity === identity && previous.token === token ? previous.doses : [], error: null, loading: true }));
         try {
             const response = await apiRequest<{ data: Lembrete[] }>('dose/me', {
-                method: 'GET', onUnauthorized: 'throw',
+                method: 'GET', onUnauthorized: 'throw', signal: request.signal,
             });
-            if (localStorage.getItem('access_token') !== token) return;
-            if (!Array.isArray(response.data)) throw new Error('Resposta de doses inv?lida');
-            setSnapshot({ identity, token, doses: response.data });
+            if (!active()) return false;
+            if (!response || !Array.isArray(response.data) || !response.data.every(dose => dose && typeof dose.id === 'number' && Number.isFinite(dose.id) && typeof dose.tomado === 'boolean' && typeof dose.data_dose === 'string' && !Number.isNaN(new Date(dose.data_dose).getTime()) && dose.remedio && typeof dose.remedio.nome === 'string' && typeof dose.remedio.quantidadeDose === 'string' && typeof dose.remedio.cor === 'string')) throw new RequestContractError();
+            setSnapshot({ identity, token, doses: response.data, error: null, loading: false });
+            return true;
         } catch (error) {
-            if (localStorage.getItem('access_token') !== token) return;
-            if (error instanceof ApiError && error.status === 401) logout();
-            // Never publish stale private data or reject an unattended mount effect.
+            if (!active()) return false;
+            if (error instanceof ApiError && error.status === 401) {
+                setSnapshot({ identity: '', token: null, doses: [], error: null, loading: false });
+                logout();
+                publishNavigationFeedback('session-expired');
+            } else {
+                setSnapshot(previous => ({ ...previous, error: requestErrorMessage(error), loading: false }));
+            }
+            return false;
         }
     }, [identity, token, logout]);
 
+    const cancelRequests = useCallback(() => {
+        version.current++;
+        controller.current?.abort();
+    }, []);
+
     useEffect(() => {
-        let active = true;
-        if (!identity || !token) return;
-        const load = async () => {
-            try {
-                const response = await apiRequest<{ data: Lembrete[] }>('dose/me', { method: 'GET', onUnauthorized: 'throw' });
-                if (!active || localStorage.getItem('access_token') !== token) return;
-                if (Array.isArray(response.data)) setSnapshot({ identity, token, doses: response.data });
-            } catch (error) {
-                if (active && localStorage.getItem('access_token') === token && error instanceof ApiError && error.status === 401) logout();
-            }
-        };
-        void load();
-        return () => { active = false; };
-    }, [identity, token, logout]);
+        void getLembretes();
+        return cancelRequests;
+    }, [getLembretes, cancelRequests]);
 
     const lembretesHoje = lembretes.filter((lembrete) => {
         const agora = new Date();
@@ -94,8 +114,14 @@ export const LembreteProvider = ({ children }: { children: ReactNode }) => {
         <LembreteContext.Provider value={{ 
             lembretesHoje,
             lembretes,
-            getLembretes
+            getLembretes,
+            lembretesError,
+            lembretesLoading,
+            setLembretesFeedbackHost
         }}>
+            {lembretesError && (feedbackHost
+                ? createPortal(<RequestFeedback context="Ao carregar lembretes" message={lembretesError} />, feedbackHost)
+                : <RequestFeedback context="Ao carregar lembretes" message={lembretesError} />)}
             {children}
         </LembreteContext.Provider>
     );

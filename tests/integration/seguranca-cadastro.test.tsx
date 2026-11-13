@@ -40,6 +40,7 @@ function fillAndSubmit(confirm = payload.senha) {
 function expectRequest() {
   expect(fetch).toHaveBeenCalledExactlyOnceWith('http://cadastro-security.test.invalid/usuario', {
     method: 'POST', headers: new Headers({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload),
+    signal: expect.any(AbortSignal),
   });
 }
 

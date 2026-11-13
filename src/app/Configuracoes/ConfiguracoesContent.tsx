@@ -4,17 +4,16 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest, ApiError } from '../utils/api';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 
-function profileErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) {
-    switch (error.status) {
-      case 400: return error.messages.length ? error.messages.join(' ') : 'Dados inválidos. Verifique os campos.';
-      case 401: return 'Sessão expirada. Entre novamente.';
-      case 409: return 'Conflito ao atualizar os dados. Verifique o e-mail informado.';
-      case 429: return `Muitas tentativas. Tente novamente mais tarde.${error.retryAfter ? ` Aguarde ${error.retryAfter} segundos.` : ''}`;
-    }
-  }
-  return 'Não foi possível atualizar os dados. Tente novamente mais tarde.';
+function validUser(value: unknown): value is Usuario {
+  if (!value || typeof value !== 'object') return false;
+  const data = value as Usuario;
+  return Boolean(data.id) && (typeof data.id === 'number' || typeof data.id === 'string') && ['nome', 'email', 'cep', 'foto'].every(field => {
+    const item = data[field as keyof Usuario];
+    return item === undefined || item === null || typeof item === 'string';
+  });
 }
 
 type Usuario = {
@@ -31,6 +30,10 @@ type Usuario = {
 
 export default function ConfiguracoesContent() {
   const { user } = useAuth();
+  return <ConfiguracoesForm key={String(user?.id ?? user?.email ?? '')} user={user} />;
+}
+
+function ConfiguracoesForm({ user }: { user: Usuario | null }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [cep, setCep] = useState('');
@@ -39,25 +42,47 @@ export default function ConfiguracoesContent() {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const mutation = useRef<AbortController | null>(null);
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [foto, setFoto] = useState('');
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoMessage, setPhotoMessage] = useState('');
+  const [photoSaving, setPhotoSaving] = useState(false);
+  const photoRequest = useRef<AbortController | null>(null);
+  const [readError, setReadError] = useState<{ identity: string; message: string | null } | null>(null);
+  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const identity = `${user?.id ?? user?.email ?? ''}:${token}`;
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
     const fetchUserData = async () => {
       setLoading(true);
+      setReadError(null);
+      setUsuario(null);
+      setNome(user?.nome || '');
+      setEmail(user?.email || '');
+      setCep(user?.cep || '');
+      setFoto('');
       try {
         const response = await apiRequest<{
           message: string;
           data: Usuario;
         }>('usuario/me', {
           method: 'GET',
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
 
-        const userData = response.data;
+        if (!current()) return;
+        const userData = response?.data;
+        if (!validUser(userData)) throw new RequestContractError();
 
         setUsuario(userData);
         setNome(userData.nome || '');
@@ -68,121 +93,119 @@ export default function ConfiguracoesContent() {
           setFoto(userData.foto);
         }
       } catch (error) {
+        if (!current()) return;
         if (user) {
           setNome(user.nome || '');
           setEmail(user.email || '');
           setCep(user.cep || '');
           setUsuario(user);
         }
-        setMessage(
-          `Erro ao carregar dados do usuário. Alguns dados podem estar desatualizados. ${error}`,
-        );
-        setMessageType('error');
+        const detail = requestErrorMessage(error);
+        setReadError({ identity, message: detail ? `${detail}${user ? ' Alguns dados podem estar desatualizados.' : ''}` : null });
       } finally {
-        setLoading(false);
+        if (current()) setLoading(false);
       }
     };
 
-    fetchUserData();
-  }, [user]);
+    void fetchUserData();
+    return () => { active = false; controller.abort(); };
+  }, [user, token, identity]);
+  useEffect(() => () => { mutation.current?.abort(); mutation.current = null; }, [identity]);
+  useEffect(() => () => { photoRequest.current?.abort(); photoRequest.current = null; }, [identity]);
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    if (mutation.current) return;
     if (!nome.trim()) {
-      setMessage('Nome é obrigatório.');
-      setMessageType('error');
+      setProfileError('Nome é obrigatório.');
       return;
     }
     if (!email.trim()) {
-      setMessage('E-mail é obrigatório.');
-      setMessageType('error');
+      setProfileError('E-mail é obrigatório.');
       return;
     }
 
     if (cep.trim()) {
       const cepSemFormatacao = cep.replace(/\D/g, '');
       if (cepSemFormatacao.length !== 8) {
-        setMessage('CEP deve ter 8 dígitos ou deixe em branco.');
-        setMessageType('error');
-        return;
+        setProfileError('CEP deve ter 8 dígitos ou deixe em branco.');
+          return;
       }
     }
 
     if (senhaAtual || novaSenha || confirmarSenha) {
       if (!senhaAtual) {
-        setMessage('Senha atual é obrigatória para alterar a senha.');
-        setMessageType('error');
-        return;
+        setProfileError('Senha atual é obrigatória para alterar a senha.');
+          return;
       }
       if (!novaSenha) {
-        setMessage('Nova senha é obrigatória.');
-        setMessageType('error');
-        return;
+        setProfileError('Nova senha é obrigatória.');
+          return;
       }
       if (novaSenha !== confirmarSenha) {
-        setMessage('As senhas não coincidem.');
-        setMessageType('error');
-        return;
+        setProfileError('As senhas não coincidem.');
+          return;
       }
       if (novaSenha.length < 8) {
-        setMessage('A nova senha deve ter pelo menos 8 caracteres.');
-        setMessageType('error');
-        return;
+        setProfileError('A nova senha deve ter pelo menos 8 caracteres.');
+          return;
       }
     }
+    const controller = new AbortController();
+    mutation.current = controller;
+    const originalToken = localStorage.getItem('access_token');
+    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === originalToken;
+    const changesPassword = Boolean(senhaAtual && novaSenha);
     setLoading(true);
+    setProfileError(null);
+    if (changesPassword) setPasswordError(null);
     setMessage('');
-
     try {
-      const updateData: { nome: string; email: string; cep?: string } = {
-        nome,
-        email,
-        cep: cep.replace(/\D/g, '').trim(),
-      };
-
-      const { data: updatedUser } = await apiRequest<{ message: string; data: Usuario }>('usuario/me', {
-        method: 'PATCH',
-        body: JSON.stringify(updateData),
+      const response = await apiRequest<{ message: string; data: Usuario }>('usuario/me', {
+        method: 'PATCH', signal: controller.signal,
+        body: JSON.stringify({ nome, email, cep: cep.replace(/\D/g, '').trim() }),
       });
+      if (!current()) return;
+      const updatedUser = response?.data;
+      if (!validUser(updatedUser)) throw new RequestContractError();
       setUsuario(updatedUser);
       setNome(updatedUser.nome || '');
       setEmail(updatedUser.email || '');
       setCep(updatedUser.cep || '');
-
-      if (senhaAtual && novaSenha) {
+      if (changesPassword) {
         try {
           await apiRequest('usuario/senha', {
-            method: 'PATCH',
-            onUnauthorized: 'throw',
+            method: 'PATCH', onUnauthorized: 'throw', signal: controller.signal,
             body: JSON.stringify({ senhaAtual, novaSenha }),
           });
-          setSenhaAtual('');
-          setNovaSenha('');
-          setConfirmarSenha('');
+          if (!current()) return;
+          setSenhaAtual(''); setNovaSenha(''); setConfirmarSenha('');
         } catch (error) {
-          let detail = profileErrorMessage(error);
+          if (!current()) return;
+          let detail = requestErrorMessage(error);
           if (error instanceof ApiError && error.status === 401) {
             try {
-              await apiRequest('usuario/me');
+              const profile = await apiRequest<{ data: Usuario }>('usuario/me', { signal: controller.signal });
+              if (!current()) return;
+              if (!validUser(profile?.data)) throw new RequestContractError();
               detail = 'Senha atual incorreta. Sua sessão continua válida.';
             } catch (sessionError) {
+              if (controller.signal.aborted || (localStorage.getItem('access_token') !== originalToken && localStorage.getItem('access_token') !== null)) return;
               detail = sessionError instanceof ApiError && sessionError.status === 401
                 ? 'Sessão expirada. Entre novamente.'
                 : 'Não foi possível verificar a sessão. A alteração da senha não foi confirmada.';
             }
           }
-          setMessage(`Perfil atualizado. Senha não atualizada: ${detail}`);
-          setMessageType('error');
+          setPasswordError(`Perfil atualizado. Senha não atualizada: ${detail}`);
           return;
         }
       }
-      setMessage(senhaAtual ? 'Perfil e senha atualizados com sucesso!' : 'Dados atualizados com sucesso!');
+      setMessage(changesPassword ? 'Perfil e senha atualizados com sucesso!' : 'Dados atualizados com sucesso!');
       setMessageType('success');
     } catch (error) {
-      setMessage(profileErrorMessage(error));
-      setMessageType('error');
+      if (current()) setProfileError(requestErrorMessage(error));
     } finally {
-      setLoading(false);
+      if (mutation.current === controller) mutation.current = null;
+      if (!controller.signal.aborted) setLoading(false);
     }
   };
   const handlePhotoChange = async (
@@ -190,52 +213,42 @@ export default function ConfiguracoesContent() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (photoRequest.current) return;
+      setPhotoMessage('');
       if (file.size > 5 * 1024 * 1024) {
-        setMessage('A imagem deve ter no máximo 5MB.');
-        setMessageType('error');
+        setPhotoError('A imagem deve ter no máximo 5MB.');
         return;
       }
       if (!file.type.startsWith('image/')) {
-        setMessage('Por favor, selecione apenas arquivos de imagem.');
-        setMessageType('error');
+        setPhotoError('Por favor, selecione apenas arquivos de imagem.');
         return;
       }
-      setLoading(true);
-      setMessage('');
+      const controller = new AbortController();
+      photoRequest.current = controller;
+      const originalToken = localStorage.getItem('access_token');
+      const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === originalToken;
+      setPhotoSaving(true);
+      setPhotoError(null);
       try {
         const formData = new FormData();
         formData.append('foto', file);
 
-        const response = await fetch(
-          'https://medreminder-backend.onrender.com/usuario/foto', //nao existe
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            },
-            body: formData,
-          },
-        );
-        if (!response.ok) {
-          throw new Error('Erro ao fazer upload da foto');
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setFoto(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-        setMessage('Foto atualizada com sucesso!');
-        setMessageType('success');
+        await apiRequest('usuario/foto', { method: 'POST', body: formData, signal: controller.signal });
+        if (!current()) return;
+        const image = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new RequestContractError());
+          reader.onerror = () => reject(new RequestContractError());
+          reader.readAsDataURL(file);
+        });
+        if (!current()) return;
+        setFoto(image);
+        setPhotoMessage('Foto atualizada com sucesso!');
       } catch (error) {
-        console.error('Erro ao atualizar foto:', error);
-        let errorMessage = 'Erro ao atualizar foto. Tente novamente.';
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        setMessage(errorMessage);
-        setMessageType('error');
+        if (current()) setPhotoError(requestErrorMessage(error));
       } finally {
-        setLoading(false);
+        if (photoRequest.current === controller) photoRequest.current = null;
+        if (current()) setPhotoSaving(false);
       }
     }
   };
@@ -255,14 +268,14 @@ export default function ConfiguracoesContent() {
     }
   };
   useEffect(() => {
-    if (message) {
+    if (message && messageType === 'success') {
       const timer = setTimeout(() => {
         setMessage('');
         setMessageType('');
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [message]);
+  }, [message, messageType]);
 
   if (loading && !usuario) {
     return (
@@ -285,8 +298,14 @@ export default function ConfiguracoesContent() {
           Gerencie suas informações pessoais
         </p>
       </div>
+      {readError?.identity === identity && readError.message && <RequestFeedback context="Ao carregar perfil" message={readError.message} />}
+      {profileError && <RequestFeedback context="Ao salvar perfil" message={profileError} />}
+      {passwordError && <RequestFeedback context="Ao alterar senha" message={passwordError} />}
+      {photoError && <RequestFeedback context="Ao atualizar foto" message={photoError} />}
+      {photoMessage && <RequestFeedback kind="success" message={photoMessage} />}
       {message && (
         <div
+          role={messageType === 'error' ? 'alert' : 'status'}
           className={`p-4 mb-6 rounded-md ${
             messageType === 'success'
               ? 'bg-green-100 text-green-700'
@@ -403,7 +422,7 @@ export default function ConfiguracoesContent() {
             <div className="pt-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || photoSaving}
                 className="w-full bg-[#037F8C] text-white py-3 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Atualizando...' : 'Salvar Alterações'}
@@ -435,10 +454,10 @@ export default function ConfiguracoesContent() {
               <button
                 type="button"
                 onClick={openFileSelector}
-                disabled={loading}
+                disabled={loading || photoSaving}
                 className="bg-[#037F8C] text-white py-4 px-8 rounded-lg text-lg hover:bg-opacity-90 hover:scale-105 hover:bg-[#044D55] hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
               >
-                {loading ? 'Enviando...' : 'Alterar Foto'}
+                {photoSaving ? 'Enviando...' : 'Alterar Foto'}
               </button>
               <p className="text-sm text-gray-500 text-center max-w-xs KantumruyRegular">
                 Selecione uma imagem de até 5MB para atualizar sua foto de

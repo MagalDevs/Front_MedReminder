@@ -11,6 +11,9 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest, ApiError, SESSION_INVALIDATED_EVENT } from '../utils/api';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { requestErrorMessage, RequestContractError } from '../utils/request-errors';
+import { clearNavigationFeedback, publishNavigationFeedback } from '../utils/navigation-feedback';
 
 interface User {
   id?: string | number;
@@ -54,7 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [restorationError, setRestorationError] = useState<string | null>(null);
   const router = useRouter();
+  const routerRef = useRef(router);
+  useEffect(() => { routerRef.current = router; }, [router]);
   // Each explicit login/logout revokes outstanding restoration responses.
   const generation = useRef(0);
 
@@ -64,16 +70,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setIsAuthenticated(false);
       setLoading(false);
-      router.push('/login');
+      setRestorationError(null);
+      publishNavigationFeedback('session-expired');
+      routerRef.current.push('/login');
     };
     window.addEventListener(SESSION_INVALIDATED_EVENT, invalidate);
     return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, invalidate);
-  }, [router]);
+  }, []);
 
   // Each explicit login/logout revokes outstanding restoration responses.
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const version = generation.current;
     const token = localStorage.getItem('access_token');
     const current = () => active && generation.current === version &&
@@ -82,10 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         if (!token) return;
         const response = await apiRequest<{ data: User }>('usuario/me', {
-          method: 'GET', onUnauthorized: 'throw',
+          method: 'GET', onUnauthorized: 'throw', signal: controller.signal,
         });
         if (!current()) return;
-        if (!response.data || !response.data.id) throw new Error('Perfil inválido');
+        if (!response?.data || !response.data.id) throw new RequestContractError();
         setUser(response.data);
         localStorage.setItem('user_data', JSON.stringify(response.data));
         setIsAuthenticated(true);
@@ -97,17 +106,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (error instanceof ApiError && error.status === 401) {
           localStorage.removeItem('access_token');
           localStorage.removeItem('user_data');
+          publishNavigationFeedback('session-expired');
+          routerRef.current.push('/login');
+        } else {
+          setRestorationError(requestErrorMessage(error, 'session'));
         }
       } finally {
         if (active && generation.current === version) setLoading(false);
       }
     };
     void checkAuth();
-    return () => { active = false; };
+    return () => { active = false; controller.abort(); };
   }, []);
 
   const login = useCallback((token: string, userData?: User) => {
     generation.current++;
+    setRestorationError(null);
+    clearNavigationFeedback();
     localStorage.setItem('access_token', token);
     if (userData) localStorage.setItem('user_data', JSON.stringify(userData));
     else localStorage.removeItem('user_data');
@@ -118,13 +133,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     generation.current++;
+    setRestorationError(null);
+    clearNavigationFeedback();
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_data');
     setIsAuthenticated(false);
     setUser(null);
     setLoading(false);
-    router.push('/login');
-  }, [router]);
+    routerRef.current.push('/login');
+  }, []);
 
   const getUserDisplayName = () => formatUserDisplayName(user);
 
@@ -139,6 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         getUserDisplayName,
       }}
     >
+      {restorationError && <RequestFeedback context="Restaurar sessão" message={restorationError} />}
       {children}
     </AuthContext.Provider>
   );

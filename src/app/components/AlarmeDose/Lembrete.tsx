@@ -1,7 +1,9 @@
 import { LembreteContext } from '@/app/contexts/lembreteContext';
 import { apiRequest } from '@/app/utils/api';
 import { Bell, Pill, X } from 'lucide-react';
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import RequestFeedback from '../RequestFeedback/RequestFeedback';
+import { requestErrorMessage } from '@/app/utils/request-errors';
 
 interface alarmeDoseProps {
   dataHora: string;
@@ -15,6 +17,18 @@ interface alarmeDoseProps {
 const Lembrete = (props: alarmeDoseProps) => {
   const { dataHora, medicamentoNome, quantidadeDose, cor, id, onClose } = props;
   const context = useContext(LembreteContext);
+  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const key = `${token}:${id}`;
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ key: string; message: string | null } | null>(null);
+  const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
+  const [refreshFailedKey, setRefreshFailedKey] = useState<string | null>(null);
+  const saving = savingKey === key;
+  const error = failure?.key === key ? failure.message : null;
+  const confirmed = confirmedKey === key;
+  const refreshFailed = refreshFailedKey === key;
+  const attempt = useRef<AbortController | null>(null);
+  useEffect(() => () => { attempt.current?.abort(); attempt.current = null; }, [id, token]);
 
   const dataDose = new Date(dataHora);
 
@@ -43,8 +57,17 @@ const Lembrete = (props: alarmeDoseProps) => {
   const corFundo = hashCor[cor] || '#FF0000';
 
   const medicamentoTomado = async () => {
-    await apiRequest(`dose/${id}`, {
+    if (attempt.current) return;
+    const controller = new AbortController();
+    attempt.current = controller;
+    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    setSavingKey(key);
+    setFailure(null);
+    try {
+      if (!confirmed) {
+        await apiRequest(`dose/${id}`, {
       method: 'PUT',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -52,10 +75,20 @@ const Lembrete = (props: alarmeDoseProps) => {
       body: JSON.stringify({
         tomado: true,
       }),
-    });
-
-    await context?.getLembretes(); // Atualiza os lembretes no contexto
-    onClose();
+        });
+        if (!current()) return;
+        setConfirmedKey(key);
+      }
+      const refreshed = await context?.getLembretes();
+      if (!current()) return;
+      if (refreshed === false) { setRefreshFailedKey(key); return; }
+      onClose();
+    } catch (failure) {
+      if (current()) setFailure({ key, message: requestErrorMessage(failure) });
+    } finally {
+      if (attempt.current === controller) attempt.current = null;
+      if (current()) setSavingKey(null);
+    }
   }
 
   return (
@@ -121,15 +154,19 @@ const Lembrete = (props: alarmeDoseProps) => {
           </div>
         </div>
 
+        <div ref={context?.setLembretesFeedbackHost} />
+        {error && <RequestFeedback context="Ao confirmar dose" message={error} />}
+        {refreshFailed && <RequestFeedback kind="success" message="Dose confirmada. A atualização dos lembretes não foi concluída." />}
         <button
           onClick={medicamentoTomado}
+          disabled={saving}
           className={`w-full transition ${
             cor === 'Branco'
               ? 'bg-gray-100 hover:bg-gray-300 text-gray-900'
               : 'bg-white hover:bg-gray-100 text-black'
           } font-bold py-4 text-lg rounded-md`}
         >
-          Medicamento Tomado
+          {saving ? 'Carregando...' : confirmed ? 'Atualizar lembretes' : 'Medicamento Tomado'}
         </button>
       </div>
     </div>

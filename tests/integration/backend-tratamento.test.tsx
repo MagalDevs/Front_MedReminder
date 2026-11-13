@@ -39,7 +39,7 @@ function montar() {
 }
 const salvar = () => fireEvent.click(screen.getByRole("button", { name: "Salvar lembrete" }));
 const aguardarFalha = async () => {
-  await waitFor(() => expect(window.alert).toHaveBeenCalled());
+  expect(await screen.findByRole('alert')).toHaveTextContent('Ao salvar tratamento:');
   await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
 };
 
@@ -209,14 +209,14 @@ describe("BEAPI-07 BEAPI-08 operação atômica idempotente", () => {
   });
 
   it.each([
-    [409, "Conflito ao salvar o tratamento. Verifique os dados antes de tentar novamente."],
-    [503, "Serviço indisponível. Tente novamente mais tarde."],
+    [409, "Não foi possível concluir a operação porque os dados foram alterados ou já existem. Verifique e tente novamente."],
+    [503, "O serviço está temporariamente indisponível. Tente novamente mais tarde."],
   ] as const)("BEAPI-07 status %i via ApiError não confirma sucesso nem recarrega", async (status, message) => {
     comportamento = status;
     montar();
     salvar();
     await aguardarFalha();
-    expect(window.alert).toHaveBeenCalledWith(message);
+    expect(screen.getByRole('alert')).toHaveTextContent(message);
     expect(window.alert).not.toHaveBeenCalledWith(SUCESSO);
     expect(posts).toHaveLength(1);
     expect(recarregar).not.toHaveBeenCalled();

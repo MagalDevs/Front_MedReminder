@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
 import { LembreteContext } from '../contexts/lembreteContext';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 
 type Medicamento = {
   id: number;
@@ -27,6 +29,13 @@ export default function MeusLembretesContent() {
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [confirmationError, setConfirmationError] = useState<string | null>(null);
+  const [confirmationStatus, setConfirmationStatus] = useState('');
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const [confirmedSnapshot, setConfirmedSnapshot] = useState<{ token: string | null; ids: Set<number> }>({ token: null, ids: new Set() });
+  const mutation = useRef<AbortController | null>(null);
+  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const confirmedIds = confirmedSnapshot.token === token ? confirmedSnapshot.ids : new Set<number>();
   const [filtroMedicamento, setFiltroMedicamento] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroPeriodo, setFiltroPeriodo] = useState('hoje');
@@ -36,36 +45,45 @@ export default function MeusLembretesContent() {
   const lembretes = lembreteContext?.lembretes ?? [];
 
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
     async function fetchData() {
       try {
         setLoading(true);
+        setError('');
+        setConfirmationError(null);
+        setConfirmationStatus('');
+        setConfirmedSnapshot({ token, ids: new Set() });
+        setSavingId(null);
         const medicamentosResponse = await apiRequest<{
           message: string;
           data: Medicamento[];
         }>('remedio/me', {
           method: 'GET',
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
 
+        if (!current()) return;
+        if (!medicamentosResponse || !Array.isArray(medicamentosResponse.data) || !medicamentosResponse.data.every(item => item && typeof item.id === 'number' && typeof item.nome === 'string')) throw new RequestContractError();
         setMedicamentos(medicamentosResponse.data);
 
         if (getLembretes) {
           await getLembretes();
         }
       } catch (err) {
-        console.error('Erro ao buscar dados:', err);
-        setError(
-          'Não foi possível carregar seus lembretes. Tente novamente mais tarde.',
-        );
+        if (current()) setError(requestErrorMessage(err) || '');
       } finally {
-        setLoading(false);
+        if (current()) setLoading(false);
       }
     }
 
-    fetchData();
-  }, [getLembretes]);
+    void fetchData();
+    return () => { active = false; controller.abort(); mutation.current?.abort(); mutation.current = null; };
+  }, [getLembretes, token]);
 
   const formatarData = (dataString: Date) => {
     if (!dataString) return 'Sem data';
@@ -74,9 +92,18 @@ export default function MeusLembretesContent() {
   };
 
   const marcarComoTomado = async (lembreteId: number) => {
+    if (mutation.current) return;
+    const controller = new AbortController();
+    mutation.current = controller;
+    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    setSavingId(lembreteId);
+    setConfirmationError(null);
+    setConfirmationStatus('');
     try {
-      await apiRequest(`dose/${lembreteId}`, {
+      if (!confirmedIds.has(lembreteId)) {
+        await apiRequest(`dose/${lembreteId}`, {
         method: 'PUT',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -84,16 +111,21 @@ export default function MeusLembretesContent() {
         body: JSON.stringify({
           tomado: true,
         }),
-      });
+        });
+        if (!current()) return;
+        setConfirmedSnapshot(previous => ({ token, ids: new Set(previous.token === token ? previous.ids : []).add(lembreteId) }));
+      }
 
       if (getLembretes) {
-        await getLembretes();
+        const refreshed = await getLembretes();
+        if (!current()) return;
+        if (refreshed === false) setConfirmationStatus('Dose confirmada. A atualização dos lembretes não foi concluída.');
       }
     } catch (err) {
-      console.error('Erro ao marcar lembrete como tomado:', err);
-      setError(
-        'Não foi possível marcar o lembrete como tomado. Tente novamente.',
-      );
+      if (current()) setConfirmationError(requestErrorMessage(err));
+    } finally {
+      if (mutation.current === controller) mutation.current = null;
+      if (current()) setSavingId(null);
     }
   };
 
@@ -141,14 +173,16 @@ export default function MeusLembretesContent() {
         </div>
       </div>
 
-      {loading ? (
+      {confirmationError && <RequestFeedback context="Ao confirmar dose" message={confirmationError} />}
+      {confirmationStatus && <RequestFeedback kind="success" message={confirmationStatus} />}
+      {loading || (lembreteContext?.lembretesLoading && lembretes.length === 0) ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#037F8C]"></div>
         </div>
       ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          {error}
-        </div>
+        <RequestFeedback context="Ao carregar medicamentos dos lembretes" message={error} />
+      ) : lembreteContext?.lembretesError && lembretes.length === 0 ? (
+        <p>Os lembretes não puderam ser carregados.</p>
       ) : lembretes.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
           <div className="text-6xl mb-6">⏰</div>
@@ -317,9 +351,10 @@ export default function MeusLembretesContent() {
                       <div className="ml-4">
                         <button
                           onClick={() => marcarComoTomado(lembrete.id)}
+                          disabled={savingId !== null}
                           className="bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#025e6a] transition-colors text-sm KantumruyMedium"
                         >
-                          ✓ Marcar como tomado
+                          {savingId === lembrete.id ? 'Carregando...' : confirmedIds.has(lembrete.id) ? 'Atualizar lembretes' : '✓ Marcar como tomado'}
                         </button>
                       </div>
                     )}

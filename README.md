@@ -59,13 +59,22 @@ npm run dev
 
 Abra [http://localhost:3000](http://localhost:3000).
 
-Para utilizar outra porta, por exemplo quando uma API local estiver na porta 3000:
+Em desenvolvimento, a API padrão é [http://localhost:3001](http://localhost:3001).
+Inicie o backend nessa porta. Não é necessário editar URLs no código.
+Se `NEXT_PUBLIC_API_URL` estiver definida, ela tem prioridade sobre esse padrão.
+
+Para utilizar outra porta para o frontend:
 
 ```bash
-npm run dev -- --port 3001
+npm run dev -- --port 3002
 ```
 
-Nesse caso, abra [http://localhost:3001](http://localhost:3001).
+Nesse caso, abra [http://localhost:3002](http://localhost:3002).
+
+`npm run start` serve um build de produção existente e não aplica o padrão de
+desenvolvimento. Para trabalhar nos fontes atuais com a API local, encerre esse
+processo e execute `npm run dev`. Alterações em variáveis `NEXT_PUBLIC_*` exigem
+reiniciar o servidor de desenvolvimento ou gerar um novo build.
 
 ### Build e execução
 
@@ -140,13 +149,17 @@ O arquivo é disponibilizado pelo frontend em `/assets/DADOS_ABERTOS_MEDICAMENTO
 
 ## Integração com a API
 
-A aplicação utiliza a API em:
+A origem da API é resolvida pelo cliente HTTP em `src/app/utils/api.ts`:
 
-```text
-https://medreminder-backend.onrender.com
-```
+| Ambiente | Origem padrão sem `NEXT_PUBLIC_API_URL` |
+| --- | --- |
+| Desenvolvimento (`npm run dev`) | `http://localhost:3001` |
+| Produção (`npm run build` e `npm run start`) | `https://medreminder-backend.onrender.com` |
+| Testes | Marcador `.invalid`, sem acesso à produção |
 
-O cliente HTTP principal está em `src/app/utils/api.ts`. Ele adiciona o token Bearer às requisições autenticadas e trata respostas de erro. Também existem chamadas diretas nas telas de cadastro, histórico e configurações.
+`NEXT_PUBLIC_API_URL` permite configurar outra origem e tem prioridade em todos
+os ambientes. Em modo `NEXT_PUBLIC_API_ENV=isolated`, essa variável é obrigatória.
+O cliente adiciona o token Bearer às requisições autenticadas e trata respostas de erro.
 
 | Recurso | Operações utilizadas |
 | --- | --- |
@@ -157,7 +170,11 @@ O cliente HTTP principal está em `src/app/utils/api.ts`. Ele adiciona o token B
 
 O token da sessão é armazenado no `localStorage` com a chave `access_token`, e os dados do perfil com a chave `user_data`.
 
-A URL da API está definida no código. Atualmente, `NEXT_PUBLIC_API_URL` não é utilizada; para conectar outra API, é necessário ajustar as URLs existentes e autorizar a origem do frontend na configuração CORS do servidor.
+Para substituir a origem local, defina `NEXT_PUBLIC_API_URL` em `.env.development.local`.
+Essa configuração só é carregada em desenvolvimento. Autorize também a origem do
+frontend na configuração CORS do backend. Variáveis `NEXT_PUBLIC_*` são públicas e
+incorporadas ao JavaScript; não coloque segredos nelas. Para builds de produção,
+defina a origem desejada antes de executar `npm run build`.
 
 ## Fluxo de uso
 

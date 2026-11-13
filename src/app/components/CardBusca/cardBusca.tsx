@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Papa, { ParseResult } from 'papaparse';
+import { ApiError, parseRetryAfter } from '../../utils/api';
+import { RequestContractError, requestErrorMessage } from '../../utils/request-errors';
+import RequestFeedback from '../RequestFeedback/RequestFeedback';
 
 type Medicamento = {
   NOME_PRODUTO: string;
@@ -21,6 +24,7 @@ export default function BuscaMedicamento({
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selection, setSelection] = useState<{
     value: Medicamento | null;
     catalog: Medicamento[];
@@ -51,24 +55,34 @@ export default function BuscaMedicamento({
   }, [initialMatch, medicamentoInicial, onSelect]);
 
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv');
+        const res = await fetch('/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv', { signal: controller.signal });
+        if (!res.ok) throw new ApiError({ status: res.status, message: 'Falha no catálogo', retryAfter: parseRetryAfter(res.headers.get('Retry-After')) });
         const csvText = await res.text();
+        if (!active || controller.signal.aborted) return;
         Papa.parse<Medicamento>(csvText, {
           header: true,
           skipEmptyLines: true,
           complete: (results: ParseResult<Medicamento>) => {
+            if (!active || controller.signal.aborted) return;
+            if (results.errors.length || !['NOME_PRODUTO', 'DESCRIÇÃO'].every(field => results.meta.fields?.includes(field)) || !results.data.every(row => typeof row.NOME_PRODUTO === 'string' && typeof row.DESCRIÇÃO === 'string')) throw new RequestContractError();
             setMedicamentos(results.data);
           },
         });
       } catch (err) {
-        console.error('Erro ao carregar CSV:', err);
-        setError('Erro ao carregar os dados');
+        if (active && !controller.signal.aborted) setError(requestErrorMessage(err));
+      } finally {
+        if (active) setLoading(false);
       }
     };
 
     void fetchData();
+    return () => { active = false; controller.abort(); };
   }, []);
 
   const filtered = useMemo(() => {
@@ -79,13 +93,6 @@ export default function BuscaMedicamento({
       med.NOME_PRODUTO?.toLowerCase().includes(lowerTerm),
     );
   }, [searchTerm, medicamentos, selectedResult]);
-
-  useEffect(() => {
-    // Se houver erro, podemos mostrar em algum elemento UI
-    if (error) {
-      console.log(error);
-    }
-  }, [searchTerm, medicamentos, error]);
 
   const handleSearch = (term: string): void => {
     setSearchTerm(term);
@@ -180,7 +187,9 @@ export default function BuscaMedicamento({
         </div>
       )}
 
-      {isDropdownOpen && (
+      {loading && <p role="status">Carregando catálogo...</p>}
+      {error && <RequestFeedback context="Ao carregar catálogo de medicamentos" message={error} />}
+      {isDropdownOpen && !loading && !error && (
         <div className="absolute mt-1 min-w-7/10 max-w-9/10 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
           <div className="py-2 flex flex-col gap-1">
             {searchTerm && filtered.length > 0 ? (

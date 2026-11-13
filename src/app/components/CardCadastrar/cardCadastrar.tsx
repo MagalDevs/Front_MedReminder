@@ -2,7 +2,9 @@
 
 import { useState, useLayoutEffect, useContext, useRef } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { apiRequest, ApiError } from "../../utils/api";
+import { apiRequest } from "../../utils/api";
+import { RequestContractError, requestErrorMessage } from "../../utils/request-errors";
+import RequestFeedback from "../RequestFeedback/RequestFeedback";
 import { LembreteContext } from "@/app/contexts/lembreteContext";
 import { Loader2 } from "lucide-react";
 
@@ -89,8 +91,14 @@ function calcularDoses(inicio: Date, intervaloHoras: number, duracaoDias: number
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
+  const scope = JSON.stringify([isAuthenticated, user?.id, user?.email]);
   const intencao = useRef<{ identidade: string; chave: string } | null>(null);
   const enviando = useRef(false);
+  const activeRequest = useRef<AbortController | null>(null);
+  const [requestFailure, setRequestFailure] = useState<{ scope: string; message: string | null } | null>(null);
+  const [refreshResult, setRefreshResult] = useState<{ scope: string; message: string } | null>(null);
+  const requestError = requestFailure?.scope === scope ? requestFailure.message : null;
+  const refreshStatus = refreshResult?.scope === scope ? refreshResult.message : '';
   const sessionEpoch = useRef(0);
   // Invalidate the prior identity before a newly committed form can be used.
   // A deferred effect could otherwise revoke a request submitted just after login.
@@ -98,13 +106,17 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     const epoch = sessionEpoch;
     epoch.current++;
     intencao.current = null;
-    return () => { epoch.current++; };
+    activeRequest.current?.abort();
+    activeRequest.current = null;
+    enviando.current = false;
+    return () => { epoch.current++; activeRequest.current?.abort(); activeRequest.current = null; };
   }, [isAuthenticated, user?.id, user?.email]);
   const [erros, setErros] = useState<ErrosForm>({});
   const [nome, setNome] = useState(medicamentoSelecionado?.nome || "");
   const [dosagem, setDosagem] = useState("");
   const [tipo, setTipo] = useState(medicamentoSelecionado?.tipo || "");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingScope, setLoadingScope] = useState<string | null>(null);
+  const isLoading = loadingScope === scope;
   const [corSelecionada, setCorSelecionada] = useState("#FF0000");
   const [horarios, setHorarios] = useState<Horario[]>([
     {
@@ -210,9 +222,13 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     }
 
     const submittedEpoch = sessionEpoch.current;
-    const currentSession = () => sessionEpoch.current === submittedEpoch && localStorage.getItem("access_token") === token;
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    const currentSession = () => !controller.signal.aborted && sessionEpoch.current === submittedEpoch && localStorage.getItem("access_token") === token;
     enviando.current = true;
-    setIsLoading(true);
+    setLoadingScope(scope);
+    setRequestFailure(null);
+    setRefreshResult(null);
     try {
       const nomeCores: Record<string, string> = {
         "#FF0000": "Vermelho",
@@ -255,6 +271,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         data: { remedio: { id: number }; doses: unknown[] };
       }>("tratamento", {
         method: "POST",
+        signal: controller.signal,
         headers: { "Idempotency-Key": intencao.current.chave },
         body: corpo,
       });
@@ -262,28 +279,29 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       if (!Number.isInteger(resposta?.data?.remedio?.id) ||
           resposta.data.remedio.id <= 0 || !Array.isArray(resposta.data.doses) ||
           resposta.data.doses.length !== dosesISO.length) {
-        throw new Error("Não foi possível confirmar o tratamento criado. Tente novamente.");
+        throw new RequestContractError();
       }
       intencao.current = null;
       alert("Lembrete e doses salvos com sucesso!");
       limparFormulario();
-      await context?.getLembretes();
-    } catch (error) {
-      if (!currentSession()) return;
-      let mensagemErro = error instanceof Error ? error.message : "Erro ao salvar o lembrete. Tente novamente.";
-      if (error instanceof ApiError) {
-        if (error.status === 401) {
-          mensagemErro = "Sua sessão expirou. Por favor, faça login novamente.";
-        } else if (error.status === 409) {
-          mensagemErro = "Conflito ao salvar o tratamento. Verifique os dados antes de tentar novamente.";
-        } else if (error.status === 503) {
-          mensagemErro = "Serviço indisponível. Tente novamente mais tarde.";
+      try {
+        const refreshed = await context?.getLembretes();
+        if (currentSession() && refreshed === false) setRefreshResult({ scope, message: 'Tratamento salvo. A atualização dos lembretes não foi concluída.' });
+      } catch (refreshError) {
+        if (currentSession()) {
+          setRefreshResult({ scope, message: 'Tratamento salvo. A atualização dos lembretes não foi concluída.' });
+          setRequestFailure({ scope, message: requestErrorMessage(refreshError) });
         }
       }
-      alert(mensagemErro);
+    } catch (error) {
+      if (!currentSession()) return;
+      setRequestFailure({ scope, message: requestErrorMessage(error) });
     } finally {
-      enviando.current = false;
-      setIsLoading(false);
+      if (activeRequest.current === controller) {
+        activeRequest.current = null;
+        enviando.current = false;
+        if (currentSession()) setLoadingScope(null);
+      }
     }
   };
 
@@ -313,6 +331,8 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
 
   return (
     <div className="bg-[#D9D9D9] p-6 rounded-xl shadow-lg m-6 ">
+      {requestError && <RequestFeedback context={refreshStatus ? 'Ao atualizar lembretes após salvar tratamento' : 'Ao salvar tratamento'} message={requestError} />}
+      {refreshStatus && <RequestFeedback kind="success" message={refreshStatus} />}
       <h2 className="text-xl font-bold text-[#0B6E71] mb-5">
         Sobre o medicamento
       </h2>

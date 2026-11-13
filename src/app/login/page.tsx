@@ -1,23 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo/Logo';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest } from '../utils/api';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { requestErrorMessage, RequestContractError } from '../utils/request-errors';
+import { clearNavigationFeedback, consumeNavigationFeedback, subscribeNavigationFeedback, type NavigationFeedback } from '../utils/navigation-feedback';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [notice, setNotice] = useState<NavigationFeedback | null>(null);
+  const noticeRead = useRef(false);
+  const pending = useRef<AbortController | null>(null);
+  useEffect(() => () => {
+    pending.current?.abort();
+    pending.current = null;
+  }, []);
+  useEffect(() => {
+    const readNotice = () => {
+      const next = consumeNavigationFeedback();
+      if (next) {
+        setNotice(next);
+        setError('');
+      }
+    };
+    if (!noticeRead.current) {
+      noticeRead.current = true;
+      readNotice();
+    }
+    return subscribeNavigationFeedback(readNotice);
+  }, []);
   const router = useRouter();
   const { login, logout } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    const attempt = new AbortController();
+    pending.current = attempt;
+    const current = () => pending.current === attempt && !attempt.signal.aborted;
     setError('');
+    setNotice(null);
+    clearNavigationFeedback();
     setIsLoading(true);
     try {
       const data = await apiRequest<{
@@ -26,16 +56,15 @@ export default function Login() {
       }>('auth/login', {
         method: 'POST',
         requireAuth: false,
+        signal: attempt.signal,
         body: JSON.stringify({
           email: username,
           senha: password,
         }),
       });
+      if (!current()) return;
 
-      if (data.message && !data.access_token) {
-        setError(data.message);
-        return;
-      }
+      if (!data || typeof data.access_token !== 'string' || !data.access_token.trim()) throw new RequestContractError();
 
       if (data.access_token) {
         try {
@@ -53,64 +82,31 @@ export default function Login() {
             };
           }>('usuario/me', {
             method: 'GET',
+            signal: attempt.signal,
             requireAuth: false,
             headers: {
               Authorization: `Bearer ${data.access_token}`,
             },
           });
+          if (!current()) return;
 
+          if (!userData?.data || !userData.data.id) throw new RequestContractError();
           login(data.access_token, userData.data);
 
           router.push('/');
         } catch (profileError) {
-          setError(`Não foi possível carregar seu perfil. Faça o login novamente. ${profileError}`);
+          if (!current()) return;
+          setError(`Não foi possível carregar seu perfil. Faça o login novamente. ${requestErrorMessage(profileError, 'session') || ''}`.trim());
           logout();
         }
-      } else {
-        setError('Erro no servidor: Token de autenticação não encontrado.');
       }
     } catch (err) {
-      if (err instanceof Error) {
-        const errorMessage = err.message;
-        if (
-          errorMessage.includes('401') ||
-          errorMessage.toLowerCase().includes('invalid') ||
-          errorMessage.toLowerCase().includes('inválido')
-        ) {
-          setError('E-mail ou senha inválidos');
-        } else if (
-          errorMessage.includes('404') ||
-          errorMessage.includes('not found')
-        ) {
-          setError(
-            'Serviço temporariamente indisponível. Tente novamente mais tarde.',
-          );
-        } else if (errorMessage.includes('429')) {
-          setError(
-            'Muitas tentativas. Aguarde um momento antes de tentar novamente.',
-          );
-        } else if (
-          errorMessage.includes('timeout') ||
-          errorMessage.includes('timed out')
-        ) {
-          setError(
-            'O servidor está demorando para responder. Verifique sua conexão.',
-          );
-        } else {
-          setError(errorMessage);
-        }
-      } else if (
-        typeof err === 'object' &&
-        err !== null &&
-        'message' in err &&
-        typeof err.message === 'string'
-      ) {
-        setError(err.message);
-      } else {
-        setError('Ocorreu um erro durante o login');
-      }
+      if (current()) setError(requestErrorMessage(err, 'login') || '');
     } finally {
-      setIsLoading(false);
+      if (current()) {
+        pending.current = null;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -123,11 +119,9 @@ export default function Login() {
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
+        {notice === 'registered' && <RequestFeedback kind="success" message="Cadastro concluído! Entre com seu e-mail e senha." />}
+        {notice === 'session-expired' && <RequestFeedback message="Sessão expirada. Entre novamente." />}
+        {error && <RequestFeedback message={error} />}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

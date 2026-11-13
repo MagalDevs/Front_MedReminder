@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 
 type Medicamento = {
   id: number;
@@ -36,36 +38,48 @@ export default function MeusMedicamentosContent() {
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
+  const deletion = useRef<AbortController | null>(null);
+  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const router = useRouter();
 
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
     async function fetchMedicamentos() {
       try {
         setLoading(true);
+        setError('');
+        setDeleteError(null);
+        setDeleting(null);
+        setMedicamentos([]);
 
         const response = await apiRequest<{
           message: string;
           data: [];
         }>('remedio/me', {
           method: 'GET',
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
 
+        if (!current()) return;
+        if (!response || !Array.isArray(response.data) || !response.data.every((item: Medicamento) => item && typeof item.id === 'number' && typeof item.nome === 'string')) throw new RequestContractError();
         setMedicamentos(response.data);
       } catch (err) {
-        console.error('Erro ao buscar medicamentos:', err);
-        setError(
-          'Não foi possível carregar seus medicamentos. Tente novamente mais tarde.',
-        );
+        if (current()) setError(requestErrorMessage(err) || '');
       } finally {
-        setLoading(false);
+        if (current()) setLoading(false);
       }
     }
 
-    fetchMedicamentos();
-  }, []);
+    void fetchMedicamentos();
+    return () => { active = false; controller.abort(); deletion.current?.abort(); deletion.current = null; };
+  }, [token]);
 
   const formatarData = (dataString: string) => {
     if (!dataString) return 'Sem data';
@@ -92,23 +106,30 @@ export default function MeusMedicamentosContent() {
   };
 
   const excluirMedicamento = async (id: number) => {
+    if (deletion.current) return;
     if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
+      const controller = new AbortController();
+      deletion.current = controller;
+      const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+      setDeleting(id);
+      setDeleteError(null);
       try {
         await apiRequest<{
           message: string;
           data: [];
         }>(`remedio/${id}`, {
           method: 'DELETE',
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
-        setMedicamentos(medicamentos.filter((med) => med.id !== id));
+        if (current()) setMedicamentos(previous => previous.filter((med) => med.id !== id));
       } catch (err) {
-        console.error('Erro ao excluir medicamento:', err);
-        alert(
-          'Não foi possível excluir o medicamento. Tente novamente mais tarde.',
-        );
+        if (current()) setDeleteError(requestErrorMessage(err));
+      } finally {
+        if (deletion.current === controller) deletion.current = null;
+        if (current()) setDeleting(null);
       }
     }
   };
@@ -148,14 +169,13 @@ export default function MeusMedicamentosContent() {
         )}
       </div>
 
+      {deleteError && <RequestFeedback context="Ao excluir medicamento" message={deleteError} />}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#037F8C]"></div>
         </div>
       ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          {error}
-        </div>
+        <RequestFeedback context="Ao carregar medicamentos" message={error} />
       ) : medicamentos.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
           <div className="text-6xl mb-6">💊</div>
@@ -272,6 +292,7 @@ export default function MeusMedicamentosContent() {
                       </button>
                       <button
                         onClick={() => excluirMedicamento(medicamento.id)}
+                        disabled={deleting !== null}
                         className="text-red-500 bg-[#F2F2F2] p-1.5 rounded-full hover:bg-[#E0E0E0] transition-colors"
                         title="Excluir medicamento"
                       >

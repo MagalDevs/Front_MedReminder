@@ -121,9 +121,12 @@ function ignorarCorridaDeNavegacao(): void {}
 
 type DialogLog = { messages: string[]; confirmResult: boolean };
 
-const test = guarded.extend<{ api: FakeApi; dialogs: DialogLog }>({
-  api: async ({ page }, provide) => {
+const test = guarded.extend<{ fixedClock: void; api: FakeApi; dialogs: DialogLog }>({
+  fixedClock: [async ({ page }, provide) => {
     await page.clock.setFixedTime(NOW);
+    await provide();
+  }, { auto: true }],
+  api: async ({ page }, provide) => {
     const api = new FakeApi();
     api.on("GET", "/usuario/me", { json: { data: USER } });
     api.on("GET", "/dose/me", { json: { data: [] } });
@@ -251,9 +254,9 @@ async function expectSemSessao(page: Page): Promise<void> {
 
 const AUTH_HEADER = `Bearer ${TOKEN}`;
 const MENSAGEM_POR_STATUS = {
-  403: "Acesso negado",
-  429: "Muitas requisições. Tente novamente mais tarde",
-  500: "Erro interno do servidor",
+  403: "Você não tem permissão para realizar esta ação.",
+  429: "Muitas tentativas. Tente novamente mais tarde.",
+  500: "O serviço está temporariamente indisponível. Tente novamente mais tarde.",
 } as const;
 type StatusDeErro = keyof typeof MENSAGEM_POR_STATUS;
 const STATUS_DE_ERRO: StatusDeErro[] = [403, 429, 500];
@@ -530,7 +533,7 @@ test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ pag
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
   const salvar = page.getByRole("button", { name: "Salvar lembrete" });
   await salvar.click();
-  await expect.poll(() => dialogs.messages.length).toBe(1);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(salvar).toBeEnabled();
   await salvar.click();
   await expect.poll(() => dialogs.messages.at(-1)).toBe("alert: Lembrete e doses salvos com sucesso!");
@@ -698,8 +701,8 @@ test("FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento n
 
   await expect.poll(() => dialogs.messages).toEqual([
     "confirm: Tem certeza que deseja excluir este medicamento?",
-    "alert: Não foi possível excluir o medicamento. Tente novamente mais tarde.",
   ]);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(titulos).toHaveCount(3);
   expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
 });
@@ -725,11 +728,11 @@ test("FN-05 TEST-03 sem medicamentos mostra o estado vazio com o atalho de cadas
 type CasoLogin = { nome: string; reply: Reply; mensagem: string };
 const CASOS_LOGIN: CasoLogin[] = [
   { nome: "401 Invalid credentials", reply: { status: 401, json: { message: "Invalid credentials" } }, mensagem: "E-mail ou senha inválidos" },
-  { nome: "401 sem corpo", reply: { status: 401 }, mensagem: "Não autorizado" },
-  { nome: "403", reply: { status: 403 }, mensagem: "Acesso negado" },
-  { nome: "429", reply: { status: 429 }, mensagem: "Muitas requisições. Tente novamente mais tarde" },
-  { nome: "500", reply: { status: 500 }, mensagem: "Erro interno do servidor" },
-  { nome: "rede interrompida", reply: { abort: true }, mensagem: "Failed to fetch" },
+  { nome: "401 sem corpo", reply: { status: 401 }, mensagem: "E-mail ou senha inválidos" },
+  { nome: "403", reply: { status: 403 }, mensagem: "Você não tem permissão para realizar esta ação." },
+  { nome: "429", reply: { status: 429 }, mensagem: "Muitas tentativas. Tente novamente mais tarde." },
+  { nome: "500", reply: { status: 500 }, mensagem: "O serviço está temporariamente indisponível. Tente novamente mais tarde." },
+  { nome: "rede interrompida", reply: { abort: true }, mensagem: "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente." },
 ];
 
 for (const caso of CASOS_LOGIN) {
@@ -744,7 +747,7 @@ for (const caso of CASOS_LOGIN) {
     await page.getByLabel("Senha", { exact: true }).fill(USER_PASSWORD);
     await page.getByRole("button", { name: "Entrar" }).click();
 
-    await expect(page.getByText(caso.mensagem, { exact: true })).toBeVisible();
+    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(caso.mensagem);
     await expect(page.getByRole("button", { name: "Entrar" })).toBeEnabled(); // loading encerrado
     await expect(page).toHaveURL(/\/login$/);
     await expectSemSessao(page);
@@ -764,7 +767,7 @@ test("FN-07 FN-01 TEST-03 login com token mas perfil 500 mostra a falha do perfi
   await page.getByLabel("Senha", { exact: true }).fill(USER_PASSWORD);
   await page.getByRole("button", { name: "Entrar" }).click();
 
-  await expect(page.getByText(/Não foi possível carregar seu perfil/)).toBeVisible();
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível carregar seu perfil. Faça o login novamente. O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Entrar" })).toBeEnabled();
   await expectSemSessao(page);
@@ -798,16 +801,19 @@ for (const status of STATUS_DE_ERRO) {
     await expect(page.getByRole("button", { name: /Marcar como tomado/ })).toHaveCount(2);
     await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2); // provider + página
     const carregamentos = api.calls("GET", "/dose/me").length;
+    await expect(selo(page, "Tomado")).toHaveCount(1);
+    const tomadosAntes = await selo(page, "Tomado").count();
 
     await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
       .getByRole("button", { name: /Marcar como tomado/ })
       .click();
 
     await expect(
-      page.getByText("Não foi possível marcar o lembrete como tomado. Tente novamente."),
-    ).toBeVisible();
+      page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
+    ).toHaveText(`Ao confirmar dose: ${MENSAGEM_POR_STATUS[status]}`);
     await expect(page.locator(".animate-spin")).toHaveCount(0);
-    await expect(selo(page, "Tomado")).toHaveCount(0); // sem sucesso falso
+    await expect(selo(page, "Tomado")).toHaveCount(tomadosAntes); // nenhuma nova confirmação
+    await expect(linhaDeLembrete(page, "Dipirona Teste", "Pendente")).toBeVisible();
     expect(api.calls("PUT", "/dose/102")).toHaveLength(1);
     expect(api.calls("GET", "/dose/me")).toHaveLength(carregamentos); // sem reconsulta
     expect(agenda.doses.find((d) => d.id === 102)?.tomado).toBe(false);
@@ -818,19 +824,28 @@ test("FN-07 FN-04 TEST-03 marcar dose tomada com rede interrompida mostra a mens
   page,
   api,
 }) => {
-  usarAgenda(api, criarAgenda());
+  const agenda = criarAgenda();
+  usarAgenda(api, agenda);
   api.on("PUT", "/dose/102", { abort: true });
   await seedSession(page);
   await page.goto("/meus-lembretes");
+  await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2);
+  const carregamentos = api.calls("GET", "/dose/me").length;
+  await expect(selo(page, "Tomado")).toHaveCount(1);
+  const tomadosAntes = await selo(page, "Tomado").count();
 
   await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
     .getByRole("button", { name: /Marcar como tomado/ })
     .click();
 
   await expect(
-    page.getByText("Não foi possível marcar o lembrete como tomado. Tente novamente."),
-  ).toBeVisible();
-  await expect(selo(page, "Tomado")).toHaveCount(0);
+    page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
+  ).toHaveText("Ao confirmar dose: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
+  await expect(selo(page, "Tomado")).toHaveCount(tomadosAntes);
+  await expect(linhaDeLembrete(page, "Dipirona Teste", "Pendente")).toBeVisible();
+  expect(agenda.doses.find((dose) => dose.id === 102)?.tomado).toBe(false);
+  expect(api.calls("PUT", "/dose/102")).toHaveLength(1);
+  expect(api.calls("GET", "/dose/me")).toHaveLength(carregamentos);
 });
 
 test("FN-07 FN-04 TEST-03 marcar dose tomada com 401 remove a sessão e leva ao login", async ({
@@ -867,8 +882,8 @@ for (const status of STATUS_DE_ERRO) {
 
     await expect.poll(() => dialogs.messages).toEqual([
       "confirm: Tem certeza que deseja excluir este medicamento?",
-      "alert: Não foi possível excluir o medicamento. Tente novamente mais tarde.",
     ]);
+    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao excluir medicamento: ${MENSAGEM_POR_STATUS[status]}`);
     await expect(titulos).toHaveCount(3);
     expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
   });
@@ -888,9 +903,8 @@ test("FN-07 FN-05 TEST-03 excluir medicamento com rede interrompida avisa a falh
   await expect(titulos).toHaveCount(3);
   await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
 
-  await expect.poll(() => dialogs.messages).toContain(
-    "alert: Não foi possível excluir o medicamento. Tente novamente mais tarde.",
-  );
+  await expect.poll(() => dialogs.messages).toEqual(["confirm: Tem certeza que deseja excluir este medicamento?"]);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(titulos).toHaveCount(3);
 });
 
@@ -921,14 +935,14 @@ test("FN-07 FN-05 TEST-03 falha ao carregar medicamentos e lembretes mostra a me
 
   await page.goto("/meus-medicamentos");
   await expect(
-    page.getByText("Não foi possível carregar seus medicamentos. Tente novamente mais tarde."),
-  ).toBeVisible();
+    page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
+  ).toHaveText("Ao carregar medicamentos: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(page.locator(".animate-spin")).toHaveCount(0);
 
   await page.goto("/meus-lembretes");
   await expect(
-    page.getByText("Não foi possível carregar seus lembretes. Tente novamente mais tarde."),
-  ).toBeVisible();
+    page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
+  ).toHaveText("Ao carregar medicamentos dos lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(page.locator(".animate-spin")).toHaveCount(0);
 });
 
@@ -949,9 +963,8 @@ for (const status of STATUS_DE_ERRO) {
 
     const mensagem = MENSAGEM_POR_STATUS[status];
     // Uma falha da operação atômica produz um aviso.
-    await expect.poll(() => dialogs.messages).toEqual([
-      `alert: ${mensagem}`,
-    ]);
+    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao salvar tratamento: ${mensagem}`);
+    expect(dialogs.messages).toEqual([]);
     await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
     expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
     expect(dialogs.messages.join("\n")).not.toContain("sucesso");
@@ -974,7 +987,7 @@ test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria dose
 
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  await expect.poll(() => dialogs.messages.length).toBe(1);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
   expect(dialogs.messages.join("\n")).not.toContain("sucesso");
@@ -1015,9 +1028,8 @@ test("FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso", async (
 
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  await expect.poll(() => dialogs.messages).toEqual([
-    "alert: Erro interno do servidor",
-  ]);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
+  expect(dialogs.messages).toEqual([]);
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   expect(dialogs.messages.join("\n")).not.toContain("sucesso");
   // Sem sucesso: nenhuma reconsulta de lembretes além da carga inicial.
@@ -1088,3 +1100,51 @@ for (const viewport of VIEWPORTS) {
     });
   });
 }
+
+// Relógio completo isolado para o disparo real do alarme, sem alterar outros casos.
+const alarmTest = test.extend({
+  fixedClock: async ({ page }, provide) => {
+    await page.clock.install({ time: NOW });
+    await page.clock.pauseAt(NOW);
+    await provide();
+  },
+});
+
+alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET', async ({ page, api }, testInfo) => {
+  await seedSession(page);
+  const rem = remedio(91, 'Alarme Sintético', { cor: 'Branco' });
+  const row = dose(901, rem, new Date(NOW.getTime() + 2000).toISOString(), false);
+  let confirmed = false;
+  let failedRefresh = true;
+  api.on('GET', '/dose/me', () => confirmed && failedRefresh
+    ? { status: 503, json: {} }
+    : { json: { data: [{ ...row, tomado: confirmed }] } });
+  api.on('PUT', '/dose/901', () => { confirmed = true; return { json: { data: { id: 901, tomado: true } } }; });
+  await page.goto('/historico');
+  await expect(page.getByRole('heading', { name: 'Alarme Sintético' })).toBeVisible();
+  await page.clock.runFor(2000);
+  await expect(page.getByText('Hora do Medicamento!')).toBeVisible();
+  await page.getByRole('button', { name: 'Medicamento Tomado' }).click();
+  const surface = page.locator('.fixed.inset-0').filter({ hasText: 'Hora do Medicamento!' });
+  const alert = surface.getByRole('alert');
+  await expect(alert).toBeVisible();
+  await expect(alert).toHaveText('Ao carregar lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
+  // Next mantém um route-announcer vazio; só feedback com texto é aviso da aplicação.
+  await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveCount(1);
+  expect(await alert.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    return element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+  })).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('f4-alarm-running.png') });
+  await expect(surface.getByRole('status')).toHaveText('Dose confirmada. A atualização dos lembretes não foi concluída.');
+  expect(api.calls('PUT', '/dose/901')).toHaveLength(1);
+  expect(api.calls('PUT', '/dose/901')[0].body).toEqual({ tomado: true });
+  const reads = api.calls('GET', '/dose/me').length;
+  failedRefresh = false;
+  await surface.getByRole('button', { name: 'Atualizar lembretes' }).click();
+  await expect(page.getByText('Hora do Medicamento!')).toHaveCount(0);
+  await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveCount(0);
+  expect(api.calls('GET', '/dose/me')).toHaveLength(reads + 1);
+  expect(api.calls('PUT', '/dose/901')).toHaveLength(1);
+  expect(confirmed).toBe(true);
+});

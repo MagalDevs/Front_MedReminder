@@ -17,7 +17,7 @@ function Probe() {
 }
 function mount() { return render(<AuthProvider><LembreteProvider><Probe /></LembreteProvider></AuthProvider>); }
 const state = () => JSON.parse(screen.getByTestId('state').textContent!);
-const dose = { id: 1, tomado: false, data_dose: '2026-11-04T12:00:00Z', remedio: { nome: 'Projeção parcial' } };
+const dose = { id: 1, tomado: false, data_dose: '2026-11-04T12:00:00Z', remedio: { nome: 'Projeção parcial', quantidadeDose: '1', cor: 'Branco' } };
 function token() { localStorage.setItem('access_token', 'token-a'); localStorage.setItem('user_data', JSON.stringify({ id: 999, nome: 'Stale' })); }
 
 describe('BEAPI-03/BEAPI-04 restauração e consultas por identidade', () => {
@@ -81,7 +81,7 @@ describe('BEAPI-03/BEAPI-04 restauração e consultas por identidade', () => {
     expect(screen.getByTestId('doses')).toHaveTextContent('[]'); expect(state().authenticated).toBe(false);
   });
   it('BEAPI-04 resposta de doses A após login B não publica dados A', async () => {
-    token(); const dosesA = pending(); vi.mocked(fetch).mockResolvedValueOnce(json({ data: { id: 1 } })).mockReturnValueOnce(dosesA.promise).mockResolvedValueOnce(json({ data: [{ ...dose, id: 2, remedio: { nome: 'Conta B' } }] }));
+    token(); const dosesA = pending(); vi.mocked(fetch).mockResolvedValueOnce(json({ data: { id: 1 } })).mockReturnValueOnce(dosesA.promise).mockResolvedValueOnce(json({ data: [{ ...dose, id: 2, remedio: { nome: 'Conta B', quantidadeDose: '1', cor: 'Branco' } }] }));
     mount(); await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2)); fireEvent.click(screen.getByText('login B'));
     await waitFor(() => expect(screen.getByTestId('doses')).toHaveTextContent('Conta B'));
     await act(async () => dosesA.resolve(json({ data: [dose] })));

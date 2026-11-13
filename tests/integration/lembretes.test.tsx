@@ -522,7 +522,7 @@ describe("IT-07 TEST-01 TEST-02: lista, filtros e marcar como tomado", () => {
 
     expect(
       await screen.findByText(
-        "Não foi possível marcar o lembrete como tomado. Tente novamente.",
+        "Ao confirmar dose: O serviço está temporariamente indisponível. Tente novamente mais tarde.",
       ),
     ).toBeInTheDocument();
     expect(pathsOf(api, "PUT", "/dose/1")).toHaveLength(1);
@@ -538,7 +538,7 @@ describe("IT-07 TEST-01 TEST-02: lista, filtros e marcar como tomado", () => {
 
     expect(
       await screen.findByText(
-        "Não foi possível carregar seus lembretes. Tente novamente mais tarde.",
+        "Ao carregar medicamentos dos lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.",
       ),
     ).toBeInTheDocument();
   });

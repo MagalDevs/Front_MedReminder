@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo/Logo';
-import { ApiError, apiRequest } from '../utils/api';
+import { apiRequest } from '../utils/api';
+import { requestErrorMessages, RequestTimeoutError } from '../utils/request-errors';
+import { clearNavigationFeedback, publishNavigationFeedback } from '../utils/navigation-feedback';
 
 export default function Cadastro() {
   const [nome, setNome] = useState('');
@@ -16,10 +18,23 @@ export default function Cadastro() {
   const [dataNascimento, setDataNascimento] = useState('');
   const [cuidador, setCuidador] = useState(false);
   const [erros, setErros] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const pending = useRef<{ active: boolean; controller: AbortController; timer?: ReturnType<typeof setTimeout> } | null>(null);
   const router = useRouter();
+
+  useEffect(() => () => {
+    if (pending.current) {
+      pending.current.active = false;
+      pending.current.controller.abort();
+      clearTimeout(pending.current.timer);
+      pending.current = null;
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    clearNavigationFeedback();
     setErros([]);
 
     // Validação básica
@@ -42,27 +57,36 @@ export default function Cadastro() {
       senha,
     };
 
+    const attempt = { active: true, controller: new AbortController(), timer: undefined as ReturnType<typeof setTimeout> | undefined };
+    pending.current = attempt;
+    setLoading(true);
+    const deadline = new Promise<never>((_resolve, reject) => {
+      attempt.timer = setTimeout(() => {
+        reject(new RequestTimeoutError());
+        attempt.controller.abort();
+      }, 15_000);
+    });
     try {
-      await apiRequest('/usuario', {
+      await Promise.race([deadline, apiRequest('/usuario', {
         method: 'POST',
         requireAuth: false,
+        expectedStatus: 201,
+        signal: attempt.controller.signal,
         body: JSON.stringify(usuarioParaCadastro),
-      });
-
+      })]);
+      if (!attempt.active || pending.current !== attempt) return;
+      publishNavigationFeedback('registered');
       router.push('/login');
     } catch (error) {
-      if (error instanceof ApiError && error.status === 429) {
-        setErros([
-          error.retryAfter !== undefined
-            ? `Muitas tentativas de cadastro. Tente novamente em ${error.retryAfter} segundos.`
-            : 'Muitas tentativas de cadastro. Tente novamente mais tarde.',
-        ]);
-      } else if (error instanceof ApiError && error.status < 500) {
-        setErros(error.messages.length > 0
-          ? error.messages
-          : ['Erro ao cadastrar. Tente novamente.']);
-      } else {
-        setErros(['Erro ao conectar com o servidor. Tente novamente mais tarde.']);
+      if (attempt.active && pending.current === attempt) {
+        setErros(requestErrorMessages(error, 'registration'));
+      }
+    } finally {
+      clearTimeout(attempt.timer);
+      if (attempt.active && pending.current === attempt) {
+        attempt.active = false;
+        pending.current = null;
+        setLoading(false);
       }
     }
   };
@@ -241,9 +265,11 @@ export default function Cadastro() {
           <div>
             <button
               type="submit"
+              disabled={loading}
+              aria-busy={loading}
               className="w-full bg-[#0B6E71] text-white py-2 px-4 rounded-md hover:bg-opacity-90 hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold"
             >
-              Cadastrar
+              {loading ? 'Carregando...' : 'Cadastrar'}
             </button>
           </div>
         </form>

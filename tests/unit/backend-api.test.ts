@@ -52,6 +52,31 @@ beforeEach(() => {
 });
 
 describe('BEAPI-01 origem configurável do cliente HTTP', () => {
+  it('desenvolvimento sem variável envia o cadastro para localhost:3001', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const api = await loadApi();
+    const fetchMock = respondJson({ data: { id: 1 } }, 201);
+    await api.apiRequest('/usuario', { method: 'POST', requireAuth: false, body: '{}' });
+    expect(api.getApiBaseUrl()).toBe('http://localhost:3001');
+    expect(api.API_URL).toBe('http://localhost:3001');
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith('http://localhost:3001/usuario', expect.any(Object));
+  });
+
+  it('desenvolvimento preserva a prioridade da origem explícita', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4010/');
+    const api = await loadApi();
+    expect(api.buildApiUrl('/usuario')).toBe('http://localhost:4010/usuario');
+  });
+
+  it('desenvolvimento isolado sem origem continua falhando sem chamar fetch', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('NEXT_PUBLIC_API_ENV', 'isolated');
+    const api = await loadApi();
+    await expect(api.apiRequest('/usuario', { requireAuth: false })).rejects.toThrow(api.ApiConfigError);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it.each([
     'https://api-a.example.test',
     'http://localhost:4010',
@@ -410,5 +435,33 @@ describe('BEAPI-03 invalida??o da identidade em mem?ria', () => {
     await expect(request).rejects.toMatchObject({ status: 401 });
     expect(localStorage.getItem('access_token')).toBe('token-b');
     expect(location.href).toBe('http://localhost/area-protegida');
+  });
+});
+
+describe('Contrato de resposta para feedback', () => {
+  it('REG-07 confirmação aceita 201 com corpo vazio de perfil', async () => {
+    const api=await loadApi(); respondJson({},201);
+    await expect(api.apiRequest('/usuario',{requireAuth:false,expectedStatus:201})).resolves.toEqual({});
+  });
+  it('REG-07 status200 não confirma cadastro esperado201', async () => {
+    const api=await loadApi(); const mock=respondJson({},200);
+    await expect(api.apiRequest('/usuario',{requireAuth:false,expectedStatus:201})).rejects.toMatchObject({name:'RequestContractError'});
+    expect(mock.mock.calls[0][1]).not.toHaveProperty('expectedStatus');
+  });
+  it('ERR-12 204 válido não é tratado como JSON inválido', async () => {
+    const api=await loadApi(); respond(null,204,{'Content-Type':'application/json'});
+    await expect(api.apiRequest('/remedio/1',{requireAuth:false,method:'DELETE'})).resolves.toBeUndefined();
+  });
+  it('ERR-12 JSON de sucesso inválido tem erro de contrato sem corpo técnico', async () => {
+    const api=await loadApi(); respond('{segredo-interno',200,{'Content-Type':'application/json'});
+    const error=await catchError(api.apiRequest('/usuario/me',{requireAuth:false}));
+    expect(error).toMatchObject({name:'RequestContractError',message:'Resposta fora do contrato'});
+    expect(String(error)).not.toContain('segredo-interno');
+  });
+  it('ERR-19 abort do corpo preserva o erro de cancelamento', async () => {
+    const api=await loadApi(); const error=new DOMException('cancelado','AbortError');
+    const response=new Response('{}',{headers:{'Content-Type':'application/json'}});
+    vi.spyOn(response,'json').mockRejectedValueOnce(error); vi.mocked(fetch).mockResolvedValueOnce(response);
+    await expect(api.apiRequest('/usuario/me',{requireAuth:false})).rejects.toBe(error);
   });
 });

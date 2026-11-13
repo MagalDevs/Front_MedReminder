@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest, ApiError } from '../utils/api';
+import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
+import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 
 type RegistroHistorico = {
   id: string;
@@ -34,7 +36,8 @@ export default function HistoricoContent() {
   const registros = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.registros : [];
   const medicamentos = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.medicamentos : [];
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [failure, setFailure] = useState({ identity: '', token: null as string | null, message: '' });
+  const error = failure.identity === identity && failure.token === token ? failure.message : '';
   const [filtroMedicamento, setFiltroMedicamento] = useState<string>('');
   const [filtroStatus, setFiltroStatus] = useState<string>('');
   const [filtroPeriodo, setFiltroPeriodo] = useState<string>('todos');
@@ -47,15 +50,16 @@ export default function HistoricoContent() {
         setLoading(authLoading);
         return;
       }
-      setError('');
+      setFailure({ identity, token, message: '' });
       setLoading(true);
       try {
         // Sem query: o contrato legado devolve a lista completa, sem paginação.
         const response = await apiRequest<{ data: DoseHistorico[] }>('dose/me', { signal: controller.signal });
         if (!active || localStorage.getItem('access_token') !== token) return;
+        if (!response || !Array.isArray(response.data)) throw new RequestContractError();
         const rows = response.data.map((dose): RegistroHistorico => {
-          if (typeof dose.tomado !== 'boolean' || !Number.isFinite(Date.parse(dose.data_dose)) || !dose.remedio) {
-            throw new Error('Resposta de histórico inválida');
+          if (!dose || !['string', 'number'].includes(typeof dose.id) || typeof dose.tomado !== 'boolean' || typeof dose.data_dose !== 'string' || !Number.isFinite(Date.parse(dose.data_dose)) || !dose.remedio || !['string', 'number'].includes(typeof dose.remedio.id) || typeof dose.remedio.nome !== 'string') {
+            throw new RequestContractError();
           }
           return {
             id: String(dose.id),
@@ -70,10 +74,10 @@ export default function HistoricoContent() {
         }])).values());
         setSnapshot({ identity, token, registros: rows, medicamentos: meds });
       } catch (err) {
-        if (!active) return;
-        setError(err instanceof ApiError && err.status === 401
-          ? 'Sessão expirada. Entre novamente para consultar o histórico.'
-          : 'Não foi possível carregar o histórico. Tente novamente mais tarde.');
+        const currentToken = localStorage.getItem('access_token');
+        const expired = err instanceof ApiError && err.status === 401 && currentToken === null;
+        if (!active || controller.signal.aborted || (currentToken !== token && !expired)) return;
+        setFailure({ identity, token: currentToken, message: requestErrorMessage(err, expired ? 'session' : 'operation') ?? '' });
       } finally {
         if (active) setLoading(false);
       }
@@ -245,9 +249,7 @@ export default function HistoricoContent() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#037F8C]"></div>
         </div>
       ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          {error}
-        </div>
+        <RequestFeedback context="Ao carregar histórico" message={error} />
       ) : registrosFiltrados.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
           <div className="text-6xl mb-6">📅</div>
