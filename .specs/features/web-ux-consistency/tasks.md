@@ -59,7 +59,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T1: Consolidar tokens e tipografia
 - [x] T2: Criar Button acessível
-- [ ] T3: Criar FormField com mensagens associadas
+- [x] T3: Criar FormField com mensagens associadas
 - [ ] T4: Criar diálogo com gestão de foco
 - [ ] T5: Padronizar RequestFeedback
 - [ ] T6: Criar AppShell responsivo
@@ -183,10 +183,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/ui/FormField.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas SYSTEM-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T3 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/ui/FormField.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas SYSTEM-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T3 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Quick gate: 2 passed, 0 failed. WUX_SYSTEM_05 asserts exact visible error, accessible description, label focus and preserved input; WUX_T03_ASSOCIATIONS covers HTML input/select/textarea, unique stable IDs, external help and cleared errors. No deviation.
 
 ### T4: Criar diálogo com gestão de foco
 
@@ -1236,7 +1238,7 @@ Proof: run nonfunctional | ✓ WUX_SYSTEM_03
 Proof: run nonfunctional | ✓ WUX_SYSTEM_04
 
 **C66** - WHEN um campo tem erro THEN the web client SHALL apresentar mensagem textual associada sem depender somente de cor ou placeholder. (SYSTEM-05, AC 5; T3).
-Proof: run coverage | ✓ WUX_SYSTEM_05
+Proof: run coverage | WUX_SYSTEM_05 associates a visible textual error with the labeled field and preserves its entered value
 
 **C67** - WHEN a interface apresenta uma ação secundária THEN the web client SHALL diferenciá-la da ação principal sem reduzir seu contraste de texto abaixo do critério de acessibilidade. (SYSTEM-06, AC 6; T45).
 Proof: run nonfunctional | ✓ WUX_SYSTEM_06

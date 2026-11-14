@@ -448,7 +448,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | SYSTEM-02 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-03 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-04 | Visual system | T46 | Tasks | In Tasks |
-| SYSTEM-05 | Visual system | T3 | Tasks | In Tasks |
+| SYSTEM-05 | Visual system | T3 | Implemented | WUX_SYSTEM_05, unit gate 2 passed |
 | SYSTEM-06 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-07 | Visual system | T47 | Tasks | In Tasks |
 | SYSTEM-08 | Visual system | T45 | Tasks | In Tasks |
