@@ -5,6 +5,7 @@ import { AuthProvider } from '../app/contexts/AuthContext';
 import { SidebarProvider } from '../app/contexts/SidebarContext';
 import { LembreteProvider } from './contexts/lembreteContext';
 import AlertaLembretes from './components/AlarmeDose/AlertaLembrete';
+import TreatmentDraftBoundary from './features/web-ux/contexts/TreatmentDraftBoundary';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -32,10 +33,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F6F6F6]`}
       >
         <AuthProvider>
-          <LembreteProvider>
-            <AlertaLembretes />
-            <SidebarProvider>{children}</SidebarProvider>
-          </LembreteProvider>
+          <TreatmentDraftBoundary>
+            <LembreteProvider>
+              <AlertaLembretes />
+              <SidebarProvider>{children}</SidebarProvider>
+            </LembreteProvider>
+          </TreatmentDraftBoundary>
         </AuthProvider>
       </body>
     </html>

@@ -465,10 +465,10 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCESS-10 | Accessibility | T4 | Implemented | WUX_ACCESS_10, integration gate 3 passed |
 | STATE-01 | Recovery and interruptions | T5 | Implemented | WUX_STATE_01, integration gate 5 passed |
 | STATE-02 | Recovery and interruptions | T5 | Implemented | WUX_STATE_02, integration gate 5 passed |
-| STATE-03 | Recovery and interruptions | T34 | Tasks | In Tasks |
-| STATE-04 | Recovery and interruptions | T34 | Tasks | In Tasks |
+| STATE-03 | Recovery and interruptions | T34 | Implemented | T34: 6 integration tests passed |
+| STATE-04 | Recovery and interruptions | T34 | Implemented | T34: 6 integration tests passed |
 | STATE-05 | Recovery and interruptions | T24 | Implemented | WUX_STATE_05, T24: 10 integration tests passed (4 contract follow-up) |
-| STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
+| STATE-06 | Recovery and interruptions | T34 | Implemented | T34: 6 integration tests passed |
 | STATE-07 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 | STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
 | STATE-09 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
@@ -535,3 +535,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T32: public HomeScreen verified by 3 integration tests and 6 affected public-screen regressions. Logo has opt-in non-heading brand presentation; legacy defaults unchanged. NAV-03 route proof remains T35.
 
 - T33: alarm presentation and identity-scoped confirmed-dose events verified by 9 own plus 58 affected integration regressions. Event payload contains identity key/ID/instant/boolean, never credentials. Older pending reads reconcile confirmed writes. Complete alarm siblings survive incomplete rows; unsupported rows receive no invented time/action. Specific user-authorized legacy alarm test corrections are recorded in context.md.
+
+- T34: root draft boundary verified by 6 integration cases plus 5 affected draft/editor regressions. Phase Build/types/lint passed. Medication editor initial loading now sets state only in response callbacks, and retry state begins at the gesture. Complete pagination of the legacy alarm provider remains an authorized immediate integration follow-up before B6.

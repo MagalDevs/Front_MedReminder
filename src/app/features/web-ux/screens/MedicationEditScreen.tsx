@@ -26,22 +26,21 @@ function Editor({ id }: { id: number }) {
   const pending = useRef<AbortController | null>(null); const deadline = useRef(0); const form = useRef<HTMLFormElement>(null);
   const waiting = useRetryDelay(notBefore) > 0;
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-  const load = useCallback(async () => {
+  const load = useCallback(() => {
     if (Date.now() < deadline.current) return;
     pending.current?.abort(); const controller = new AbortController(); pending.current = controller;
     const active = () => !controller.signal.aborted && pending.current === controller && localStorage.getItem('access_token') === token;
-    setLoading(true); setError(null);
-    try {
-      const response = await apiRequest<{ data: Item }>(`remedio/${id}`, { method: 'GET', signal: controller.signal });
+    return apiRequest<{ data: Item }>(`remedio/${id}`, { method: 'GET', signal: controller.signal }).then(response => {
       if (!active()) return;
       if (response?.data?.id !== id || typeof response.data.nome !== 'string') throw new RequestContractError();
       const item = response.data;
       setOriginal(item); setEdited({ nome: item.nome, classificacao: item.classificacao ?? '', quantidadeCaixa: item.quantidadeCaixa, dataValidade: item.dataValidade?.slice(0, 10) ?? '', cor: item.cor ?? '', motivo: item.motivo ?? '', observacao: item.observacao ?? '' });
       deadline.current = 0; setNotBefore(0);
-    } catch (cause) { if (active()) { deadline.current = cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : 0; setNotBefore(deadline.current); setError(requestErrorMessage(cause)); } }
-    finally { if (active()) { pending.current = null; setLoading(false); } }
+    }).catch(cause => { if (active()) { deadline.current = cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : 0; setNotBefore(deadline.current); setError(requestErrorMessage(cause)); } })
+      .finally(() => { if (active()) { pending.current = null; setLoading(false); } });
   }, [id, token]);
   useEffect(() => { void load(); return () => { pending.current?.abort(); pending.current = null; }; }, [load]);
+  function retryLoad() { setLoading(true); setError(null); return load(); }
   async function save(event: React.FormEvent) {
     event.preventDefault(); if (!original || !edited || pending.current || waiting) return;
     const invalid: Record<string, string> = {};
@@ -68,7 +67,7 @@ function Editor({ id }: { id: number }) {
   return <AppShell title="Editar medicamento" onSignOut={auth.logout}>
     <Link href="/meus-medicamentos" className="inline-flex min-h-11 items-center font-semibold text-[var(--action-primary)] underline">Voltar para Medicamentos</Link>
     {loading && <RequestFeedback kind="loading" message="Carregando medicamento…" />}
-    {error && <RequestFeedback message={error} retry={!edited ? { onRetry: load, notBefore } : undefined} />}
+    {error && <RequestFeedback message={error} retry={!edited ? { onRetry: retryLoad, notBefore } : undefined} />}
     {message && <RequestFeedback kind="success" message={message} />}
     {edited && original && <form ref={form} noValidate onSubmit={save} className="mt-6 max-w-3xl space-y-6 rounded-[var(--radius-surface)] bg-[var(--surface-raised)] p-4 sm:p-6">
       <h2 className="break-words text-xl font-semibold">{original.nome}</h2>

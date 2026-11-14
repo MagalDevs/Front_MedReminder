@@ -102,7 +102,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T31: Criar Perfil centrado em dados e segurança
 - [x] T32: Criar entrada pública clara
 - [x] T33: Alinhar apresentação do alarme existente
-- [ ] T34: Conectar rascunho ao layout raiz
+- [x] T34: Conectar rascunho ao layout raiz
 
 ### Phase 6: Existing route migration
 
@@ -835,7 +835,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T34: Conectar rascunho ao layout raiz
 
 **What**: Adicionar provider estável sem duplicar providers de sessão/doses nem reiniciar o rascunho por rota.
-**Where**: `src/app/layout.tsx`
+**Where**: `src/app/layout.tsx`; cohesive client support in features/web-ux/contexts/TreatmentDraftBoundary.tsx; phase-lint closure in MedicationEditScreen.tsx moves state updates into request callbacks and retry gesture
 **Depends on**: T14
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: STATE-03, STATE-04, SYSTEM-01, STATE-06
@@ -846,10 +846,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/layout.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas STATE-03, STATE-04, STATE-06 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T34 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/layout.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas STATE-03, STATE-04, STATE-06 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T34 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 6 own integration tests passed; 2 draft-provider and 3 medication-editor affected regressions passed, 0 failed. Actual RootLayout provider subtree preserves same-identity draft/summary across route children and metadata changes, clears it on logout/identity/expiration, discards stale reads and does not duplicate the dose provider. Only document CSS and next/font are mocked in this integration harness; production CSS is checked by Build/lint. Build (Webpack, 11/11 prerendered), TypeScript and global ESLint --max-warnings=0 passed. Sandbox EPERM in .next required escalated build, without cleanup or stopping user processes. No routes T35 onward connected.
 
 ### Phase 6: Existing route migration
 
@@ -1353,16 +1355,16 @@ Proof: run coverage | WUX_STATE_01 retry refreshes only the failed reading and r
 Proof: run coverage | WUX_STATE_02 announces loading while preserving the error and last known content
 
 **C83** - WHEN a pessoa navega internamente durante um cadastro de medicamento THEN the web client SHALL preservar o rascunho em memória para a mesma identidade conforme a política declarada. (STATE-03, AC 3; T34).
-Proof: run coverage | ✓ WUX_STATE_03
+Proof: run coverage | WUX_STATE_03
 
 **C84** - WHEN ocorre logout, troca de identidade ou expiração confirmada THEN the web client SHALL eliminar rascunhos e dados privados da identidade anterior. (STATE-04, AC 4; T34).
-Proof: run coverage | ✓ WUX_STATE_04
+Proof: run coverage | WUX_STATE_04
 
 **C85** - WHEN a pessoa inicia o cadastro de medicamento THEN the web client SHALL informar “O rascunho é mantido nesta aba enquanto você navega. Recarregar ou fechar a aba descarta o preenchimento.”. (STATE-05, AC 5; T24).
 Proof: run coverage | WUX_STATE_05
 
 **C86** - IF uma resposta chega depois da troca de identidade ou de uma solicitação mais recente da mesma listagem THEN the web client SHALL descartá-la sem alterar o estado visível atual. (STATE-06, AC 6; T34).
-Proof: run coverage | ✓ WUX_STATE_06
+Proof: run coverage | WUX_STATE_06
 
 **C87** - IF o POST de tratamento termina sem resultado confirmado THEN the web client SHALL manter o formulário e a chave em memória para nova tentativa manual do mesmo conteúdo, sem anunciar falha definitiva ou criar chave nova automaticamente. (STATE-07, AC 7; T15).
 Proof: run coverage | WUX_STATE_07
@@ -1674,7 +1676,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; T28–T47 permanecem pendentes. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; T35–T47 permanecem pendentes. Suporte adicional autorizado após T34: reutilizar collector T11 para paginação completa do provider legado, com provas de página 2 e falha parcial antes do handoff B6. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
 **Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 e correção autorizada em 1b7e1bc, 39 testes novos + 27 regressões afetadas; todos os lotes com Build/tipos/lint verdes. B5 /root/batch_05, T28–T34, HEAD 1b7e1bc, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
