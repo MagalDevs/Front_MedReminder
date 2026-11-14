@@ -76,7 +76,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 3: Operations and input
 
-- [ ] T14: Criar rascunho em memória
+- [x] T14: Criar rascunho em memória
 - [ ] T15: Controlar submissão idempotente de tratamento
 - [ ] T16: Implementar atualização de metadados
 - [ ] T17: Controlar exclusão nominal
@@ -420,10 +420,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/contexts/TreatmentDraftContext.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T14 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/contexts/TreatmentDraftContext.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T14 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2 testes passaram, 0 falhas (2026-11-14).
 
 ### T15: Controlar submissão idempotente de tratamento
 
@@ -1632,7 +1634,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6 com gates por tarefa e Build de Phase 1 verdes em 2026-11-14; T7–T47 permanecem pendentes.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 concluídas em 7edc5d1, 19 testes novos + 4 regressões aprovados, Build/tipos/lint verdes. B2 /root/batch_02, T7–T13, HEAD 7edc5d1, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
+**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6 e B2 concluiu T7–T13 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. T14–T47 permanecem pendentes. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões aprovados. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões aprovados, Build/tipos/lint verdes. B3 /root/batch_03, T14–T20, HEAD f704393, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
