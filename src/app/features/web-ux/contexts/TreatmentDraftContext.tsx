@@ -4,7 +4,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { TreatmentDraft } from '../domain/treatment';
 
 export type TreatmentSummary = { medicationId: number; medicationName: string; firstDoseAt: string };
-export type TreatmentIntent = { phase: 'editing' } | { phase: 'submitting' | 'uncertain'; key: string; identity: string; body: string } | { phase: 'confirmed'; summary: TreatmentSummary; refreshFailed: boolean };
+export type TreatmentIntent = { phase: 'editing' } | { phase: 'submitting' | 'uncertain'; key: string; identity: string; body: string; retryNotBefore?: number } | { phase: 'confirmed'; summary: TreatmentSummary; refreshFailed: boolean };
 export const emptyTreatmentDraft: TreatmentDraft = {
   medicationName: '', classification: '', stock: '', expiry: '', amount: '', unit: '', boxUnit: '',
   color: '', reason: '', notes: '', photo: '', firstDoseAt: '', intervalHours: '', duration: '', durationUnit: 'days',

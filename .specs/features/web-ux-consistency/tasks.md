@@ -77,7 +77,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 3: Operations and input
 
 - [x] T14: Criar rascunho em memória
-- [ ] T15: Controlar submissão idempotente de tratamento
+- [x] T15: Controlar submissão idempotente de tratamento
 - [ ] T16: Implementar atualização de metadados
 - [ ] T17: Controlar exclusão nominal
 - [ ] T18: Tornar busca do catálogo acessível
@@ -441,10 +441,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/hooks/useTreatmentSubmission.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-16, STATE-07, STATE-11 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T15 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/hooks/useTreatmentSubmission.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas FORM-16, STATE-07, STATE-11 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T15 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 9 testes passaram, 0 falhas (2026-11-14).
 
 ### T16: Implementar atualização de metadados
 
@@ -1193,7 +1195,7 @@ Proof: run functional | ✓ WUX_FORM_14
 Proof: run functional | ✓ WUX_FORM_15
 
 **C43** - IF o tratamento foi confirmado mas a atualização da lista falha THEN the web client SHALL mostrar “Tratamento salvo. Não foi possível atualizar a lista.” com ação para atualizar, sem reenviar a criação. (FORM-16, AC 16; T15).
-Proof: run coverage | ✓ WUX_FORM_16
+Proof: run coverage | WUX_FORM_16
 
 **C44** - IF o catálogo não pode ser carregado THEN the web client SHALL oferecer cadastro manual sem exigir escolha de um resultado indisponível. (FORM-17, AC 17; T18).
 Proof: run coverage | ✓ WUX_FORM_17
@@ -1325,7 +1327,7 @@ Proof: run coverage | ✓ WUX_STATE_05
 Proof: run coverage | ✓ WUX_STATE_06
 
 **C87** - IF o POST de tratamento termina sem resultado confirmado THEN the web client SHALL manter o formulário e a chave em memória para nova tentativa manual do mesmo conteúdo, sem anunciar falha definitiva ou criar chave nova automaticamente. (STATE-07, AC 7; T15).
-Proof: run coverage | ✓ WUX_STATE_07
+Proof: run coverage | WUX_STATE_07
 
 **C88** - IF uma operação retorna HTTP 429 com Retry-After válido THEN the web client SHALL informar a espera e impedir nova tentativa da mesma operação até o prazo, sem criar repetição automática. (STATE-08, AC 8; T5).
 Proof: run coverage | WUX_STATE_08 honors the actual 429 Retry-After deadline with no automatic retry
@@ -1337,7 +1339,7 @@ Proof: run coverage | WUX_STATE_09
 Proof: run coverage | WUX_STATE_10
 
 **C91** - WHILE uma criação de tratamento tem resultado incerto the web client SHALL impedir alteração do conteúdo daquela intenção, oferecendo tentar a mesma intenção novamente ou consultar os registros sem gerar nova criação automaticamente. (STATE-11, AC 11; T15).
-Proof: run coverage | ✓ WUX_STATE_11
+Proof: run coverage | WUX_STATE_11
 
 ## Phase Execution Map
 
