@@ -91,7 +91,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T23: Criar revisão verificável
 - [x] T24: Compor wizard de tratamento
 - [x] T25: Criar tela Medicamentos
-- [ ] T26: Criar Hoje e agenda do medicamento
+- [x] T26: Criar Hoje e agenda do medicamento
 - [ ] T27: Criar Histórico com filtros compostos
 
 ### Phase 5: Account and shared composition
@@ -663,7 +663,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T26: Criar Hoje e agenda do medicamento
 
 **What**: Exibir próxima dose e agenda completa do dia; modo por medicamento preserva acesso a futuras.
-**Where**: `src/app/features/web-ux/screens/TodayScreen.tsx`
+**Where**: `src/app/features/web-ux/screens/TodayScreen.tsx`; approved shared support `src/app/features/web-ux/hooks/useDoseCollection.ts`
 **Depends on**: T6, T7, T10, T11, T20
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: DAY-01, DAY-02, DAY-03, DAY-05, DAY-08
@@ -674,15 +674,17 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/TodayScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas DAY-02, DAY-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T26 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/TodayScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas DAY-02, DAY-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T26 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 10 passed (10), 0 failed; TypeScript and targeted zero-warning lint passed. stdout: WUX_DAY_02, WUX_DAY_08. Actual loader/mutation composition verifies sorted local dates/times/states, next alongside overdue, incomplete records with no invented name/time/action, empty day, future agenda by ID, stable source through clock/mutation, partial pages, 429/manual read retry and stale identity discard. Shared loader support approved by root; no AC deviation or legacy test change. Route proofs remain T36/T43. Follow-up: dose-read 401 ends the current session using the existing logout/expiry-feedback policy; network errors retain session/draft. 10 T26 tests plus 11 unchanged backend-session regressions passed (21 total).
 
 ### T27: Criar Histórico com filtros compostos
 
 **What**: Listar até agora em ordem decrescente, com filtros e totais somente do conjunto completo.
-**Where**: `src/app/features/web-ux/screens/HistoryScreen.tsx`
+**Where**: `src/app/features/web-ux/screens/HistoryScreen.tsx`; reuse approved shared `src/app/features/web-ux/hooks/useDoseCollection.ts`
 **Depends on**: T6, T7, T10, T11, T20
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: DAY-06, DAY-07, DAY-09
@@ -1116,7 +1118,7 @@ Proof: run nonfunctional | ✓ WUX_NAV_08
 Proof: run functional | ✓ WUX_DAY_01
 
 **C10** - WHEN uma dose é apresentada THEN the web client SHALL exibir nome do medicamento, quantidade com unidade, data, hora prevista em HH:mm e estado conforme Product Rules. (DAY-02, AC 2; T26).
-Proof: run coverage | ✓ WUX_DAY_02
+Proof: run coverage | WUX_DAY_02
 
 **C11** - WHEN há doses Programadas no dia THEN the web client SHALL identificar como próxima dose a de menor instante futuro, sem ocultar as doses Atrasadas. (DAY-03, AC 3; T36).
 Proof: run functional | ✓ WUX_DAY_03
@@ -1134,7 +1136,7 @@ Proof: run functional | ✓ WUX_DAY_06
 Proof: run functional | ✓ WUX_DAY_07
 
 **C16** - IF uma dose tem data inválida, ausência de relação ou data sem hora THEN the web client SHALL mostrá-la em uma seção “Dados incompletos”, sem inventar horário, medicamento ou ação de registro. (DAY-08, AC 8; T26).
-Proof: run coverage | ✓ WUX_DAY_08
+Proof: run coverage | WUX_DAY_08
 
 **C17** - WHEN a listagem usa resposta paginada THEN the web client SHALL calcular contagens e próxima dose somente sobre um conjunto completo do período ou rotulá-los como parciais até concluir a carga. (DAY-09, AC 9; T11).
 Proof: run coverage | WUX_DAY_09

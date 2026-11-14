@@ -392,13 +392,13 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | NAV-07 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-08 | Navigate the daily routine | T45 | Tasks | In Tasks |
 | DAY-01 | Understand today's doses and history | T36 | Tasks | In Tasks |
-| DAY-02 | Understand today's doses and history | T26 | Tasks | In Tasks |
+| DAY-02 | Understand today's doses and history | T26 | Implemented | T26: 10 integration tests passed |
 | DAY-03 | Understand today's doses and history | T36 | Tasks | In Tasks |
 | DAY-04 | Understand today's doses and history | T10 | Implemented | T10: 2 integration tests passed |
 | DAY-05 | Understand today's doses and history | T36 | Tasks | In Tasks |
 | DAY-06 | Understand today's doses and history | T39 | Tasks | In Tasks |
 | DAY-07 | Understand today's doses and history | T39 | Tasks | In Tasks |
-| DAY-08 | Understand today's doses and history | T26 | Tasks | In Tasks |
+| DAY-08 | Understand today's doses and history | T26 | Implemented | T26: 10 integration tests passed |
 | DAY-09 | Understand today's doses and history | T11 | Implemented | T11: 4 integration tests passed |
 | MED-01 | Manage medications | T37 | Tasks | In Tasks |
 | MED-02 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
