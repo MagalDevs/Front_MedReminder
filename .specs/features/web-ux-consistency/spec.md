@@ -471,8 +471,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-07 | Recovery and interruptions | T15 | Tasks | In Tasks |
 | STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
-| STATE-09 | Recovery and interruptions | T13 | Tasks | In Tasks |
-| STATE-10 | Recovery and interruptions | T13 | Tasks | In Tasks |
+| STATE-09 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
+| STATE-10 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
 | STATE-11 | Recovery and interruptions | T15 | Tasks | In Tasks |
 
 **Coverage:** 91 critérios mapeados às 47 tarefas de [tasks.md](tasks.md); 0 sem tarefa. Design e plano de tarefas aprovados em 2026-11-14. Nenhum critério foi implementado ou verificado como comportamento da aplicação.
@@ -517,3 +517,4 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 
 - T8: MED-01, MED-02 and MED-03 domain rules covered directly by 3 passing unit tests. Screen proofs remain assigned to T37.
 - T9: FORM-06/07/08/09/12/13 domain rules covered by 5 passing unit tests, including literal recurrence and payload examples.
+- T13: safe return targets and identity generation are available to subsequent route adapters. STATE-09/10 provider proofs and 21 existing session/profile regressions passed; composed Profile verification remains T31/T40.

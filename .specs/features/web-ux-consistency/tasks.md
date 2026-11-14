@@ -72,7 +72,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T10: Criar relógio local observável
 - [x] T11: Unificar carga completa de doses
 - [x] T12: Controlar mutação por dose
-- [ ] T13: Reforçar fronteira de sessão e destino interno
+- [x] T13: Reforçar fronteira de sessão e destino interno
 
 ### Phase 3: Operations and input
 
@@ -395,10 +395,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/contexts/AuthContext.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas STATE-09, STATE-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T13 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/contexts/AuthContext.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas STATE-09, STATE-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T13 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 11 T13 tests passed; 21 existing session/profile regression tests passed (32 total), 0 failed. stdout includes `WUX_STATE_09 profile revalidation 200 after operational password 401`, `WUX_STATE_10`. Phase build passed (Webpack, 11/11 prerendered) after sandbox EPERM was resolved with escalated execution; TypeScript and global ESLint --max-warnings=0 passed. STATE-09 verifies the real HTTP client and session provider; the composed new Profile gesture remains T31/T40. No previous assertions changed. No visual transition added.
 
 ### Phase 3: Operations and input
 
@@ -1325,10 +1327,10 @@ Proof: run coverage | ✓ WUX_STATE_07
 Proof: run coverage | WUX_STATE_08 honors the actual 429 Retry-After deadline with no automatic retry
 
 **C89** - IF a atualização de senha retorna 401 operacional THEN the web client SHALL reutilizar a política existente de revalidação única da sessão, distinguindo senha incorreta de sessão expirada. (STATE-09, AC 9; T13).
-Proof: run coverage | ✓ WUX_STATE_09
+Proof: run coverage | WUX_STATE_09
 
 **C90** - WHILE a sessão está em restauração ou falhou por rede the web client SHALL mostrar verificação pendente ou indisponível sem declarar o token expirado somente por essa falha. (STATE-10, AC 10; T13).
-Proof: run coverage | ✓ WUX_STATE_10
+Proof: run coverage | WUX_STATE_10
 
 **C91** - WHILE uma criação de tratamento tem resultado incerto the web client SHALL impedir alteração do conteúdo daquela intenção, oferecendo tentar a mesma intenção novamente ou consultar os registros sem gerar nova criação automaticamente. (STATE-11, AC 11; T15).
 Proof: run coverage | ✓ WUX_STATE_11
