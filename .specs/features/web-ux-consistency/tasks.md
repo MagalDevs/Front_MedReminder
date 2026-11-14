@@ -82,7 +82,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T17: Controlar exclusão nominal
 - [x] T18: Tornar busca do catálogo acessível
 - [x] T19: Criar seletor de cores nomeado
-- [ ] T20: Criar cartão de dose operacional
+- [x] T20: Criar cartão de dose operacional
 
 ### Phase 4: Medication and agenda screens
 
@@ -546,10 +546,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/components/DoseCard.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas DOSE-01, DOSE-02, DOSE-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T20 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/components/DoseCard.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas DOSE-01, DOSE-02, DOSE-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T20 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 8 testes T20 passaram; T15+T20 = 17 testes passaram após correção de ref para layout effect exigida pelo lint. Build webpack, tsc --noEmit e lint --max-warnings=0 passaram (2026-11-14). Build exigiu execução escalada após EPERM em .next. Nenhum processo do usuário foi encerrado.
 
 ### Phase 4: Medication and agenda screens
 
@@ -1209,10 +1211,10 @@ Proof: run coverage | WUX_FORM_16
 Proof: run coverage | WUX_FORM_17
 
 **C45** - WHEN a pessoa vê uma dose Pendente ou Atrasada com dados completos THEN the web client SHALL oferecer Registrar dose com nome e horário no nome acessível da ação. (DOSE-01, AC 1; T20).
-Proof: run coverage | ✓ WUX_DOSE_01
+Proof: run coverage | WUX_DOSE_01
 
 **C46** - WHILE uma dose está Programada the web client SHALL mantê-la visível sem permitir registro antecipado nesta interface. (DOSE-02, AC 2; T20).
-Proof: run coverage | ✓ WUX_DOSE_02
+Proof: run coverage | WUX_DOSE_02
 
 **C47** - WHEN a pessoa usa Registrar dose THEN the web client SHALL enviar PUT `/dose/:id` com corpo restrito a `{tomado:true}`. (DOSE-03, AC 3; T12).
 Proof: run coverage | WUX_DOSE_03
@@ -1221,7 +1223,7 @@ Proof: run coverage | WUX_DOSE_03
 Proof: run coverage | WUX_DOSE_04
 
 **C49** - WHEN a pessoa usa Corrigir registro em uma dose Registrada THEN the web client SHALL pedir confirmação com medicamento e horário previsto antes de enviar `{tomado:false}` ao mesmo endpoint. (DOSE-05, AC 5; T20).
-Proof: run coverage | ✓ WUX_DOSE_05
+Proof: run coverage | WUX_DOSE_05
 
 **C50** - WHEN o servidor confirma a correção THEN the web client SHALL recalcular o estado da dose pelo relógio atual sem alterar seu instante previsto. (DOSE-06, AC 6; T12).
 Proof: run coverage | WUX_DOSE_06

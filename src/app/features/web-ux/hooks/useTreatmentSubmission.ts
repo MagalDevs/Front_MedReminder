@@ -20,7 +20,8 @@ export function useTreatmentSubmission({ refresh: refreshCollection }: { refresh
   const { identity, draft, intent, setIntent, resetDraft, setSummary } = useTreatmentDraft();
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const request = useRef<AbortController | null>(null);
-  const latestIntent = useRef(intent); latestIntent.current = intent;
+  const latestIntent = useRef(intent);
+  useLayoutEffect(() => { latestIntent.current = intent; }, [intent]);
   const [error, setError] = useState<string | null>(null);
   useLayoutEffect(() => () => {
     request.current?.abort(); request.current = null;
