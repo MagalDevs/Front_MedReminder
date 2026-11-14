@@ -527,3 +527,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T28: MedicationEditScreen composed contract verified by 3 integration tests; MED-05/06/07 route proofs remain T44.
 
 - T29: composed login verified by 3 integration tests; destination/visibility route proofs remain T41/T42.
+
+- T30: composed account registration verified by 3 integration tests; ACCOUNT-01/02/03/04 route proofs remain T42.
