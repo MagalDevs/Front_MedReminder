@@ -62,7 +62,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T3: Criar FormField com mensagens associadas
 - [x] T4: Criar diálogo com gestão de foco
 - [x] T5: Padronizar RequestFeedback
-- [ ] T6: Criar AppShell responsivo
+- [x] T6: Criar AppShell responsivo
 
 ### Phase 2: Testable domain
 
@@ -246,10 +246,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/layout/AppShell.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-02, ACCESS-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T6 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/layout/AppShell.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas NAV-02, ACCESS-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T6 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Full gate: 3 passed, 0 failed. WUX_NAV_02 exercises all four destinations and visible/current state through a synthetic Next router boundary; WUX_ACCESS_04 exercises keyboard exclusion, open/Escape, focus return and next content control. Additional test covers narrow selection/close, breakpoint changes and legacy agenda current state. Phase 1 Build gate passed: npm run build, npx tsc --noEmit, npm run lint -- --max-warnings=0 (exit 0). Native browser route/layout checks remain with migration/T45. No motion or deviation.
 
 ### Phase 2: Testable domain
 
@@ -1050,7 +1052,7 @@ Cada check abaixo corresponde a exatamente um dos 91 critérios, com ID e AC da 
 Proof: run functional | ✓ WUX_NAV_01
 
 **C2** - WHEN a pessoa seleciona Hoje, Medicamentos, Histórico ou Perfil THEN the web client SHALL mostrar a tela correspondente com o destino atual identificado por texto e estado acessível. (NAV-02, AC 2; T6).
-Proof: run coverage | ✓ WUX_NAV_02
+Proof: run coverage | WUX_NAV_02 selects each destination and renders its named screen with accessible current state
 
 **C3** - WHEN um visitante abre a página inicial THEN the web client SHALL apresentar o propósito “Organize seus medicamentos e acompanhe os horários das doses.” antes da ação principal “Criar conta”. (NAV-03, AC 3; T35).
 Proof: run functional | ✓ WUX_NAV_03
@@ -1266,7 +1268,7 @@ Proof: run coverage | ✓ WUX_ACCESS_02
 Proof: run coverage | ✓ WUX_ACCESS_03
 
 **C74** - WHILE um menu está fechado the web client SHALL excluir seu conteúdo da navegação por teclado e da árvore acessível. (ACCESS-04, AC 4; T6).
-Proof: run coverage | ✓ WUX_ACCESS_04
+Proof: run coverage | WUX_ACCESS_04 excludes closed menu content from keyboard and accessibility and restores focus on Escape
 
 **C75** - WHEN a pessoa fecha menu sobreposto ou diálogo THEN the web client SHALL devolver o foco ao controle que o abriu. (ACCESS-05, AC 5; T4).
 Proof: run coverage | WUX_ACCESS_05 returns focus to the opener after explicit cancellation and close
@@ -1614,7 +1616,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. Nenhuma tarefa T1–T47 iniciada.
+**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6 com gates por tarefa e Build de Phase 1 verdes em 2026-11-14; T7–T47 permanecem pendentes.
 **Dispatched:** B1, /root/batch_01, T1–T6, HEAD dc98effe1cf3eef59eb39fe923b2a36a2d6e8870, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 

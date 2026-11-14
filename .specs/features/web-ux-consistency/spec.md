@@ -384,7 +384,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | Requirement ID | Story | Task | Phase | Status |
 | --- | --- | --- | --- | --- |
 | NAV-01 | Navigate the daily routine | T41 | Tasks | In Tasks |
-| NAV-02 | Navigate the daily routine | T6 | Tasks | In Tasks |
+| NAV-02 | Navigate the daily routine | T6 | Implemented | WUX_NAV_02, integration gate 3 passed |
 | NAV-03 | Navigate the daily routine | T35 | Tasks | In Tasks |
 | NAV-04 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-05 | Navigate the daily routine | T43 | Tasks | In Tasks |
@@ -456,7 +456,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCESS-01 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-02 | Accessibility | T18 | Tasks | In Tasks |
 | ACCESS-03 | Accessibility | T19 | Tasks | In Tasks |
-| ACCESS-04 | Accessibility | T6 | Tasks | In Tasks |
+| ACCESS-04 | Accessibility | T6 | Implemented | WUX_ACCESS_04, integration gate 3 passed |
 | ACCESS-05 | Accessibility | T4 | Implemented | WUX_ACCESS_05, integration gate 3 passed |
 | ACCESS-06 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-07 | Accessibility | T45 | Tasks | In Tasks |
