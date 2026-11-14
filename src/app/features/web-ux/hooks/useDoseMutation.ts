@@ -4,6 +4,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, apiRequest } from '../../../utils/api';
 import { RequestContractError, requestErrorMessage } from '../../../utils/request-errors';
 import { CompleteDose, DoseView, doseState, isDoseInstant } from '../domain/agenda';
+import { publishDoseConfirmation, subscribeDoseConfirmations } from '../data/dose-confirmations';
 
 export type DoseMutationStatus = { pending: boolean; error: string | null; retryNotBefore?: number; desired?: boolean };
 type Snapshot = { scope: string; source: DoseView[]; confirmed: Record<number, boolean>; status: Record<number, DoseMutationStatus> };
@@ -24,6 +25,15 @@ export function useDoseMutation({ doses, identity }: { doses: DoseView[]; identi
     return () => { for (const request of pending.values()) request.abort(); pending.clear(); };
   }, [scope, doses]);
 
+  useLayoutEffect(() => subscribeDoseConfirmations(identity, value => {
+    if (localStorage.getItem('access_token') !== token || !doses.some(dose => dose.kind === 'complete' && dose.id === value.id && Date.parse(dose.expectedAt) === Date.parse(value.expectedAt))) return;
+    requests.current.get(value.id)?.abort(); requests.current.delete(value.id);
+    setSnapshot(previous => {
+      const base = previous.scope === scope && previous.source === doses ? previous : { scope, source: doses, confirmed: {}, status: {} };
+      return { ...base, confirmed: { ...base.confirmed, [value.id]: value.registered }, status: { ...base.status, [value.id]: { pending: false, error: null } } };
+    });
+  }), [identity, token, scope, doses]);
+
   const mutate = useCallback(async (id: number, registered: boolean): Promise<boolean> => {
     const dose = visibleDoses.find((item): item is CompleteDose => item.kind === 'complete' && item.id === id);
     if (!identity || !token || !dose || typeof registered !== 'boolean' || requests.current.has(id) || dose.registered === registered || (status[id]?.retryNotBefore ?? 0) > Date.now()) return false;
@@ -40,6 +50,7 @@ export function useDoseMutation({ doses, identity }: { doses: DoseView[]; identi
       const saved = response?.data;
       if (!saved || saved.id !== id || saved.tomado !== registered || !isDoseInstant(saved.data_dose) || Date.parse(saved.data_dose) !== Date.parse(dose.expectedAt)) throw new RequestContractError();
       update(previous => ({ ...previous, confirmed: { ...previous.confirmed, [id]: registered }, status: { ...previous.status, [id]: { pending: false, error: null } } }));
+      publishDoseConfirmation({ identityKey: identity, id, expectedAt: dose.expectedAt, registered });
       return true;
     } catch (error) {
       if (!active()) return false;

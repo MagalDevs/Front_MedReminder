@@ -435,7 +435,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | DOSE-06 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
-| DOSE-09 | Register and correct a dose | T33 | Tasks | In Tasks |
+| DOSE-09 | Register and correct a dose | T33 | Implemented | WUX_DOSE_09; T33 9 integration tests passed |
 | ACCOUNT-01 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-02 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-03 | Account and profile | T42 | Tasks | In Tasks |
@@ -533,3 +533,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T31: metadata-only AuthContext.updateProfile preserves generation/token/draft, allowlists mutable fields and checks expected generation; JSON birth-date typing aligned in the legacy consumer. 8 own plus 32 regression tests and type/lint checks passed. ACCOUNT-05/08 route proofs remain T40.
 
 - T32: public HomeScreen verified by 3 integration tests and 6 affected public-screen regressions. Logo has opt-in non-heading brand presentation; legacy defaults unchanged. NAV-03 route proof remains T35.
+
+- T33: alarm presentation and identity-scoped confirmed-dose events verified by 9 own plus 58 affected integration regressions. Event payload contains identity key/ID/instant/boolean, never credentials. Older pending reads reconcile confirmed writes. Complete alarm siblings survive incomplete rows; unsupported rows receive no invented time/action. Specific user-authorized legacy alarm test corrections are recorded in context.md.

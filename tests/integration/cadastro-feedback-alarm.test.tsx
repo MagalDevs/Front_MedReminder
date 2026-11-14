@@ -33,7 +33,12 @@ const props = {
 function mount(onClose = vi.fn()) {
   return { ...render(<Lembrete {...props} onClose={onClose} />), onClose };
 }
-beforeEach(() => localStorage.setItem('access_token', 'a'));
+beforeEach(() => {
+  localStorage.setItem('access_token', 'a');
+  vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-11-14T12:00:00-03:00'));
+  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
+  Object.defineProperty(HTMLDialogElement.prototype, 'close', { configurable: true, value: function (this: HTMLDialogElement) { this.open = false; } });
+});
 describe('NET-18 confirmação no alarme', () => {
   it.each([503, 'network'] as const)(
     'ERR-01 NET-18 falha %s mantém alarme e recupera controle',
@@ -43,16 +48,16 @@ describe('NET-18 confirmação no alarme', () => {
       else vi.mocked(fetch).mockResolvedValueOnce(json({}, mode));
       const { onClose } = mount();
       fireEvent.click(
-        screen.getByRole('button', { name: 'Medicamento Tomado' }),
+        screen.getByRole('button', { name: /Registrar dose de/ }),
       );
       expect(await screen.findByRole('alert')).toHaveTextContent(
-        'Ao confirmar dose:',
+        'Ao registrar dose:',
       );
       expect(
-        screen.getByRole('button', { name: 'Medicamento Tomado' }),
+        screen.getByRole('button', { name: /Registrar dose de/ }),
       ).toBeEnabled();
       expect(onClose).not.toHaveBeenCalled();
-      expect(screen.getByText('Hora do Medicamento!')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Lembrete de dose' })).toBeInTheDocument();
       expect(
         JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]?.body)),
       ).toEqual({ tomado: true });
@@ -63,13 +68,13 @@ describe('NET-18 confirmação no alarme', () => {
     let resolve!: (r: Response) => void;
     vi.mocked(fetch).mockReturnValueOnce(new Promise((r) => (resolve = r)));
     const { onClose } = mount();
-    const button = screen.getByRole('button', { name: 'Medicamento Tomado' });
+    const button = screen.getByRole('button', { name: /Registrar dose de/ });
     fireEvent.click(button);
     fireEvent.click(button);
     expect(button).toBeDisabled();
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
-    await act(async () => resolve(new Response(null, { status: 204 })));
+    await act(async () => resolve(json({ data: { id: props.id, tomado: true, data_dose: props.dataHora } })));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
   it('ERR-01 NET-18 refresh falho após PUT confirmado não reenvia a dose', async () => {
@@ -77,7 +82,7 @@ describe('NET-18 confirmação no alarme', () => {
     let reads = 0;
     vi.mocked(fetch).mockImplementation(async (_url, init) =>
       init?.method === 'PUT'
-        ? json({})
+        ? json({ data: { id: props.id, tomado: true, data_dose: props.dataHora } })
         : ++reads === 2
           ? json({}, 503)
           : json({ data: [] }),
@@ -88,12 +93,12 @@ describe('NET-18 confirmação no alarme', () => {
       </LembreteProvider>,
     );
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByRole('button', { name: 'Medicamento Tomado' }));
+    fireEvent.click(screen.getByRole('button', { name: /Registrar dose de/ }));
     expect(await screen.findByRole('status')).toHaveTextContent(
-      'Dose confirmada. A atualização dos lembretes não foi concluída.',
+      'Dose registrada. A atualização dos lembretes não foi concluída.',
     );
     expect(screen.getAllByRole('alert')).toHaveLength(1);
-    const surface = screen.getByText('Hora do Medicamento!').closest('.fixed') as HTMLElement;
+    const surface = screen.getByRole('dialog', { name: 'Lembrete de dose' }).closest('.fixed') as HTMLElement;
     expect(within(surface).getByRole('alert').textContent).toBe('Ao carregar lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
     expect(onClose).not.toHaveBeenCalled();
     fireEvent.click(
@@ -108,7 +113,7 @@ describe('NET-18 confirmação no alarme', () => {
     let reject!: (e: unknown) => void;
     vi.mocked(fetch).mockReturnValueOnce(new Promise((_r, j) => (reject = j)));
     const view = mount();
-    fireEvent.click(screen.getByRole('button', { name: 'Medicamento Tomado' }));
+    fireEvent.click(screen.getByRole('button', { name: /Registrar dose de/ }));
     const signal = vi.mocked(fetch).mock.calls[0][1]?.signal;
     view.unmount();
     expect(signal?.aborted).toBe(true);

@@ -6,6 +6,7 @@ import { ApiError } from '../../../utils/api';
 import { requestErrorMessage } from '../../../utils/request-errors';
 import { publishNavigationFeedback } from '../../../utils/navigation-feedback';
 import { loadDoseCollection, type DoseCollection } from '../data/loadDoseCollection';
+import { subscribeDoseConfirmations, type DoseConfirmation } from '../data/dose-confirmations';
 
 /** Owns a stable immutable collection snapshot; clocks and filters never replace it. */
 export function useDoseCollection() {
@@ -16,14 +17,25 @@ export function useDoseCollection() {
   const [snapshot, setSnapshot] = useState<{ scope: string; collection: DoseCollection; retryNotBefore?: number }>({ scope, collection: empty });
   const request = useRef<AbortController | null>(null);
   const deadline = useRef({ scope, at: 0 });
+  const confirmations = useRef<DoseConfirmation[]>([]);
+  useLayoutEffect(() => {
+    confirmations.current = [];
+    return subscribeDoseConfirmations(identityKey, value => { if (localStorage.getItem('access_token') === token) confirmations.current.push(value); });
+  }, [identityKey, scope, token]);
   const authenticated = sessionStatus === 'authenticated' && !!identityKey && !!token;
   const refresh = useCallback(async (): Promise<DoseCollection> => {
     if (!authenticated || deadline.current.scope === scope && Date.now() < deadline.current.at) return { ...empty, loading: false };
     request.current?.abort(); const controller = new AbortController(); request.current = controller;
+    const start = confirmations.current.length;
+    const reconcile = (value: DoseCollection): DoseCollection => ({ ...value, items: value.items.map(dose => {
+      if (dose.kind !== 'complete') return dose;
+      const confirmed = confirmations.current.slice(start).findLast(item => item.id === dose.id && Date.parse(item.expectedAt) === Date.parse(dose.expectedAt));
+      return confirmed ? { ...dose, registered: confirmed.registered } : dose;
+    }) });
     const active = () => !controller.signal.aborted && request.current === controller && localStorage.getItem('access_token') === token;
     setSnapshot(previous => ({ scope, collection: { ...(previous.scope === scope ? previous.collection : empty), complete: false, loading: true } }));
     try {
-      const result = await loadDoseCollection({ signal: controller.signal, onProgress: collection => { if (active()) setSnapshot({ scope, collection }); } });
+      const result = reconcile(await loadDoseCollection({ signal: controller.signal, onProgress: collection => { if (active()) setSnapshot({ scope, collection: reconcile(collection) }); } }));
       if (result.failure instanceof ApiError && result.failure.status === 401 && active()) {
         logout(); publishNavigationFeedback('session-expired');
       }

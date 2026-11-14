@@ -88,6 +88,12 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - Correção autorizada: preencher ambos pelo formulário, manter a comparação exata do payload e todos os cenários existentes, acrescentar bloqueio de campos ausentes e de URL da foto com mais de 255 caracteres. Não há mudança do contrato nem autorização genérica para enfraquecer testes.
 - O usuário também autorizou a retomada após a interrupção de uso: "continue com o processo". Os lotes sequenciais aprovados permanecem em vigor.
 
+### Alarm Integration and Regression Authorization
+
+- Em 2026-11-14, o usuário respondeu: "Sim, corrigir alarme e testes" à atualização dos testes legados do alarme para a interface padronizada e à conversão dos quatro casos de falha esperada em testes normais.
+- Preservar as verificações de dose já registrada, fila de doses simultâneas, cancelamento de timers e ausência de duplicação. Os seletores devem continuar identificando a interface real; renomear o título não pode fazer uma asserção negativa passar sem provar a ausência do alarme.
+- A integração mantém os resultados confirmados sincronizados em memória entre telas e alarme, por identidade. Não acrescenta storage, polling, endpoints nem garantia de sincronização entre dispositivos.
+
 ## Deferred Ideas
 
 - Implementação e correções do app mobile.

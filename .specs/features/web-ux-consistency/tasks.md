@@ -101,7 +101,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T30: Criar cadastro progressivo de conta
 - [x] T31: Criar Perfil centrado em dados e segurança
 - [x] T32: Criar entrada pública clara
-- [ ] T33: Alinhar apresentação do alarme existente
+- [x] T33: Alinhar apresentação do alarme existente
 - [ ] T34: Conectar rascunho ao layout raiz
 
 ### Phase 6: Existing route migration
@@ -814,7 +814,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T33: Alinhar apresentação do alarme existente
 
 **What**: Manter confirmação idempotente e fechar apenas o lembrete visual; adotar semântica e contraste comuns.
-**Where**: `src/app/components/AlarmeDose/Lembrete.tsx`
+**Where**: `src/app/components/AlarmeDose/Lembrete.tsx`; approved cohesive support in AlertaLembrete.tsx, contexts/lembreteContext.tsx, features/web-ux/data/dose-confirmations.ts, hooks/useDoseMutation.ts and useDoseCollection.ts; authorized legacy alarm tests in lembretes.test.tsx, cadastro-feedback-alarm.test.tsx and seguranca-alerta.test.tsx
 **Depends on**: T4, T5, T7, T12
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: DOSE-09
@@ -825,10 +825,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/AlarmeDose/Lembrete.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas DOSE-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T33 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/AlarmeDose/Lembrete.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas DOSE-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T33 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 9 own integration tests plus 58 affected regressions passed (67 total), 0 failed. Native Dialog close/Escape/focus and no-write semantics, exact PUT confirmation, duplicate block, future block, 204/malformed rejection and refresh-only recovery verified. Confirmed events synchronize both presentations, preserve other pending IDs and reconcile older GETs; no new polling/storage. Alarm queue filters registered rows, cancels timers, preserves simultaneous doses and valid siblings of incomplete rows. Four authorized FE-05 expected-failure cases now run normally with every assertion preserved. Alarm selectors/copy and generic success fixtures aligned to the interface/actual DTO with user authorization recorded in context.md. TypeScript and affected ESLint passed.
 
 ### T34: Conectar rascunho ao layout raiz
 
@@ -1261,7 +1263,7 @@ Proof: run coverage | WUX_DOSE_07
 Proof: run coverage | WUX_DOSE_08
 
 **C53** - WHEN a pessoa fecha o lembrete sobreposto existente THEN the web client SHALL fechar somente a apresentação, sem registrar, corrigir ou adiar a dose no servidor. (DOSE-09, AC 9; T33).
-Proof: run coverage | ✓ WUX_DOSE_09
+Proof: run coverage | WUX_DOSE_09
 
 **C54** - WHEN a pessoa abre o cadastro THEN the web client SHALL organizar os campos exigidos nas etapas Conta e Dados pessoais com resumo das informações obrigatórias antes de enviar. (ACCOUNT-01, AC 1; T42).
 Proof: run functional | ✓ WUX_ACCOUNT_01
