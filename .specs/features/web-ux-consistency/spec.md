@@ -519,3 +519,4 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T9: FORM-06/07/08/09/12/13 domain rules covered by 5 passing unit tests, including literal recurrence and payload examples.
 - T13: safe return targets and identity generation are available to subsequent route adapters. STATE-09/10 provider proofs and 21 existing session/profile regressions passed; composed Profile verification remains T31/T40.
 - T12 follow-up: newer dose collection snapshots revoke outstanding writes; a red-then-green STATE-06 regression preserves the newer confirmed result (9/9 T12 tests).
+- T23: review composition verified by 3 integration tests, including all 1000 instants and invalid-model handling. FORM-11 route proof remains T38.

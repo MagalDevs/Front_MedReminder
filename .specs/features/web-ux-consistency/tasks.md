@@ -88,7 +88,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T21: Criar etapa Medicamento
 - [x] T22: Criar etapa Tratamento
-- [ ] T23: Criar revisão verificável
+- [x] T23: Criar revisão verificável
 - [ ] T24: Compor wizard de tratamento
 - [ ] T25: Criar tela Medicamentos
 - [ ] T26: Criar Hoje e agenda do medicamento
@@ -611,10 +611,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/components/TreatmentReview.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T23 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/components/TreatmentReview.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T23 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 passed (3), 0 failed. Review shows literal local times, IANA zone, exclusive end, canonical quantity and all 1000 instants through a working disclosure; invalid model has no invented schedule. FORM-11 route proof remains T38. No deviations or legacy test changes.
 
 ### T24: Compor wizard de tratamento
 
