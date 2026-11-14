@@ -69,7 +69,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T7: Definir projeção de agenda
 - [x] T8: Definir filtros de medicamentos
 - [x] T9: Definir modelo de tratamento
-- [ ] T10: Criar relógio local observável
+- [x] T10: Criar relógio local observável
 - [ ] T11: Unificar carga completa de doses
 - [ ] T12: Controlar mutação por dose
 - [ ] T13: Reforçar fronteira de sessão e destino interno
@@ -332,10 +332,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/hooks/useLocalClock.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas DAY-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T10 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/hooks/useLocalClock.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas DAY-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T10 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 2 passed (2), 0 failed. stdout includes `WUX_DAY_04`. Clock crosses midnight and exact due instant, refreshes visibility/gesture time and cleans resources. No visual transition added.
 
 ### T11: Unificar carga completa de doses
 
@@ -1088,7 +1090,7 @@ Proof: run coverage | ✓ WUX_DAY_02
 Proof: run functional | ✓ WUX_DAY_03
 
 **C12** - WHEN o relógio cruza um horário previsto ou meia-noite local com a página visível THEN the web client SHALL recalcular os estados e o conjunto do dia em até um segundo, recalculando também ao retomar uma aba oculta antes de aceitar registro. (DAY-04, AC 4; T10).
-Proof: run coverage | ✓ WUX_DAY_04
+Proof: run coverage | WUX_DAY_04
 
 **C13** - WHEN Hoje recebe lista vazia com sucesso THEN the web client SHALL exibir “Nenhuma dose prevista para hoje” com ações para Histórico e Adicionar medicamento. (DAY-05, AC 5; T36).
 Proof: run functional | ✓ WUX_DAY_05
