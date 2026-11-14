@@ -8,6 +8,7 @@ import { CompleteDose, DoseView, doseState, isDoseInstant } from '../domain/agen
 export type DoseMutationStatus = { pending: boolean; error: string | null; retryNotBefore?: number; desired?: boolean };
 type Snapshot = { scope: string; source: DoseView[]; confirmed: Record<number, boolean>; status: Record<number, DoseMutationStatus> };
 
+/** Pass the immutable collection snapshot; a new snapshot revokes pending writes. */
 export function useDoseMutation({ doses, identity }: { doses: DoseView[]; identity: string }) {
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const scope = JSON.stringify([identity, token]);
@@ -21,7 +22,7 @@ export function useDoseMutation({ doses, identity }: { doses: DoseView[]; identi
   useLayoutEffect(() => {
     const pending = requests.current;
     return () => { for (const request of pending.values()) request.abort(); pending.clear(); };
-  }, [scope]);
+  }, [scope, doses]);
 
   const mutate = useCallback(async (id: number, registered: boolean): Promise<boolean> => {
     const dose = visibleDoses.find((item): item is CompleteDose => item.kind === 'complete' && item.id === id);

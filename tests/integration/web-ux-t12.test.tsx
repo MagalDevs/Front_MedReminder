@@ -90,3 +90,17 @@ it('honors per-item Retry-After without an automatic request', async () => {
   await act(async () => { expect(await result.current.retry(1)).toBe(true); });
   expect(result.current.doses[0]).toMatchObject({ registered: true });
 });
+it('discards an old collection mutation without replacing newer confirmed items', async () => {
+  const old = deferred<Response>(); const latest = deferred<Response>();
+  vi.stubGlobal('fetch', vi.fn().mockReturnValueOnce(old.promise).mockReturnValueOnce(latest.promise));
+  const { result, rerender } = renderHook(({ doses }) => useDoseMutation({ doses, identity: 'A' }), { initialProps: { doses: [row(1), row(2)] } });
+  let oldOperation!: Promise<boolean>; let newOperation!: Promise<boolean>;
+  act(() => { oldOperation = result.current.mutate(1, true); });
+  rerender({ doses: [row(1), row(2)] });
+  act(() => { newOperation = result.current.mutate(2, true); });
+  await act(async () => { latest.resolve(saved(2, true)); expect(await newOperation).toBe(true); });
+  expect(result.current.doses.map(item => item.kind === 'complete' && item.registered)).toEqual([false, true]);
+  await act(async () => { old.resolve(saved(1, true)); expect(await oldOperation).toBe(false); });
+  expect(result.current.doses.map(item => item.kind === 'complete' && item.registered)).toEqual([false, true]);
+  expect(result.current.status[2]).toEqual({ pending: false, error: null });
+});

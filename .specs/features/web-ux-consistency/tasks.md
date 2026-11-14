@@ -381,6 +381,8 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Observed gate**: 2026-11-14, 8 passed (8), 0 failed. stdout includes `WUX_DOSE_03`, `WUX_DOSE_04`, `WUX_DOSE_06`, `WUX_DOSE_07`, `WUX_DOSE_08`. Targeted TypeScript and zero-warning ESLint passed. DoseInstant guard uses a validated string brand so false branches preserve unvalidated string types; callback status is memoized. No behavior deviation.
 
+**Concurrency follow-up**: 2026-11-14, added STATE-06 regression: an old collection response must not replace confirmed items from a newer collection. Observed red first (1 failed, 8 passed), then 9 passed (9) after aborting writes on source snapshot replacement. TypeScript and global zero-warning lint passed. Existing tests preserved. Source array represents an immutable collection snapshot.
+
 ### T13: Reforçar fronteira de sessão e destino interno
 
 **What**: Preservar restauração e invalidação existentes, destino interno permitido e geração de identidade.

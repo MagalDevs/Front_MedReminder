@@ -429,12 +429,12 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-17 | Create and review a treatment | T18 | Tasks | In Tasks |
 | DOSE-01 | Register and correct a dose | T20 | Tasks | In Tasks |
 | DOSE-02 | Register and correct a dose | T20 | Tasks | In Tasks |
-| DOSE-03 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
-| DOSE-04 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
+| DOSE-03 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
+| DOSE-04 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-05 | Register and correct a dose | T20 | Tasks | In Tasks |
-| DOSE-06 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
-| DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
-| DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
+| DOSE-06 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
+| DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
+| DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-09 | Register and correct a dose | T33 | Tasks | In Tasks |
 | ACCOUNT-01 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-02 | Account and profile | T42 | Tasks | In Tasks |
@@ -518,3 +518,4 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T8: MED-01, MED-02 and MED-03 domain rules covered directly by 3 passing unit tests. Screen proofs remain assigned to T37.
 - T9: FORM-06/07/08/09/12/13 domain rules covered by 5 passing unit tests, including literal recurrence and payload examples.
 - T13: safe return targets and identity generation are available to subsequent route adapters. STATE-09/10 provider proofs and 21 existing session/profile regressions passed; composed Profile verification remains T31/T40.
+- T12 follow-up: newer dose collection snapshots revoke outstanding writes; a red-then-green STATE-06 regression preserves the newer confirmed result (9/9 T12 tests).
