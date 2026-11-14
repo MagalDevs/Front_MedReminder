@@ -412,7 +412,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | MED-10 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | FORM-01 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-02 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
-| FORM-03 | Create and review a treatment | T21 | Tasks | In Tasks |
+| FORM-03 | Create and review a treatment | T21 | Implemented | WUX_FORM_03, T21 2 integration tests passed |
 | FORM-04 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-05 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-06 | Create and review a treatment | T22 | Tasks | In Tasks |

@@ -86,7 +86,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 4: Medication and agenda screens
 
-- [ ] T21: Criar etapa Medicamento
+- [x] T21: Criar etapa Medicamento
 - [ ] T22: Criar etapa Tratamento
 - [ ] T23: Criar revisão verificável
 - [ ] T24: Compor wizard de tratamento
@@ -569,10 +569,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/components/MedicationStep.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T21 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/components/MedicationStep.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas FORM-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T21 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 2 passed (2), 0 failed. stdout: WUX_FORM_03. Catalog selection preserves dose, unit, start, interval and duration; manual metadata, color and associated model errors asserted. No legacy test changed. Impeccable launcher unavailable; direct context and craft-floor used. No visual transition added.
 
 ### T22: Criar etapa Tratamento
 
@@ -1166,7 +1168,7 @@ Proof: run functional | ✓ WUX_FORM_01
 Proof: run coverage | WUX_FORM_02
 
 **C30** - WHEN a pessoa seleciona um resultado THEN the web client SHALL preencher nome e classificação sem substituir dados de tratamento já digitados sem confirmação. (FORM-03, AC 3; T21).
-Proof: run coverage | ✓ WUX_FORM_03
+Proof: run coverage | WUX_FORM_03
 
 **C31** - IF a pessoa tenta avançar com um campo obrigatório inválido THEN the web client SHALL manter a etapa e focar o primeiro campo inválido com mensagem associada. (FORM-04, AC 4; T24).
 Proof: run coverage | ✓ WUX_FORM_04
@@ -1646,7 +1648,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6 e B2 concluiu T7–T13 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. T14–T47 permanecem pendentes. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões aprovados. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões aprovados, Build/tipos/lint verdes. B3 /root/batch_03, T14–T20, HEAD f704393, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
+**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. T21–T47 permanecem pendentes. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios; todos com Build/tipos/lint verdes. Root reconciliou rastreabilidade em e009aab. B4 /root/batch_04, T21–T27, HEAD e009aab, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
