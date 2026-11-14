@@ -96,7 +96,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 5: Account and shared composition
 
-- [ ] T28: Criar tela de edição de medicamento
+- [x] T28: Criar tela de edição de medicamento
 - [ ] T29: Criar login coerente com o destino
 - [ ] T30: Criar cadastro progressivo de conta
 - [ ] T31: Criar Perfil centrado em dados e segurança
@@ -720,10 +720,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/MedicationEditScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T28 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/MedicationEditScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T28 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 integration tests passed, 0 failed. Exact seven-field PUT, unchanged no-op, read-only schedule, invalid stock, failed write preserving edits and wrong-ID read recovery verified. No existing tests changed. First dose uses stored dose instants; interval/duration absent from the read contract remain explicitly unknown.
 
 ### T29: Criar login coerente com o destino
 
@@ -1662,7 +1664,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** user: `"Sim, corrigir teste e validação`" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; T28–T47 permanecem pendentes. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged pelo usuário; preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios; todos com Build/tipos/lint verdes. Root reconciliou rastreabilidade em e009aab. B4 /root/batch_04, T21–T27 concluídas em c8d8e90 com correção contratual adicional autorizada e verificada; 39 testes próprios e 27 regressões de domínio/cor/submissão/sessão executadas, Build/tipos/lint verdes; aguardando retorno ao root. Nenhum outro worker ou Verifier despachado.
+**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; T28–T47 permanecem pendentes. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 e correção autorizada em 1b7e1bc, 39 testes novos + 27 regressões afetadas; todos os lotes com Build/tipos/lint verdes. B5 /root/batch_05, T28–T34, HEAD 1b7e1bc, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 

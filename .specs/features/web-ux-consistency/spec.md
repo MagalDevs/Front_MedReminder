@@ -523,3 +523,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T27: composed History verified by 5 integration tests, including 102 records, local period boundaries, confirmed correction and partial-load recovery. DAY-06/07 route proofs remain T39.
 
 - Authorized T24 follow-up: 4 additional contract checks plus existing gates pass for required color/stock unit (50 chars) and photo URL (255 chars); exact payload expectation correction approved by user in context.md. No legacy assertions weakened or cases removed.
+
+- T28: MedicationEditScreen composed contract verified by 3 integration tests; MED-05/06/07 route proofs remain T44.
