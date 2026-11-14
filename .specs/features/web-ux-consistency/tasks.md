@@ -100,7 +100,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T29: Criar login coerente com o destino
 - [x] T30: Criar cadastro progressivo de conta
 - [x] T31: Criar Perfil centrado em dados e segurança
-- [ ] T32: Criar entrada pública clara
+- [x] T32: Criar entrada pública clara
 - [ ] T33: Alinhar apresentação do alarme existente
 - [ ] T34: Conectar rascunho ao layout raiz
 
@@ -793,7 +793,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T32: Criar entrada pública clara
 
 **What**: Apresentar propósito e ação Criar conta antes de opções secundárias, com busca ainda utilizável.
-**Where**: `src/app/features/web-ux/screens/HomeScreen.tsx`
+**Where**: `src/app/features/web-ux/screens/HomeScreen.tsx`; approved support in `src/app/components/Logo/Logo.tsx` and new LoginScreen/RegistrationScreen callsites (brand without duplicate h1)
 **Depends on**: T2, T18
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: NAV-03
@@ -804,10 +804,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/HomeScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T32 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/HomeScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T32 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 T32 integration tests plus 6 T29/T30 affected regressions passed, 0 failed. Public purpose and destinations, keyboard catalog selection, unavailable/manual path, no private requests, single content h1 and unchanged brand styling verified. Affected ESLint passed. No existing tests changed.
 
 ### T33: Alinhar apresentação do alarme existente
 

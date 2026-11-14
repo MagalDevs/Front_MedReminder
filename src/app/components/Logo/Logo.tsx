@@ -3,9 +3,11 @@ import Image from 'next/image';
 interface LogoProps {
   width?: number;
   height?: number;
+  heading?: boolean;
 }
 
-export default function Logo({ width = 160, height = 160 }: LogoProps) {
+export default function Logo({ width = 160, height = 160, heading = true }: LogoProps) {
+  const Name = heading ? 'h1' : 'span';
   return (
     <div className="flex flex-col items-center">
       <div className="w-40 h-40 relative mb-2 flex items-center justify-center">
@@ -17,9 +19,9 @@ export default function Logo({ width = 160, height = 160 }: LogoProps) {
           priority
         />
       </div>
-      <h1 className="text-2xl font-semibold text-[#BE185D] KantumruySemiBold">
+      <Name className="text-2xl font-semibold text-[#BE185D] KantumruySemiBold">
         MedReminder
-      </h1>
+      </Name>
     </div>
   );
 }

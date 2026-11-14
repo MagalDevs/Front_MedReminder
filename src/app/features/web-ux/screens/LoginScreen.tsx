@@ -38,7 +38,7 @@ export default function LoginScreen({ returnTo }: { returnTo?: string | null }) 
     finally { if (active()) { pending.current = null; setBusy(false); } }
   }
   return <main className="mx-auto w-full max-w-lg space-y-6 px-4 py-8 sm:py-12">
-    <Link href="/" aria-label="MedReminder, página inicial" className="inline-flex min-h-11 items-center"><Logo width={140} /></Link>
+    <Link href="/" aria-label="MedReminder, página inicial" className="inline-flex min-h-11 items-center"><Logo width={140} heading={false} /></Link>
     <section className="space-y-6 rounded-[var(--radius-surface)] bg-[var(--surface-raised)] p-4 sm:p-8">
       <h1 className="text-2xl font-semibold">Entrar</h1><p className="text-[var(--text-muted)]">Acesse seus medicamentos e a agenda de doses.</p>
       {notice === 'registered' && <RequestFeedback kind="success" message="Cadastro concluído! Entre com seu e-mail e senha." />}

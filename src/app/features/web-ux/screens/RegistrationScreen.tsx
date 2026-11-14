@@ -49,7 +49,7 @@ export default function RegistrationScreen() {
   }
   const field = (key: Exclude<keyof typeof values, 'cuidador'>, label: string, type = 'text', maxLength?: number, autoComplete?: string) => <FormField key={key} label={label} error={errors[key]} description={key === 'senha' ? passwordHelp : undefined}><input className={control} type={type} required maxLength={maxLength} autoComplete={autoComplete} inputMode={key === 'cpf' || key === 'cep' ? 'numeric' : undefined} value={values[key]} onChange={event => setValues({ ...values, [key]: event.target.value })} /></FormField>;
   return <main className="mx-auto w-full max-w-xl space-y-6 px-4 py-8 sm:py-12">
-    <Link href="/" aria-label="MedReminder, página inicial" className="inline-flex min-h-11 items-center"><Logo width={140} /></Link>
+    <Link href="/" aria-label="MedReminder, página inicial" className="inline-flex min-h-11 items-center"><Logo width={140} heading={false} /></Link>
     <section className="space-y-6 rounded-[var(--radius-surface)] bg-[var(--surface-raised)] p-4 sm:p-8">
       <h1 className="text-2xl font-semibold">Criar conta</h1><ol aria-label="Etapas do cadastro" className="flex flex-wrap gap-4"><li aria-current={step === 0 ? 'step' : undefined}>1. Conta</li><li aria-current={step === 1 ? 'step' : undefined}>2. Dados pessoais</li></ol>
       <h2 ref={heading} tabIndex={-1} className="text-xl font-semibold">{step === 0 ? 'Conta' : 'Dados pessoais'}</h2>

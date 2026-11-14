@@ -531,3 +531,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T30: composed account registration verified by 3 integration tests; ACCOUNT-01/02/03/04 route proofs remain T42.
 
 - T31: metadata-only AuthContext.updateProfile preserves generation/token/draft, allowlists mutable fields and checks expected generation; JSON birth-date typing aligned in the legacy consumer. 8 own plus 32 regression tests and type/lint checks passed. ACCOUNT-05/08 route proofs remain T40.
+
+- T32: public HomeScreen verified by 3 integration tests and 6 affected public-screen regressions. Logo has opt-in non-heading brand presentation; legacy defaults unchanged. NAV-03 route proof remains T35.
