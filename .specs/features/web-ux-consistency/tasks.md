@@ -13,8 +13,8 @@ Utilizar também frontend-design, taste-skill:design-taste-frontend, transitions
 **Date**: 2026-11-13
 **Build**: `npm run build; npx tsc --noEmit; npm run lint -- --max-warnings=0`
 **Run coverage**: `npm run test:coverage -- --reporter=verbose && node scripts/check-coverage.mjs`
-**Run functional**: `npm run test:functional -- --reporter=list --workers=1 --retries=0`
-**Run nonfunctional**: `npm run test:nonfunctional -- --reporter=list --workers=1 --retries=0`
+**Run functional**: `npm run test:functional -- --config playwright.web-ux.config.ts --reporter=list --workers=1 --retries=0`
+**Run nonfunctional**: `npm run test:nonfunctional -- --config playwright.web-ux.config.ts --reporter=list --workers=1 --retries=0`
 
 O usuário aprovou este plano em 2026-11-14 e solicitou registrar as skills e os MCPs no AGENTS.md do frontend antes de iniciar a implementação. Essa preparação documental não conclui nenhuma tarefa de produto.
 
@@ -57,7 +57,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 1: Shared UI
 
-- [ ] T1: Consolidar tokens e tipografia
+- [x] T1: Consolidar tokens e tipografia
 - [ ] T2: Criar Button acessível
 - [ ] T3: Criar FormField com mensagens associadas
 - [ ] T4: Criar diálogo com gestão de foco
@@ -130,21 +130,23 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T1: Consolidar tokens e tipografia
 
 **What**: Aplicar tokens do design e herança Kantumruy, verificando pares de cores e estados sem alterar a marca.
-**Where**: `src/app/globals.css`
+**Where**: `src/app/globals.css`; supporting test harness `playwright.web-ux.config.ts`
 **Depends on**: None
 **Reuses**: Kantumruy e tokens atuais de globals.css
 **Requirement**: SYSTEM-01, SYSTEM-02, SYSTEM-03, SYSTEM-06
 **Skills**: tlc-spec-driven, frontend-design e design-taste-frontend; carregar as skills de movimento se houver transição
 **Tests**: nonfunctional; criar/atualizar `tests/nonfunctional/web-ux-t01.spec.ts` nesta tarefa; mínimo planejado de 2 casos, incluindo 0 prova(s) primária(s) de AC
-**Gate**: browser — `npm run test:nonfunctional -- tests/nonfunctional/web-ux-t01.spec.ts --reporter=list --workers=1 --retries=0`
+**Gate**: browser — `npm run test:nonfunctional -- tests/nonfunctional/web-ux-t01.spec.ts --config playwright.web-ux.config.ts --reporter=list --workers=1 --retries=0`
 **Commit**: `feat(web-ux): consolidar tokens e tipografia`
 
 **Done when**:
 
-- [ ] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T1 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T1 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate: 3 passed, 0 failed. Computed font/weights, literal palette, 10 contrast pairs >=4.5:1 and keyboard focus asserted. Port 3000 has an existing developer server (PID 24956), preserved. The supporting config imports the shared config and changes only baseURL/server port/url (WEB_UX_TEST_PORT, default 3102); fresh build and reuseExistingServer:false are preserved. First run exposed CSS hex minification; canonical RGB normalization preserves all expected colors and thresholds. No product deviation.
 
 ### T2: Criar Button acessível
 
@@ -1605,6 +1607,6 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 ## Handoff
 
 **Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. Nenhuma tarefa T1–T47 iniciada.
-**Dispatched:** Nenhum worker, Verifier ou agente de telas foi despachado para esta feature.
+**Dispatched:** B1, /root/batch_01, T1–T6, HEAD dc98effe1cf3eef59eb39fe923b2a36a2d6e8870, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
