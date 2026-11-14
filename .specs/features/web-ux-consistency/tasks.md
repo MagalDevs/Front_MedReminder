@@ -60,7 +60,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T1: Consolidar tokens e tipografia
 - [x] T2: Criar Button acessível
 - [x] T3: Criar FormField com mensagens associadas
-- [ ] T4: Criar diálogo com gestão de foco
+- [x] T4: Criar diálogo com gestão de foco
 - [ ] T5: Padronizar RequestFeedback
 - [ ] T6: Criar AppShell responsivo
 
@@ -204,10 +204,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/ui/Dialog.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas ACCESS-05, ACCESS-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T4 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/ui/Dialog.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas ACCESS-05, ACCESS-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T4 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Full gate: 3 passed, 0 failed. Exact WUX_ACCESS_05 and WUX_ACCESS_10 outcomes include label/description, explicit close/cancel focus restoration, forward/reverse Tab loop and Escape without deletion. Minimal dialog remains operable. jsdom lacks showModal/close; tests supply only native open/close plumbing, not keyboard/focus behavior. Browser top-layer modality remains for browser route verification; no transition or deviation.
 
 ### T5: Padronizar RequestFeedback
 
@@ -1265,7 +1267,7 @@ Proof: run coverage | ✓ WUX_ACCESS_03
 Proof: run coverage | ✓ WUX_ACCESS_04
 
 **C75** - WHEN a pessoa fecha menu sobreposto ou diálogo THEN the web client SHALL devolver o foco ao controle que o abriu. (ACCESS-05, AC 5; T4).
-Proof: run coverage | ✓ WUX_ACCESS_05
+Proof: run coverage | WUX_ACCESS_05 returns focus to the opener after explicit cancellation and close
 
 **C76** - The web client SHALL manter contraste de texto comum de pelo menos 4,5:1 e de texto grande de pelo menos 3:1 nos estados disponíveis. (ACCESS-06, AC 6; T45).
 Proof: run nonfunctional | ✓ WUX_ACCESS_06
@@ -1280,7 +1282,7 @@ Proof: run nonfunctional | ✓ WUX_ACCESS_08
 Proof: run nonfunctional | ✓ WUX_ACCESS_09
 
 **C80** - WHILE um diálogo ou menu modal está aberto the web client SHALL manter o foco em seus controles, permitindo encerramento por Escape sem confirmar uma ação destrutiva. (ACCESS-10, AC 10; T4).
-Proof: run coverage | ✓ WUX_ACCESS_10
+Proof: run coverage | WUX_ACCESS_10 contains Tab and Shift+Tab and Escape cancels without confirming a destructive action
 
 **C81** - WHEN uma leitura falha THEN the web client SHALL exibir ação Tentar novamente que repete somente a leitura sem reenviar mutações. (STATE-01, AC 1; T5).
 Proof: run coverage | ✓ WUX_STATE_01

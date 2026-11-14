@@ -457,12 +457,12 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCESS-02 | Accessibility | T18 | Tasks | In Tasks |
 | ACCESS-03 | Accessibility | T19 | Tasks | In Tasks |
 | ACCESS-04 | Accessibility | T6 | Tasks | In Tasks |
-| ACCESS-05 | Accessibility | T4 | Tasks | In Tasks |
+| ACCESS-05 | Accessibility | T4 | Implemented | WUX_ACCESS_05, integration gate 3 passed |
 | ACCESS-06 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-07 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-08 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-09 | Accessibility | T46 | Tasks | In Tasks |
-| ACCESS-10 | Accessibility | T4 | Tasks | In Tasks |
+| ACCESS-10 | Accessibility | T4 | Implemented | WUX_ACCESS_10, integration gate 3 passed |
 | STATE-01 | Recovery and interruptions | T5 | Tasks | In Tasks |
 | STATE-02 | Recovery and interruptions | T5 | Tasks | In Tasks |
 | STATE-03 | Recovery and interruptions | T34 | Tasks | In Tasks |
