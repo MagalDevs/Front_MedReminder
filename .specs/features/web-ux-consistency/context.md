@@ -82,6 +82,12 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - Decisão: tornar explícito `next build --webpack` no script `build`, alinhando a compilação de produção ao compilador já utilizado por `playwright.config.ts`. O comando de gate continua `npm run build`, seguido de TypeScript e lint, sem remover validações.
 - Webpack é opção de produção suportada pelo Next.js. Isto contorna a falha observada do Turbopack; não declara que o compilador Turbopack foi corrigido. Não há atualização de dependências nem mudança de código das telas neste pré-requisito.
 
+### Treatment Contract Test Correction Authorization
+
+- Em 2026-11-14, o usuário respondeu: "Sim, corrigir teste e validação" à pergunta sobre o teste novo T24 que esperava cor e unidade de estoque vazias, contrariando a API existente.
+- Correção autorizada: preencher ambos pelo formulário, manter a comparação exata do payload e todos os cenários existentes, acrescentar bloqueio de campos ausentes e de URL da foto com mais de 255 caracteres. Não há mudança do contrato nem autorização genérica para enfraquecer testes.
+- O usuário também autorizou a retomada após a interrupção de uso: "continue com o processo". Os lotes sequenciais aprovados permanecem em vigor.
+
 ## Deferred Ideas
 
 - Implementação e correções do app mobile.

@@ -14,7 +14,7 @@ beforeEach(() => {
 const refresh = async () => true;
 function mount(read = refresh) { return render(<TreatmentDraftProvider identity="A"><TreatmentWizard refresh={read} /></TreatmentDraftProvider>); }
 function fill(label: string, value: string) { fireEvent.change(screen.getByLabelText(label), { target: { value } }); }
-function medication() { fill('Nome do medicamento', 'Vitamina'); fill('Quantidade em estoque', '10'); fill('Validade', '2027-12-31'); fill('URL da foto', 'https://example.test/photo.png'); }
+function medication() { fill('Nome do medicamento', 'Vitamina'); fill('Quantidade em estoque', '10'); fill('Unidade do estoque', 'comprimidos'); fill('Validade', '2027-12-31'); fill('URL da foto', 'https://example.test/photo.png'); fireEvent.click(screen.getByRole('radio', { name: 'Azul' })); }
 function treatment() { fill('Quantidade por dose', '1,5'); fill('Unidade por dose', 'mg'); fill('Primeira dose', '2026-11-13T08:00'); fill('Intervalo em horas', '6'); fill('Duração', '1'); }
 function review() { medication(); fireEvent.click(screen.getByRole('button', { name: 'Continuar' })); treatment(); fireEvent.click(screen.getByRole('button', { name: 'Continuar' })); }
 function savedResponse() { const call = vi.mocked(fetch).mock.calls.find(([, init]) => init?.method === 'POST')!; const payload = JSON.parse(String(call[1]!.body)); return new Response(JSON.stringify({ data: { remedio: { id: 71, nome: payload.remedio.nome }, doses: payload.doses.map((date: string, index: number) => ({ id: index + 1, remedioId: 71, data_dose: date, tomado: false })) } }), { status: 201, headers: { 'content-type': 'application/json' } }); }
@@ -43,7 +43,7 @@ it('T24 review gesture submits the real exact payload once and keeps a persisten
   await screen.findByText('Tratamento salvo.'); expect(screen.getByText('Vitamina')).toBeVisible(); expect(screen.getByText('Primeira dose criada')).toBeVisible();
   expect(screen.getByRole('link', { name: 'Ver horários' })).toHaveAttribute('href', '/meus-lembretes?medicamentoId=71');
   const posts = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'POST'); expect(posts).toHaveLength(1);
-  expect(JSON.parse(String(posts[0][1]!.body))).toEqual({ remedio: { nome: 'Vitamina', classificacao: 'Não classificado', quantidadeCaixa: 10, dataValidade: '2027-12-31', quantidadeDiaria: 4, quantidadeDias: 1, horaInicio: '2026-11-13T11:00:00.000Z', quantidadeDose: '1.5 mg', unidadeMedida: '', cor: '', motivo: 'Não especificado', observacao: '', foto: 'https://example.test/photo.png' }, doses: ['2026-11-13T11:00:00.000Z', '2026-11-13T17:00:00.000Z', '2026-11-13T23:00:00.000Z', '2026-11-14T05:00:00.000Z'] });
+  expect(JSON.parse(String(posts[0][1]!.body))).toEqual({ remedio: { nome: 'Vitamina', classificacao: 'Não classificado', quantidadeCaixa: 10, dataValidade: '2027-12-31', quantidadeDiaria: 4, quantidadeDias: 1, horaInicio: '2026-11-13T11:00:00.000Z', quantidadeDose: '1.5 mg', unidadeMedida: 'comprimidos', cor: 'Azul', motivo: 'Não especificado', observacao: '', foto: 'https://example.test/photo.png' }, doses: ['2026-11-13T11:00:00.000Z', '2026-11-13T17:00:00.000Z', '2026-11-13T23:00:00.000Z', '2026-11-14T05:00:00.000Z'] });
   expect(new Headers(posts[0][1]!.headers).get('Idempotency-Key')).toBeTruthy();
 });
 it('T24 uncertain result freezes content and retries the same intention after leaving and returning', async () => {

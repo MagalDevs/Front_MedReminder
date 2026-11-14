@@ -6,7 +6,7 @@ import { TreatmentDraftProvider, useTreatmentDraft } from '@/app/features/web-ux
 import { buildTreatmentPayload, validateDraft } from '@/app/features/web-ux/domain/treatment';
 function Harness() {
   const { draft, updateDraft } = useTreatmentDraft(); const [errors, setErrors] = useState<Record<string, string>>({}); const [payload, setPayload] = useState('');
-  return <><TreatmentStep errors={errors} /><button onClick={() => updateDraft({ medicationName: 'Vitamina', stock: '10', expiry: '2027-01-31', photo: 'https://example.test/photo.png' })}>Preparar medicamento</button>
+  return <><TreatmentStep errors={errors} /><button onClick={() => updateDraft({ medicationName: 'Vitamina', stock: '10', expiry: '2027-01-31', photo: 'https://example.test/photo.png', boxUnit: 'comprimidos', color: 'Azul' })}>Preparar medicamento</button>
     <button onClick={() => { const result = validateDraft(draft); setErrors(result.errors); if (result.valid) setPayload(JSON.stringify(buildTreatmentPayload(draft))); }}>Conferir</button>
     <output data-testid="payload">{payload}</output></>;
 }

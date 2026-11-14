@@ -413,8 +413,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-01 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-02 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
 | FORM-03 | Create and review a treatment | T21 | Implemented | WUX_FORM_03, T21 2 integration tests passed |
-| FORM-04 | Create and review a treatment | T24 | Implemented | T24: 6 integration tests passed |
-| FORM-05 | Create and review a treatment | T24 | Implemented | T24: 6 integration tests passed |
+| FORM-04 | Create and review a treatment | T24 | Implemented | T24: 10 integration tests passed (4 contract follow-up) |
+| FORM-05 | Create and review a treatment | T24 | Implemented | T24: 10 integration tests passed (4 contract follow-up) |
 | FORM-06 | Create and review a treatment | T22 | Implemented | T22: 3 integration tests passed |
 | FORM-07 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-08 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
@@ -467,7 +467,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | STATE-02 | Recovery and interruptions | T5 | Implemented | WUX_STATE_02, integration gate 5 passed |
 | STATE-03 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-04 | Recovery and interruptions | T34 | Tasks | In Tasks |
-| STATE-05 | Recovery and interruptions | T24 | Implemented | WUX_STATE_05, T24: 6 integration tests passed |
+| STATE-05 | Recovery and interruptions | T24 | Implemented | WUX_STATE_05, T24: 10 integration tests passed (4 contract follow-up) |
 | STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-07 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 | STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
@@ -521,3 +521,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T12 follow-up: newer dose collection snapshots revoke outstanding writes; a red-then-green STATE-06 regression preserves the newer confirmed result (9/9 T12 tests).
 - T23: review composition verified by 3 integration tests, including all 1000 instants and invalid-model handling. FORM-11 route proof remains T38.
 - T27: composed History verified by 5 integration tests, including 102 records, local period boundaries, confirmed correction and partial-load recovery. DAY-06/07 route proofs remain T39.
+
+- Authorized T24 follow-up: 4 additional contract checks plus existing gates pass for required color/stock unit (50 chars) and photo URL (255 chars); exact payload expectation correction approved by user in context.md. No legacy assertions weakened or cases removed.

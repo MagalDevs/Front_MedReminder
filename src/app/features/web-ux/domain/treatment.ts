@@ -65,9 +65,12 @@ export function validateDraft(draft: TreatmentDraft) {
   const amount = parseDoseAmount(draft.amount);
   if (!amount) errors.amount = DOSE_AMOUNT_ERROR;
   if (!draft.unit.trim() || (amount && `${amount.canonical} ${draft.unit.trim()}`.length > 50)) errors.unit = 'Informe a unidade; quantidade e unidade devem ter até 50 caracteres';
+  if (!draft.boxUnit.trim() || draft.boxUnit.trim().length > 50) errors.boxUnit = 'Informe a unidade do estoque com até 50 caracteres';
+  if (!draft.color.trim() || draft.color.trim().length > 50) errors.color = 'Escolha uma cor identificadora com até 50 caracteres';
   if (!isCalendarDate(draft.expiry)) errors.expiry = 'Data de validade inválida';
   try { positiveInteger(draft.stock, 'stock'); } catch (error) { if (error instanceof TreatmentValidationError) errors[error.field] = error.message; }
   try { const url = new URL(draft.photo); if (!['https:', 'http:'].includes(url.protocol)) errors.photo = 'Informe uma URL de imagem válida'; } catch { errors.photo = 'Informe uma URL de imagem válida'; }
+  if (draft.photo.trim().length > 255) errors.photo = 'Informe uma URL de imagem com até 255 caracteres';
   let schedule: TreatmentSchedule | undefined;
   try { schedule = buildSchedule(draft); } catch (error) { if (error instanceof TreatmentValidationError) errors[error.field] = error.message; else throw error; }
   return { valid: Object.keys(errors).length === 0, errors, schedule, amount };
