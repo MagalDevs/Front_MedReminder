@@ -407,11 +407,11 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | MED-05 | Manage medications | T44 | Tasks | In Tasks |
 | MED-06 | Manage medications | T44 | Tasks | In Tasks |
 | MED-07 | Manage medications | T44 | Tasks | In Tasks |
-| MED-08 | Manage medications | T17 | Tasks | In Tasks |
-| MED-09 | Manage medications | T17 | Tasks | In Tasks |
-| MED-10 | Manage medications | T17 | Tasks | In Tasks |
+| MED-08 | Manage medications | T17 | Implemented | T17: 4 tests passed |
+| MED-09 | Manage medications | T17 | Implemented | T17: 4 tests passed |
+| MED-10 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | FORM-01 | Create and review a treatment | T38 | Tasks | In Tasks |
-| FORM-02 | Create and review a treatment | T18 | Tasks | In Tasks |
+| FORM-02 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
 | FORM-03 | Create and review a treatment | T21 | Tasks | In Tasks |
 | FORM-04 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-05 | Create and review a treatment | T24 | Tasks | In Tasks |
@@ -425,13 +425,13 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-13 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-14 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-15 | Create and review a treatment | T38 | Tasks | In Tasks |
-| FORM-16 | Create and review a treatment | T15 | Tasks | In Tasks |
-| FORM-17 | Create and review a treatment | T18 | Tasks | In Tasks |
-| DOSE-01 | Register and correct a dose | T20 | Tasks | In Tasks |
-| DOSE-02 | Register and correct a dose | T20 | Tasks | In Tasks |
+| FORM-16 | Create and review a treatment | T15 | Implemented | T15: 9 tests passed |
+| FORM-17 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
+| DOSE-01 | Register and correct a dose | T20 | Implemented | T20: 8 tests passed |
+| DOSE-02 | Register and correct a dose | T20 | Implemented | T20: 8 tests passed |
 | DOSE-03 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-04 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
-| DOSE-05 | Register and correct a dose | T20 | Tasks | In Tasks |
+| DOSE-05 | Register and correct a dose | T20 | Implemented | T20: 8 tests passed |
 | DOSE-06 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
@@ -454,8 +454,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | SYSTEM-08 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-09 | Visual system | T31 | Tasks | In Tasks |
 | ACCESS-01 | Accessibility | T45 | Tasks | In Tasks |
-| ACCESS-02 | Accessibility | T18 | Tasks | In Tasks |
-| ACCESS-03 | Accessibility | T19 | Tasks | In Tasks |
+| ACCESS-02 | Accessibility | T18 | Implemented | T18: 3 tests passed |
+| ACCESS-03 | Accessibility | T19 | Implemented | T19: 2 tests passed |
 | ACCESS-04 | Accessibility | T6 | Implemented | WUX_ACCESS_04, integration gate 3 passed |
 | ACCESS-05 | Accessibility | T4 | Implemented | WUX_ACCESS_05, integration gate 3 passed |
 | ACCESS-06 | Accessibility | T45 | Tasks | In Tasks |
@@ -469,11 +469,11 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | STATE-04 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-05 | Recovery and interruptions | T24 | Tasks | In Tasks |
 | STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
-| STATE-07 | Recovery and interruptions | T15 | Tasks | In Tasks |
+| STATE-07 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 | STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
 | STATE-09 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
 | STATE-10 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
-| STATE-11 | Recovery and interruptions | T15 | Tasks | In Tasks |
+| STATE-11 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 
 **Coverage:** 91 critérios mapeados às 47 tarefas de [tasks.md](tasks.md); 0 sem tarefa. Design e plano de tarefas aprovados em 2026-11-14. Nenhum critério foi implementado ou verificado como comportamento da aplicação.
 
