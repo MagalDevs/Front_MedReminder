@@ -80,7 +80,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T15: Controlar submissão idempotente de tratamento
 - [x] T16: Implementar atualização de metadados
 - [x] T17: Controlar exclusão nominal
-- [ ] T18: Tornar busca do catálogo acessível
+- [x] T18: Tornar busca do catálogo acessível
 - [ ] T19: Criar seletor de cores nomeado
 - [ ] T20: Criar cartão de dose operacional
 
@@ -504,10 +504,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/CardBusca/cardBusca.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-02, FORM-17, ACCESS-02 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T18 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/CardBusca/cardBusca.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas FORM-02, FORM-17, ACCESS-02 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T18 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 3 testes passaram, 0 falhas (2026-11-14). Papel combobox exigido substitui textbox legado; testes legados não alterados. Acabamento de movimento permanece em T46. Impeccable context indisponível por motor/cache ausente; contexto direto e craft-floor lidos.
 
 ### T19: Criar seletor de cores nomeado
 
@@ -1157,7 +1159,7 @@ Proof: run coverage | WUX_MED_10
 Proof: run functional | ✓ WUX_FORM_01
 
 **C29** - WHEN a pessoa busca no catálogo THEN the web client SHALL permitir selecionar um resultado ou seguir com cadastro manual quando não houver correspondência. (FORM-02, AC 2; T18).
-Proof: run coverage | ✓ WUX_FORM_02
+Proof: run coverage | WUX_FORM_02
 
 **C30** - WHEN a pessoa seleciona um resultado THEN the web client SHALL preencher nome e classificação sem substituir dados de tratamento já digitados sem confirmação. (FORM-03, AC 3; T21).
 Proof: run coverage | ✓ WUX_FORM_03
@@ -1202,7 +1204,7 @@ Proof: run functional | ✓ WUX_FORM_15
 Proof: run coverage | WUX_FORM_16
 
 **C44** - IF o catálogo não pode ser carregado THEN the web client SHALL oferecer cadastro manual sem exigir escolha de um resultado indisponível. (FORM-17, AC 17; T18).
-Proof: run coverage | ✓ WUX_FORM_17
+Proof: run coverage | WUX_FORM_17
 
 **C45** - WHEN a pessoa vê uma dose Pendente ou Atrasada com dados completos THEN the web client SHALL oferecer Registrar dose com nome e horário no nome acessível da ação. (DOSE-01, AC 1; T20).
 Proof: run coverage | ✓ WUX_DOSE_01
@@ -1286,7 +1288,7 @@ Proof: run coverage | ✓ WUX_SYSTEM_09
 Proof: run nonfunctional | ✓ WUX_ACCESS_01
 
 **C72** - WHEN a pessoa usa a busca por teclado THEN the web client SHALL permitir abrir sugestões, percorrê-las por setas, selecionar por Enter e fechar por Escape com semântica de combobox/listbox. (ACCESS-02, AC 2; T18).
-Proof: run coverage | ✓ WUX_ACCESS_02
+Proof: run coverage | WUX_ACCESS_02
 
 **C73** - WHEN a pessoa escolhe uma cor THEN the web client SHALL oferecer grupo de opções nomeadas com estado selecionado anunciado e operação por teclado. (ACCESS-03, AC 3; T19).
 Proof: run coverage | ✓ WUX_ACCESS_03
