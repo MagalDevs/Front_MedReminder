@@ -58,7 +58,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 1: Shared UI
 
 - [x] T1: Consolidar tokens e tipografia
-- [ ] T2: Criar Button acessível
+- [x] T2: Criar Button acessível
 - [ ] T3: Criar FormField com mensagens associadas
 - [ ] T4: Criar diálogo com gestão de foco
 - [ ] T5: Padronizar RequestFeedback
@@ -162,10 +162,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/ui/Button.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T2 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/ui/Button.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T2 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Quick gate: 3 passed, 0 failed. Enter/Space activation, default button and explicit submit, visible 44px minimum target, loading announcement and duplicate-action blocking asserted. No transition or deviation.
 
 ### T3: Criar FormField com mensagens associadas
 
