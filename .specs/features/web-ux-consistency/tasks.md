@@ -78,7 +78,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T14: Criar rascunho em memória
 - [x] T15: Controlar submissão idempotente de tratamento
-- [ ] T16: Implementar atualização de metadados
+- [x] T16: Implementar atualização de metadados
 - [ ] T17: Controlar exclusão nominal
 - [ ] T18: Tornar busca do catálogo acessível
 - [ ] T19: Criar seletor de cores nomeado
@@ -462,10 +462,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/data/updateMedication.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T16 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/data/updateMedication.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T16 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 3 testes passaram, 0 falhas (2026-11-14).
 
 ### T17: Controlar exclusão nominal
 
