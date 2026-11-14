@@ -61,7 +61,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T2: Criar Button acessível
 - [x] T3: Criar FormField com mensagens associadas
 - [x] T4: Criar diálogo com gestão de foco
-- [ ] T5: Padronizar RequestFeedback
+- [x] T5: Padronizar RequestFeedback
 - [ ] T6: Criar AppShell responsivo
 
 ### Phase 2: Testable domain
@@ -225,10 +225,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/RequestFeedback/RequestFeedback.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas STATE-01, STATE-02, STATE-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T5 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/RequestFeedback/RequestFeedback.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas STATE-01, STATE-02, STATE-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T5 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Full gate: 5 new integration tests passed; targeted existing RequestFeedback regression: 4 passed unchanged (9 total). Actual apiRequest with intercepted fetch proves GET-only retry and returned content, error/data retention during load/failure, actual 429 Retry-After=2 parsing, blocked at 1999ms and manual availability at 2000ms without automatic requests. Initial/filtered empty, loading and confirmed success use status; error retains alert. Timed callback never performs network work; callers pass absolute notBefore derived once. No transition or deviation.
 
 ### T6: Criar AppShell responsivo
 
@@ -1285,10 +1287,10 @@ Proof: run nonfunctional | ✓ WUX_ACCESS_09
 Proof: run coverage | WUX_ACCESS_10 contains Tab and Shift+Tab and Escape cancels without confirming a destructive action
 
 **C81** - WHEN uma leitura falha THEN the web client SHALL exibir ação Tentar novamente que repete somente a leitura sem reenviar mutações. (STATE-01, AC 1; T5).
-Proof: run coverage | ✓ WUX_STATE_01
+Proof: run coverage | WUX_STATE_01 retry refreshes only the failed reading and renders the returned data
 
 **C82** - WHILE uma região está carregando the web client SHALL anunciar o estado de carga sem substituir dados de erro por um vazio de sucesso. (STATE-02, AC 2; T5).
-Proof: run coverage | ✓ WUX_STATE_02
+Proof: run coverage | WUX_STATE_02 announces loading while preserving the error and last known content
 
 **C83** - WHEN a pessoa navega internamente durante um cadastro de medicamento THEN the web client SHALL preservar o rascunho em memória para a mesma identidade conforme a política declarada. (STATE-03, AC 3; T34).
 Proof: run coverage | ✓ WUX_STATE_03
@@ -1306,7 +1308,7 @@ Proof: run coverage | ✓ WUX_STATE_06
 Proof: run coverage | ✓ WUX_STATE_07
 
 **C88** - IF uma operação retorna HTTP 429 com Retry-After válido THEN the web client SHALL informar a espera e impedir nova tentativa da mesma operação até o prazo, sem criar repetição automática. (STATE-08, AC 8; T5).
-Proof: run coverage | ✓ WUX_STATE_08
+Proof: run coverage | WUX_STATE_08 honors the actual 429 Retry-After deadline with no automatic retry
 
 **C89** - IF a atualização de senha retorna 401 operacional THEN the web client SHALL reutilizar a política existente de revalidação única da sessão, distinguindo senha incorreta de sessão expirada. (STATE-09, AC 9; T13).
 Proof: run coverage | ✓ WUX_STATE_09

@@ -463,14 +463,14 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCESS-08 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-09 | Accessibility | T46 | Tasks | In Tasks |
 | ACCESS-10 | Accessibility | T4 | Implemented | WUX_ACCESS_10, integration gate 3 passed |
-| STATE-01 | Recovery and interruptions | T5 | Tasks | In Tasks |
-| STATE-02 | Recovery and interruptions | T5 | Tasks | In Tasks |
+| STATE-01 | Recovery and interruptions | T5 | Implemented | WUX_STATE_01, integration gate 5 passed |
+| STATE-02 | Recovery and interruptions | T5 | Implemented | WUX_STATE_02, integration gate 5 passed |
 | STATE-03 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-04 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-05 | Recovery and interruptions | T24 | Tasks | In Tasks |
 | STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-07 | Recovery and interruptions | T15 | Tasks | In Tasks |
-| STATE-08 | Recovery and interruptions | T5 | Tasks | In Tasks |
+| STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
 | STATE-09 | Recovery and interruptions | T13 | Tasks | In Tasks |
 | STATE-10 | Recovery and interruptions | T13 | Tasks | In Tasks |
 | STATE-11 | Recovery and interruptions | T15 | Tasks | In Tasks |
