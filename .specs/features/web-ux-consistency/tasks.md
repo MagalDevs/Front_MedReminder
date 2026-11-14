@@ -67,7 +67,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 2: Testable domain
 
 - [x] T7: Definir projeção de agenda
-- [ ] T8: Definir filtros de medicamentos
+- [x] T8: Definir filtros de medicamentos
 - [ ] T9: Definir modelo de tratamento
 - [ ] T10: Criar relógio local observável
 - [ ] T11: Unificar carga completa de doses
@@ -290,10 +290,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/domain/medication-filters.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T8 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/domain/medication-filters.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T8 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 passed (3), 0 failed. stdout: `✓ |unit| tests/unit/web-ux-t08.test.tsx > medication filters > WUX_MED_01 intersection uses trimmed accent-insensitive partial names and exact classifications`. No deviations.
 
 ### T9: Definir modelo de tratamento
 

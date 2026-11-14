@@ -419,7 +419,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-07 | Create and review a treatment | T9 | Tasks | In Tasks |
 | FORM-08 | Create and review a treatment | T9 | Tasks | In Tasks |
 | FORM-09 | Create and review a treatment | T9 | Tasks | In Tasks |
-| FORM-10 | Create and review a treatment | T7 | Tasks | In Tasks |
+| FORM-10 | Create and review a treatment | T7 | Implemented | T7: 4 unit tests passed |
 | FORM-11 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-12 | Create and review a treatment | T22 | Tasks | In Tasks |
 | FORM-13 | Create and review a treatment | T9 | Tasks | In Tasks |
@@ -512,3 +512,7 @@ Nenhuma captura vinculante foi fornecida. A crítica autoriza corrigir os proble
 ## Delivery Boundary
 
 A especificação e o adendo de skills estão aprovados. [design.md](design.md) e [tasks.md](tasks.md) foram aprovados em 2026-11-14, com a solicitação de registrar as skills e os MCPs no AGENTS.md antes de implementar. Essa preparação documental foi realizada. Não foram produzidos `proofs.md` ou `verification.md`, nem iniciada implementação.
+
+## Domain Execution Trace
+
+- T8: MED-01, MED-02 and MED-03 domain rules covered directly by 3 passing unit tests. Screen proofs remain assigned to T37.
