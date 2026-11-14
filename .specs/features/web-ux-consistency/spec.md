@@ -520,3 +520,4 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T13: safe return targets and identity generation are available to subsequent route adapters. STATE-09/10 provider proofs and 21 existing session/profile regressions passed; composed Profile verification remains T31/T40.
 - T12 follow-up: newer dose collection snapshots revoke outstanding writes; a red-then-green STATE-06 regression preserves the newer confirmed result (9/9 T12 tests).
 - T23: review composition verified by 3 integration tests, including all 1000 instants and invalid-model handling. FORM-11 route proof remains T38.
+- T27: composed History verified by 5 integration tests, including 102 records, local period boundaries, confirmed correction and partial-load recovery. DAY-06/07 route proofs remain T39.

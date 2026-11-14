@@ -92,7 +92,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T24: Compor wizard de tratamento
 - [x] T25: Criar tela Medicamentos
 - [x] T26: Criar Hoje e agenda do medicamento
-- [ ] T27: Criar Histórico com filtros compostos
+- [x] T27: Criar Histórico com filtros compostos
 
 ### Phase 5: Account and shared composition
 
@@ -695,10 +695,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/HistoryScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T27 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/HistoryScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T27 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 5 passed (5), 0 failed. Composed period/medication-ID/state filters, local-midnight boundaries, descending times until now, 102-record pagination with partial labels, reset, confirmed correction/count and failed-page read recovery asserted through actual modules. Phase build passed with Webpack (11/11 pages) after sandbox EPERM was resolved with escalated execution; TypeScript and global ESLint --max-warnings=0 passed. No legacy test changed. DAY-06/07 route proofs remain T39; visual/browser walkthrough remains the final integration phase.
 
 ### Phase 5: Account and shared composition
 
