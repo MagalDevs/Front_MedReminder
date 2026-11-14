@@ -81,7 +81,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T16: Implementar atualização de metadados
 - [x] T17: Controlar exclusão nominal
 - [x] T18: Tornar busca do catálogo acessível
-- [ ] T19: Criar seletor de cores nomeado
+- [x] T19: Criar seletor de cores nomeado
 - [ ] T20: Criar cartão de dose operacional
 
 ### Phase 4: Medication and agenda screens
@@ -525,10 +525,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/components/ui/ColorSelector.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas ACCESS-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T19 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/components/ui/ColorSelector.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas ACCESS-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T19 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2 testes passaram, 0 falhas (2026-11-14).
 
 ### T20: Criar cartão de dose operacional
 
@@ -1291,7 +1293,7 @@ Proof: run nonfunctional | ✓ WUX_ACCESS_01
 Proof: run coverage | WUX_ACCESS_02
 
 **C73** - WHEN a pessoa escolhe uma cor THEN the web client SHALL oferecer grupo de opções nomeadas com estado selecionado anunciado e operação por teclado. (ACCESS-03, AC 3; T19).
-Proof: run coverage | ✓ WUX_ACCESS_03
+Proof: run coverage | WUX_ACCESS_03
 
 **C74** - WHILE um menu está fechado the web client SHALL excluir seu conteúdo da navegação por teclado e da árvore acessível. (ACCESS-04, AC 4; T6).
 Proof: run coverage | WUX_ACCESS_04 excludes closed menu content from keyboard and accessibility and restores focus on Escape
