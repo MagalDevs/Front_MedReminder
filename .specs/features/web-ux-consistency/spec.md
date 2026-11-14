@@ -401,8 +401,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | DAY-08 | Understand today's doses and history | T26 | Tasks | In Tasks |
 | DAY-09 | Understand today's doses and history | T11 | Implemented | T11: 4 integration tests passed |
 | MED-01 | Manage medications | T37 | Tasks | In Tasks |
-| MED-02 | Manage medications | T25 | Tasks | In Tasks |
-| MED-03 | Manage medications | T25 | Tasks | In Tasks |
+| MED-02 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
+| MED-03 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
 | MED-04 | Manage medications | T43 | Tasks | In Tasks |
 | MED-05 | Manage medications | T44 | Tasks | In Tasks |
 | MED-06 | Manage medications | T44 | Tasks | In Tasks |

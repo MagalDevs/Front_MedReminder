@@ -90,7 +90,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T22: Criar etapa Tratamento
 - [x] T23: Criar revisão verificável
 - [x] T24: Compor wizard de tratamento
-- [ ] T25: Criar tela Medicamentos
+- [x] T25: Criar tela Medicamentos
 - [ ] T26: Criar Hoje e agenda do medicamento
 - [ ] T27: Criar Histórico com filtros compostos
 
@@ -653,10 +653,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/MedicationsScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas MED-02, MED-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T25 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/MedicationsScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas MED-02, MED-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T25 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 6 passed (6), 0 failed; TypeScript and targeted zero-warning lint passed. stdout: WUX_MED_02, WUX_MED_03. Combined-filter/reset gestures, distinct empty states, ID destinations, nominal delete cancellation/failure/success, read retry/429 and identity replacement tested through the real HTTP client. No legacy test changed. Route-level MED-01/04/05 proofs remain assigned to T37/T43/T44.
 
 ### T26: Criar Hoje e agenda do medicamento
 
@@ -1141,10 +1143,10 @@ Proof: run coverage | WUX_DAY_09
 Proof: run functional | ✓ WUX_MED_01
 
 **C19** - WHEN a pessoa usa Limpar filtros THEN the web client SHALL restabelecer a lista sem filtros e sua contagem. (MED-02, AC 2; T25).
-Proof: run coverage | ✓ WUX_MED_02
+Proof: run coverage | WUX_MED_02
 
 **C20** - WHEN filtros não encontram resultados THEN the web client SHALL distinguir esse estado da ausência de medicamentos cadastrados e oferecer Limpar filtros. (MED-03, AC 3; T25).
-Proof: run coverage | ✓ WUX_MED_03
+Proof: run coverage | WUX_MED_03
 
 **C21** - WHEN a pessoa usa Ver horários de um medicamento THEN the web client SHALL abrir suas doses com filtro pelo ID do medicamento selecionado. (MED-04, AC 4; T43).
 Proof: run functional | ✓ WUX_MED_04
