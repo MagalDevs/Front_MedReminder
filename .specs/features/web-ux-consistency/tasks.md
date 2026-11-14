@@ -66,7 +66,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 2: Testable domain
 
-- [ ] T7: Definir projeção de agenda
+- [x] T7: Definir projeção de agenda
 - [ ] T8: Definir filtros de medicamentos
 - [ ] T9: Definir modelo de tratamento
 - [ ] T10: Criar relógio local observável
@@ -269,10 +269,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/domain/agenda.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T7 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/domain/agenda.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas FORM-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T7 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 4 passed (4), 0 failed. stdout: `✓ |unit| tests/unit/web-ux-t07.test.tsx > agenda > WUX_FORM_10`. No deviations.
 
 ### T8: Definir filtros de medicamentos
 
@@ -1617,6 +1619,6 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 ## Handoff
 
 **Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6 com gates por tarefa e Build de Phase 1 verdes em 2026-11-14; T7–T47 permanecem pendentes.
-**Dispatched:** B1, /root/batch_01, T1–T6, HEAD dc98effe1cf3eef59eb39fe923b2a36a2d6e8870, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 concluídas em 7edc5d1, 19 testes novos + 4 regressões aprovados, Build/tipos/lint verdes. B2 /root/batch_02, T7–T13, HEAD 7edc5d1, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
