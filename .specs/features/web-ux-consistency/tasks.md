@@ -79,7 +79,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T14: Criar rascunho em memória
 - [x] T15: Controlar submissão idempotente de tratamento
 - [x] T16: Implementar atualização de metadados
-- [ ] T17: Controlar exclusão nominal
+- [x] T17: Controlar exclusão nominal
 - [ ] T18: Tornar busca do catálogo acessível
 - [ ] T19: Criar seletor de cores nomeado
 - [ ] T20: Criar cartão de dose operacional
@@ -483,10 +483,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/hooks/useMedicationDeletion.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas MED-08, MED-09, MED-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T17 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/hooks/useMedicationDeletion.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas MED-08, MED-09, MED-10 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T17 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 4 testes passaram, 0 falhas (2026-11-14).
 
 ### T18: Tornar busca do catálogo acessível
 
@@ -1143,13 +1145,13 @@ Proof: run functional | ✓ WUX_MED_06
 Proof: run functional | ✓ WUX_MED_07
 
 **C25** - WHEN a pessoa solicita excluir THEN the web client SHALL pedir confirmação com o nome do medicamento e informar que a operação também remove suas doses, conforme o serviço existente. (MED-08, AC 8; T17).
-Proof: run coverage | ✓ WUX_MED_08
+Proof: run coverage | WUX_MED_08
 
 **C26** - WHEN a pessoa cancela a exclusão THEN the web client SHALL manter o item e todas as doses sem realizar requisição de exclusão. (MED-09, AC 9; T17).
-Proof: run coverage | ✓ WUX_MED_09
+Proof: run coverage | WUX_MED_09
 
 **C27** - IF a exclusão falha THEN the web client SHALL manter o item visível com ação de nova tentativa sem anunciar sucesso. (MED-10, AC 10; T17).
-Proof: run coverage | ✓ WUX_MED_10
+Proof: run coverage | WUX_MED_10
 
 **C28** - WHEN a pessoa inicia Adicionar medicamento THEN the web client SHALL oferecer as etapas Medicamento, Tratamento e Revisão com identificação textual da etapa atual. (FORM-01, AC 1; T38).
 Proof: run functional | ✓ WUX_FORM_01
