@@ -70,7 +70,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T8: Definir filtros de medicamentos
 - [x] T9: Definir modelo de tratamento
 - [x] T10: Criar relógio local observável
-- [ ] T11: Unificar carga completa de doses
+- [x] T11: Unificar carga completa de doses
 - [ ] T12: Controlar mutação por dose
 - [ ] T13: Reforçar fronteira de sessão e destino interno
 
@@ -353,10 +353,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/data/loadDoseCollection.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas DAY-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T11 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/data/loadDoseCollection.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas DAY-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T11 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 4 passed (4), 0 failed. stdout includes `WUX_DAY_09`. Legacy and paginated envelopes, 102 records, incomplete preservation, page failures and metadata drift verified. No deviations.
 
 ### T12: Controlar mutação por dose
 
@@ -1105,7 +1107,7 @@ Proof: run functional | ✓ WUX_DAY_07
 Proof: run coverage | ✓ WUX_DAY_08
 
 **C17** - WHEN a listagem usa resposta paginada THEN the web client SHALL calcular contagens e próxima dose somente sobre um conjunto completo do período ou rotulá-los como parciais até concluir a carga. (DAY-09, AC 9; T11).
-Proof: run coverage | ✓ WUX_DAY_09
+Proof: run coverage | WUX_DAY_09
 
 **C18** - WHEN a pessoa combina nome, classificação e validade THEN the web client SHALL listar somente medicamentos que satisfazem os três filtros. (MED-01, AC 1; T37).
 Proof: run functional | ✓ WUX_MED_01
