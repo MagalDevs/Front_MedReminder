@@ -22,7 +22,7 @@ type Usuario = {
   email?: string;
   cpf?: string;
   cuidador?: boolean;
-  dataNasc?: Date;
+  dataNasc?: Date | string;
   foto?: string;
   cep?: string;
   senha?: string;

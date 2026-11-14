@@ -99,7 +99,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T28: Criar tela de edição de medicamento
 - [x] T29: Criar login coerente com o destino
 - [x] T30: Criar cadastro progressivo de conta
-- [ ] T31: Criar Perfil centrado em dados e segurança
+- [x] T31: Criar Perfil centrado em dados e segurança
 - [ ] T32: Criar entrada pública clara
 - [ ] T33: Alinhar apresentação do alarme existente
 - [ ] T34: Conectar rascunho ao layout raiz
@@ -772,7 +772,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### T31: Criar Perfil centrado em dados e segurança
 
 **What**: Reutilizar contratos de perfil/senha e resultados separados, com avatar de iniciais e sem ações sem endpoint.
-**Where**: `src/app/features/web-ux/screens/ProfileScreen.tsx`
+**Where**: `src/app/features/web-ux/screens/ProfileScreen.tsx`; approved cohesive support in `src/app/contexts/AuthContext.tsx` (metadata-only updateProfile) and type-only `src/app/Configuracoes/ConfiguracoesContent.tsx` (birth date JSON string compatibility)
 **Depends on**: T2, T3, T5, T6, T13
 **Reuses**: módulos e padrões de reutilização indicados em design.md; sem cliente HTTP ou framework adicional
 **Requirement**: ACCOUNT-05, ACCOUNT-06, ACCOUNT-07, ACCOUNT-08, SYSTEM-09
@@ -783,10 +783,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/ProfileScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas ACCOUNT-06, ACCOUNT-07, SYSTEM-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T31 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/ProfileScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas ACCOUNT-06, ACCOUNT-07, SYSTEM-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T31 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 8 own integration tests and 32 affected session/profile regression tests passed, 0 failed. Exact password endpoint/body, independent results, one operational-401 revalidation, expiration/network distinction, changed-field PATCH/optional omission, immutable metadata and same-identity draft/generation/token preservation verified. A to B to A discards old writes. TypeScript and affected ESLint passed. No existing tests changed. Root approved the two support changes before editing.
 
 ### T32: Criar entrada pública clara
 
@@ -1275,10 +1277,10 @@ Proof: run functional | ✓ WUX_ACCOUNT_04
 Proof: run functional | ✓ WUX_ACCOUNT_05
 
 **C59** - WHEN a pessoa altera a senha autenticada THEN the web client SHALL enviar senha atual e nova senha somente ao endpoint existente, sem armazenar senhas no rascunho. (ACCOUNT-06, AC 6; T31).
-Proof: run coverage | ✓ WUX_ACCOUNT_06
+Proof: run coverage | WUX_ACCOUNT_06
 
 **C60** - IF o perfil foi salvo e a alteração de senha falha THEN the web client SHALL comunicar os dois resultados separadamente sem afirmar sucesso da senha. (ACCOUNT-07, AC 7; T31).
-Proof: run coverage | ✓ WUX_ACCOUNT_07
+Proof: run coverage | WUX_ACCOUNT_07
 
 **C61** - WHILE não existe contrato comprovado de foto de perfil ou recuperação sem sessão the web client SHALL omitir essas ações sem apresentar botões que falham ou rotas fictícias. (ACCOUNT-08, AC 8; T40).
 Proof: run functional | ✓ WUX_ACCOUNT_08
@@ -1308,7 +1310,7 @@ Proof: walk - Ler DESIGN.md e comparar a documentação de tokens, componentes e
 Proof: run nonfunctional | ✓ WUX_SYSTEM_08
 
 **C70** - WHEN a pessoa abre Perfil THEN the web client SHALL priorizar dados pessoais e segurança sobre elementos de personalização sem contrato, mantendo os grupos identificados por títulos. (SYSTEM-09, AC 9; T31).
-Proof: run coverage | ✓ WUX_SYSTEM_09
+Proof: run coverage | WUX_SYSTEM_09
 
 **C71** - The web client SHALL dar nome acessível associado a cada campo, botão, seletor e controle de navegação do escopo. (ACCESS-01, AC 1; T45).
 Proof: run nonfunctional | ✓ WUX_ACCESS_01

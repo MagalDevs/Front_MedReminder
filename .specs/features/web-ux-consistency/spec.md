@@ -441,8 +441,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCOUNT-03 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-04 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-05 | Account and profile | T40 | Tasks | In Tasks |
-| ACCOUNT-06 | Account and profile | T31 | Tasks | In Tasks |
-| ACCOUNT-07 | Account and profile | T31 | Tasks | In Tasks |
+| ACCOUNT-06 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
+| ACCOUNT-07 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
 | ACCOUNT-08 | Account and profile | T40 | Tasks | In Tasks |
 | SYSTEM-01 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-02 | Visual system | T45 | Tasks | In Tasks |
@@ -452,7 +452,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | SYSTEM-06 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-07 | Visual system | T47 | Tasks | In Tasks |
 | SYSTEM-08 | Visual system | T45 | Tasks | In Tasks |
-| SYSTEM-09 | Visual system | T31 | Tasks | In Tasks |
+| SYSTEM-09 | Visual system | T31 | Implemented | T31: 8 integration tests passed |
 | ACCESS-01 | Accessibility | T45 | Tasks | In Tasks |
 | ACCESS-02 | Accessibility | T18 | Implemented | T18: 3 tests passed |
 | ACCESS-03 | Accessibility | T19 | Implemented | T19: 2 tests passed |
@@ -529,3 +529,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - T29: composed login verified by 3 integration tests; destination/visibility route proofs remain T41/T42.
 
 - T30: composed account registration verified by 3 integration tests; ACCOUNT-01/02/03/04 route proofs remain T42.
+
+- T31: metadata-only AuthContext.updateProfile preserves generation/token/draft, allowlists mutable fields and checks expected generation; JSON birth-date typing aligned in the legacy consumer. 8 own plus 32 regression tests and type/lint checks passed. ACCOUNT-05/08 route proofs remain T40.

@@ -22,7 +22,7 @@ interface User {
   cep?: string;
   cpf?: string;
   cuidador?: boolean;
-  dataNasc?: Date;
+  dataNasc?: Date | string;
   senha?: string;
 }
 
@@ -42,6 +42,7 @@ interface AuthContextType {
   returnTarget: string;
   rememberReturnTarget: (value: string | null | undefined) => string;
   consumeReturnTarget: (value?: string | null) => string;
+  updateProfile: (profile: Pick<User, 'id' | 'nome' | 'email' | 'cep' | 'dataNasc'>, expectedIdentity: string) => void;
 }
 
 /** Only product destinations can become a post-authentication return target. */
@@ -232,6 +233,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return target;
   }, [returnTarget]);
 
+  const profileToken = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const updateProfile = useCallback((profile: Pick<User, 'id' | 'nome' | 'email' | 'cep' | 'dataNasc'>, expectedIdentity: string) => {
+    if (!user?.id || String(profile.id) !== String(user.id) || expectedIdentity !== `${user.id}:${generation.current}` || !profileToken || localStorage.getItem('access_token') !== profileToken) return;
+    if (!['nome', 'email', 'cep', 'dataNasc'].every(field => profile[field as keyof typeof profile] === undefined || typeof profile[field as keyof typeof profile] === 'string')) return;
+    const metadata = Object.fromEntries(['nome', 'email', 'cep', 'dataNasc'].filter(field => profile[field as keyof typeof profile] !== undefined).map(field => [field, profile[field as keyof typeof profile]]));
+    const next = { ...user, ...metadata };
+    setUser(next);
+    localStorage.setItem('user_data', JSON.stringify(next));
+  }, [user, profileToken]);
+
   const getUserDisplayName = () => formatUserDisplayName(user);
 
   return (
@@ -252,6 +263,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         returnTarget,
         rememberReturnTarget,
         consumeReturnTarget,
+        updateProfile,
       }}
     >
       {loading && <RequestFeedback kind="loading" message="Verificando sessão…" />}
