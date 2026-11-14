@@ -89,7 +89,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T21: Criar etapa Medicamento
 - [x] T22: Criar etapa Tratamento
 - [x] T23: Criar revisão verificável
-- [ ] T24: Compor wizard de tratamento
+- [x] T24: Compor wizard de tratamento
 - [ ] T25: Criar tela Medicamentos
 - [ ] T26: Criar Hoje e agenda do medicamento
 - [ ] T27: Criar Histórico com filtros compostos
@@ -632,10 +632,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/components/TreatmentWizard.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-04, FORM-05, STATE-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T24 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/components/TreatmentWizard.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas FORM-04, FORM-05, STATE-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T24 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 6 passed (6), 0 failed. stdout: WUX_FORM_04, WUX_FORM_05, WUX_STATE_05. Gestures assert first-error focus and description, back preservation, exact POST payload/idempotency, confirmed summary, uncertain remount/same-body retry and read-only refresh recovery. No legacy tests changed; no transition added (motion finishing remains T46). React checklist applied to structure, hooks and accessible controls.
 
 ### T25: Criar tela Medicamentos
 
@@ -1175,10 +1177,10 @@ Proof: run coverage | WUX_FORM_02
 Proof: run coverage | WUX_FORM_03
 
 **C31** - IF a pessoa tenta avançar com um campo obrigatório inválido THEN the web client SHALL manter a etapa e focar o primeiro campo inválido com mensagem associada. (FORM-04, AC 4; T24).
-Proof: run coverage | ✓ WUX_FORM_04
+Proof: run coverage | WUX_FORM_04
 
 **C32** - WHEN a pessoa retorna à etapa anterior THEN the web client SHALL preservar os valores do rascunho da mesma identidade. (FORM-05, AC 5; T24).
-Proof: run coverage | ✓ WUX_FORM_05
+Proof: run coverage | WUX_FORM_05
 
 **C33** - WHEN a pessoa informa dosagem decimal positiva com vírgula ou ponto THEN the web client SHALL preservar o valor numérico conforme Time and Input Examples. (FORM-06, AC 6; T22).
 Proof: run coverage | WUX_FORM_06
@@ -1337,7 +1339,7 @@ Proof: run coverage | ✓ WUX_STATE_03
 Proof: run coverage | ✓ WUX_STATE_04
 
 **C85** - WHEN a pessoa inicia o cadastro de medicamento THEN the web client SHALL informar “O rascunho é mantido nesta aba enquanto você navega. Recarregar ou fechar a aba descarta o preenchimento.”. (STATE-05, AC 5; T24).
-Proof: run coverage | ✓ WUX_STATE_05
+Proof: run coverage | WUX_STATE_05
 
 **C86** - IF uma resposta chega depois da troca de identidade ou de uma solicitação mais recente da mesma listagem THEN the web client SHALL descartá-la sem alterar o estado visível atual. (STATE-06, AC 6; T34).
 Proof: run coverage | ✓ WUX_STATE_06
@@ -1652,7 +1654,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. T21–T47 permanecem pendentes. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios; todos com Build/tipos/lint verdes. Root reconciliou rastreabilidade em e009aab. B4 /root/batch_04, T21–T27, HEAD e009aab, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
+**Settled mid-build:** Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. T21–T23 estão concluídas em 9920190; T24–T47 permanecem pendentes. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged pelo usuário; preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider segue legado; telas novas devem compor loadDoseCollection e usar identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios; todos com Build/tipos/lint verdes. Root reconciliou rastreabilidade em e009aab. B4 /root/batch_04, T21–T23 em 9920190; retomada de T24–T27 autorizada em 2026-11-14 por "continue com o processo", HEAD 9920190; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 

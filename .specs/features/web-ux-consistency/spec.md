@@ -413,8 +413,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-01 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-02 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
 | FORM-03 | Create and review a treatment | T21 | Implemented | WUX_FORM_03, T21 2 integration tests passed |
-| FORM-04 | Create and review a treatment | T24 | Tasks | In Tasks |
-| FORM-05 | Create and review a treatment | T24 | Tasks | In Tasks |
+| FORM-04 | Create and review a treatment | T24 | Implemented | T24: 6 integration tests passed |
+| FORM-05 | Create and review a treatment | T24 | Implemented | T24: 6 integration tests passed |
 | FORM-06 | Create and review a treatment | T22 | Implemented | T22: 3 integration tests passed |
 | FORM-07 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-08 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
@@ -467,7 +467,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | STATE-02 | Recovery and interruptions | T5 | Implemented | WUX_STATE_02, integration gate 5 passed |
 | STATE-03 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-04 | Recovery and interruptions | T34 | Tasks | In Tasks |
-| STATE-05 | Recovery and interruptions | T24 | Tasks | In Tasks |
+| STATE-05 | Recovery and interruptions | T24 | Implemented | WUX_STATE_05, T24: 6 integration tests passed |
 | STATE-06 | Recovery and interruptions | T34 | Tasks | In Tasks |
 | STATE-07 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 | STATE-08 | Recovery and interruptions | T5 | Implemented | WUX_STATE_08, integration gate 5 passed |
