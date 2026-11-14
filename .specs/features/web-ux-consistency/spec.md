@@ -415,13 +415,13 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-03 | Create and review a treatment | T21 | Implemented | WUX_FORM_03, T21 2 integration tests passed |
 | FORM-04 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-05 | Create and review a treatment | T24 | Tasks | In Tasks |
-| FORM-06 | Create and review a treatment | T22 | Tasks | In Tasks |
+| FORM-06 | Create and review a treatment | T22 | Implemented | T22: 3 integration tests passed |
 | FORM-07 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-08 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-09 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-10 | Create and review a treatment | T7 | Implemented | T7: 4 unit tests passed |
 | FORM-11 | Create and review a treatment | T38 | Tasks | In Tasks |
-| FORM-12 | Create and review a treatment | T22 | Tasks | In Tasks |
+| FORM-12 | Create and review a treatment | T22 | Implemented | T22: 3 integration tests passed |
 | FORM-13 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-14 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-15 | Create and review a treatment | T38 | Tasks | In Tasks |

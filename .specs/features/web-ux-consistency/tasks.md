@@ -87,7 +87,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 4: Medication and agenda screens
 
 - [x] T21: Criar etapa Medicamento
-- [ ] T22: Criar etapa Tratamento
+- [x] T22: Criar etapa Tratamento
 - [ ] T23: Criar revisão verificável
 - [ ] T24: Compor wizard de tratamento
 - [ ] T25: Criar tela Medicamentos
@@ -590,10 +590,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/components/TreatmentStep.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-06, FORM-12 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T22 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/components/TreatmentStep.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas FORM-06, FORM-12 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T22 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 passed (3), 0 failed. stdout: WUX_FORM_06, WUX_FORM_12. Decimal gestures preserve 1,5/1.5 and canonical payload; explicit week/month conversion and invalid recurrence asserted against the shared model. No deviations or legacy test changes.
 
 ### T23: Criar revisão verificável
 
@@ -1177,7 +1179,7 @@ Proof: run coverage | ✓ WUX_FORM_04
 Proof: run coverage | ✓ WUX_FORM_05
 
 **C33** - WHEN a pessoa informa dosagem decimal positiva com vírgula ou ponto THEN the web client SHALL preservar o valor numérico conforme Time and Input Examples. (FORM-06, AC 6; T22).
-Proof: run coverage | ✓ WUX_FORM_06
+Proof: run coverage | WUX_FORM_06
 
 **C34** - IF a dosagem contém zero, negativo, notação exponencial, separadores mistos ou texto não numérico THEN the web client SHALL rejeitar a entrada com orientação “Informe uma quantidade maior que zero, usando vírgula ou ponto para decimais”. (FORM-07, AC 7; T9).
 Proof: run coverage | WUX_FORM_07
@@ -1195,7 +1197,7 @@ Proof: run coverage | WUX_FORM_10
 Proof: run functional | ✓ WUX_FORM_11
 
 **C39** - WHEN a pessoa escolhe semana ou mês como duração THEN the web client SHALL explicitar a conversão para 7 ou 30 dias antes da revisão. (FORM-12, AC 12; T22).
-Proof: run coverage | ✓ WUX_FORM_12
+Proof: run coverage | WUX_FORM_12
 
 **C40** - IF os parâmetros geram zero, mais de 1000 doses, instantes duplicados ou datas normalizadas pelo relógio THEN the web client SHALL impedir o envio e identificar o parâmetro a corrigir. (FORM-13, AC 13; T9).
 Proof: run coverage | WUX_FORM_13
