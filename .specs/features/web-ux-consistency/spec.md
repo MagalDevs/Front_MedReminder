@@ -429,12 +429,12 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-17 | Create and review a treatment | T18 | Tasks | In Tasks |
 | DOSE-01 | Register and correct a dose | T20 | Tasks | In Tasks |
 | DOSE-02 | Register and correct a dose | T20 | Tasks | In Tasks |
-| DOSE-03 | Register and correct a dose | T12 | Tasks | In Tasks |
-| DOSE-04 | Register and correct a dose | T12 | Tasks | In Tasks |
+| DOSE-03 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
+| DOSE-04 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
 | DOSE-05 | Register and correct a dose | T20 | Tasks | In Tasks |
-| DOSE-06 | Register and correct a dose | T12 | Tasks | In Tasks |
-| DOSE-07 | Register and correct a dose | T12 | Tasks | In Tasks |
-| DOSE-08 | Register and correct a dose | T12 | Tasks | In Tasks |
+| DOSE-06 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
+| DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
+| DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 8 integration tests passed |
 | DOSE-09 | Register and correct a dose | T33 | Tasks | In Tasks |
 | ACCOUNT-01 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-02 | Account and profile | T42 | Tasks | In Tasks |

@@ -71,7 +71,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T9: Definir modelo de tratamento
 - [x] T10: Criar relógio local observável
 - [x] T11: Unificar carga completa de doses
-- [ ] T12: Controlar mutação por dose
+- [x] T12: Controlar mutação por dose
 - [ ] T13: Reforçar fronteira de sessão e destino interno
 
 ### Phase 3: Operations and input
@@ -374,10 +374,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/hooks/useDoseMutation.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 5 casos planejados sem correção formal do plano.
-- [ ] As provas DOSE-03, DOSE-04, DOSE-06, DOSE-07, DOSE-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T12 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/hooks/useDoseMutation.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 5 casos planejados sem correção formal do plano.
+- [x] As provas DOSE-03, DOSE-04, DOSE-06, DOSE-07, DOSE-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T12 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 8 passed (8), 0 failed. stdout includes `WUX_DOSE_03`, `WUX_DOSE_04`, `WUX_DOSE_06`, `WUX_DOSE_07`, `WUX_DOSE_08`. Targeted TypeScript and zero-warning ESLint passed. DoseInstant guard uses a validated string brand so false branches preserve unvalidated string types; callback status is memoized. No behavior deviation.
 
 ### T13: Reforçar fronteira de sessão e destino interno
 
@@ -1197,22 +1199,22 @@ Proof: run coverage | ✓ WUX_DOSE_01
 Proof: run coverage | ✓ WUX_DOSE_02
 
 **C47** - WHEN a pessoa usa Registrar dose THEN the web client SHALL enviar PUT `/dose/:id` com corpo restrito a `{tomado:true}`. (DOSE-03, AC 3; T12).
-Proof: run coverage | ✓ WUX_DOSE_03
+Proof: run coverage | WUX_DOSE_03
 
 **C48** - WHEN o servidor confirma o registro THEN the web client SHALL apresentar o estado Registrada na mesma dose e atualizar os totais derivados. (DOSE-04, AC 4; T12).
-Proof: run coverage | ✓ WUX_DOSE_04
+Proof: run coverage | WUX_DOSE_04
 
 **C49** - WHEN a pessoa usa Corrigir registro em uma dose Registrada THEN the web client SHALL pedir confirmação com medicamento e horário previsto antes de enviar `{tomado:false}` ao mesmo endpoint. (DOSE-05, AC 5; T20).
 Proof: run coverage | ✓ WUX_DOSE_05
 
 **C50** - WHEN o servidor confirma a correção THEN the web client SHALL recalcular o estado da dose pelo relógio atual sem alterar seu instante previsto. (DOSE-06, AC 6; T12).
-Proof: run coverage | ✓ WUX_DOSE_06
+Proof: run coverage | WUX_DOSE_06
 
 **C51** - IF registro ou correção falha THEN the web client SHALL manter o último estado confirmado com mensagem e ação de nova tentativa. (DOSE-07, AC 7; T12).
-Proof: run coverage | ✓ WUX_DOSE_07
+Proof: run coverage | WUX_DOSE_07
 
 **C52** - WHILE há mutação pendente para uma dose the web client SHALL bloquear novas mutações dessa dose sem bloquear ações de outros itens. (DOSE-08, AC 8; T12).
-Proof: run coverage | ✓ WUX_DOSE_08
+Proof: run coverage | WUX_DOSE_08
 
 **C53** - WHEN a pessoa fecha o lembrete sobreposto existente THEN the web client SHALL fechar somente a apresentação, sem registrar, corrigir ou adiar a dose no servidor. (DOSE-09, AC 9; T33).
 Proof: run coverage | ✓ WUX_DOSE_09

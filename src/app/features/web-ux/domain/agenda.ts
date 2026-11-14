@@ -1,4 +1,5 @@
 export type DoseState = 'scheduled' | 'due' | 'overdue' | 'registered';
+export type DoseInstant = string & { readonly __doseInstant: unique symbol };
 export type CompleteDose = {
   kind: 'complete'; id: number; medicationId: number; medicationName: string;
   expectedAt: string; amountLabel: string; registered: boolean; color?: string;
@@ -15,7 +16,7 @@ export function isCalendarDate(value: string): boolean {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
-export function isDoseInstant(value: unknown): value is string {
+export function isDoseInstant(value: unknown): value is DoseInstant {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return false;
   return isCalendarDate(value.slice(0, 10)) && Number(value.slice(11, 13)) < 24 && Number(value.slice(14, 16)) < 60 && Number(value.slice(17, 19)) < 60 && Number.isFinite(Date.parse(value));
 }
