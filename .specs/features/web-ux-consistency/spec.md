@@ -525,3 +525,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - Authorized T24 follow-up: 4 additional contract checks plus existing gates pass for required color/stock unit (50 chars) and photo URL (255 chars); exact payload expectation correction approved by user in context.md. No legacy assertions weakened or cases removed.
 
 - T28: MedicationEditScreen composed contract verified by 3 integration tests; MED-05/06/07 route proofs remain T44.
+
+- T29: composed login verified by 3 integration tests; destination/visibility route proofs remain T41/T42.

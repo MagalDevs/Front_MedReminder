@@ -97,7 +97,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 5: Account and shared composition
 
 - [x] T28: Criar tela de edição de medicamento
-- [ ] T29: Criar login coerente com o destino
+- [x] T29: Criar login coerente com o destino
 - [ ] T30: Criar cadastro progressivo de conta
 - [ ] T31: Criar Perfil centrado em dados e segurança
 - [ ] T32: Criar entrada pública clara
@@ -741,10 +741,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/screens/LoginScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
-- [ ] Gate concreto acima passa; marcar T29 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/screens/LoginScreen.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] Os testes próprios comprovam o componente/módulo diretamente; a futura composição não é usada como justificativa para adiar testes.
+- [x] Gate concreto acima passa; marcar T29 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 3 integration tests passed, 0 failed. Password visibility gesture, exact login body/profile credential, safe internal/default destination and failed-profile manual recovery verified. No existing tests changed.
 
 ### T30: Criar cadastro progressivo de conta
 
