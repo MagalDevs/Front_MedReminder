@@ -416,13 +416,13 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-04 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-05 | Create and review a treatment | T24 | Tasks | In Tasks |
 | FORM-06 | Create and review a treatment | T22 | Tasks | In Tasks |
-| FORM-07 | Create and review a treatment | T9 | Tasks | In Tasks |
-| FORM-08 | Create and review a treatment | T9 | Tasks | In Tasks |
-| FORM-09 | Create and review a treatment | T9 | Tasks | In Tasks |
+| FORM-07 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
+| FORM-08 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
+| FORM-09 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-10 | Create and review a treatment | T7 | Implemented | T7: 4 unit tests passed |
 | FORM-11 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-12 | Create and review a treatment | T22 | Tasks | In Tasks |
-| FORM-13 | Create and review a treatment | T9 | Tasks | In Tasks |
+| FORM-13 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-14 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-15 | Create and review a treatment | T38 | Tasks | In Tasks |
 | FORM-16 | Create and review a treatment | T15 | Tasks | In Tasks |
@@ -516,3 +516,4 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 ## Domain Execution Trace
 
 - T8: MED-01, MED-02 and MED-03 domain rules covered directly by 3 passing unit tests. Screen proofs remain assigned to T37.
+- T9: FORM-06/07/08/09/12/13 domain rules covered by 5 passing unit tests, including literal recurrence and payload examples.

@@ -68,7 +68,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T7: Definir projeção de agenda
 - [x] T8: Definir filtros de medicamentos
-- [ ] T9: Definir modelo de tratamento
+- [x] T9: Definir modelo de tratamento
 - [ ] T10: Criar relógio local observável
 - [ ] T11: Unificar carga completa de doses
 - [ ] T12: Controlar mutação por dose
@@ -311,10 +311,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/features/web-ux/domain/treatment.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 4 casos planejados sem correção formal do plano.
-- [ ] As provas FORM-07, FORM-08, FORM-09, FORM-13 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T9 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/features/web-ux/domain/treatment.ts funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 4 casos planejados sem correção formal do plano.
+- [x] As provas FORM-07, FORM-08, FORM-09, FORM-13 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T9 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Observed gate**: 2026-11-14, 5 passed (5), 0 failed. stdout includes `WUX_FORM_07`, `WUX_FORM_08`, `WUX_FORM_09`, `WUX_FORM_13`. Assertions cover exact payload, DST, 1/1000/1001, invalid parsing and normalized dates. No deviations.
 
 ### T10: Criar relógio local observável
 
@@ -1152,16 +1154,16 @@ Proof: run coverage | ✓ WUX_FORM_05
 Proof: run coverage | ✓ WUX_FORM_06
 
 **C34** - IF a dosagem contém zero, negativo, notação exponencial, separadores mistos ou texto não numérico THEN the web client SHALL rejeitar a entrada com orientação “Informe uma quantidade maior que zero, usando vírgula ou ponto para decimais”. (FORM-07, AC 7; T9).
-Proof: run coverage | ✓ WUX_FORM_07
+Proof: run coverage | WUX_FORM_07
 
 **C35** - WHEN a pessoa informa primeira dose, intervalo e duração válidos THEN the web client SHALL gerar os instantes conforme as regras de duração e recorrência de Assumptions & Open Questions. (FORM-08, AC 8; T9).
-Proof: run coverage | ✓ WUX_FORM_08
+Proof: run coverage | WUX_FORM_08
 
 **C36** - WHEN o cliente prepara um novo tratamento THEN the web client SHALL enviar `quantidadeDiaria` como `ceil(24 / intervaloHoras)` e `quantidadeDias` como duração total convertida em dias. (FORM-09, AC 9; T9).
-Proof: run coverage | ✓ WUX_FORM_09
+Proof: run coverage | WUX_FORM_09
 
 **C37** - WHEN uma tela apresenta tratamento legado THEN the web client SHALL usar horários efetivamente cadastrados em vez de traduzir `quantidadeDiaria` em “x ao dia” ou intervalo. (FORM-10, AC 10; T7).
-Proof: run coverage | ✓ WUX_FORM_10
+Proof: run coverage | WUX_FORM_10
 
 **C38** - WHEN a pessoa chega à Revisão THEN the web client SHALL mostrar medicamento, dose/unidade, intervalo, início, fim exclusivo, total de doses e fuso utilizado com acesso à lista completa de instantes. (FORM-11, AC 11; T38).
 Proof: run functional | ✓ WUX_FORM_11
@@ -1170,7 +1172,7 @@ Proof: run functional | ✓ WUX_FORM_11
 Proof: run coverage | ✓ WUX_FORM_12
 
 **C40** - IF os parâmetros geram zero, mais de 1000 doses, instantes duplicados ou datas normalizadas pelo relógio THEN the web client SHALL impedir o envio e identificar o parâmetro a corrigir. (FORM-13, AC 13; T9).
-Proof: run coverage | ✓ WUX_FORM_13
+Proof: run coverage | WUX_FORM_13
 
 **C41** - WHEN a pessoa confirma Salvar tratamento na Revisão THEN the web client SHALL usar o POST `/tratamento` existente com uma chave de idempotência por identidade e conteúdo, sem criar remédio e doses em chamadas separadas. (FORM-14, AC 14; T38).
 Proof: run functional | ✓ WUX_FORM_14
