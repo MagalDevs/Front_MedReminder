@@ -390,7 +390,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | NAV-05 | Navigate the daily routine | T43 | Implemented | T43 browser gate 3 passed |
 | NAV-06 | Navigate the daily routine | T38 | Implemented | T38 browser gate 7 passed |
 | NAV-07 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
-| NAV-08 | Navigate the daily routine | T45 | Tasks | In Tasks |
+| NAV-08 | Navigate the daily routine | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_NAV_08 |
 | DAY-01 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
 | DAY-02 | Understand today's doses and history | T26 | Implemented | T26: 10 integration tests passed |
 | DAY-03 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
@@ -444,23 +444,23 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCOUNT-06 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
 | ACCOUNT-07 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
 | ACCOUNT-08 | Account and profile | T40 | Implemented | T40 browser gate 3 passed |
-| SYSTEM-01 | Visual system | T45 | Tasks | In Tasks |
-| SYSTEM-02 | Visual system | T45 | Tasks | In Tasks |
-| SYSTEM-03 | Visual system | T45 | Tasks | In Tasks |
+| SYSTEM-01 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_01 |
+| SYSTEM-02 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_02 |
+| SYSTEM-03 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_03 |
 | SYSTEM-04 | Visual system | T46 | Tasks | In Tasks |
 | SYSTEM-05 | Visual system | T3 | Implemented | WUX_SYSTEM_05, unit gate 2 passed |
-| SYSTEM-06 | Visual system | T45 | Tasks | In Tasks |
+| SYSTEM-06 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_06 |
 | SYSTEM-07 | Visual system | T47 | Tasks | In Tasks |
-| SYSTEM-08 | Visual system | T45 | Tasks | In Tasks |
+| SYSTEM-08 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_08 |
 | SYSTEM-09 | Visual system | T31 | Implemented | T31: 8 integration tests passed |
-| ACCESS-01 | Accessibility | T45 | Tasks | In Tasks |
+| ACCESS-01 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_01 |
 | ACCESS-02 | Accessibility | T18 | Implemented | T18: 3 tests passed |
 | ACCESS-03 | Accessibility | T19 | Implemented | T19: 2 tests passed |
 | ACCESS-04 | Accessibility | T6 | Implemented | WUX_ACCESS_04, integration gate 3 passed |
 | ACCESS-05 | Accessibility | T4 | Implemented | WUX_ACCESS_05, integration gate 3 passed |
-| ACCESS-06 | Accessibility | T45 | Tasks | In Tasks |
-| ACCESS-07 | Accessibility | T45 | Tasks | In Tasks |
-| ACCESS-08 | Accessibility | T45 | Tasks | In Tasks |
+| ACCESS-06 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_06 |
+| ACCESS-07 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_07 |
+| ACCESS-08 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_08 |
 | ACCESS-09 | Accessibility | T46 | Tasks | In Tasks |
 | ACCESS-10 | Accessibility | T4 | Implemented | WUX_ACCESS_10, integration gate 3 passed |
 | STATE-01 | Recovery and interruptions | T5 | Implemented | WUX_STATE_01, integration gate 5 passed |

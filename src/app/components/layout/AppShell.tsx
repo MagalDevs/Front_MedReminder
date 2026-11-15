@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore, type ReactNode } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Button from '../ui/Button';
 import Dialog from '../ui/Dialog';
@@ -41,7 +42,7 @@ export default function AppShell({ title, children, actions, onSignOut }: AppShe
   const current = destinationFor(pathname);
 
   function navigation() {
-    return <nav aria-label="Navegação principal" className="flex flex-col gap-2 md:flex-row">
+    return <nav aria-label="Navegação principal" className="flex flex-col flex-wrap gap-2 md:flex-row">
       {destinations.map(({ href, label }) => <Link key={href} href={href}
         aria-current={current === href ? 'page' : undefined} onClick={() => setMenuOpen(false)}
         className={`inline-flex min-h-11 min-w-11 items-center rounded-[var(--radius-control)] px-4 py-2 font-medium ${
@@ -54,7 +55,7 @@ export default function AppShell({ title, children, actions, onSignOut }: AppShe
     <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-[var(--surface-raised)] focus:p-3">Ir para o conteúdo</a>
     <header className="border-b border-[var(--border-default)] bg-[var(--surface-raised)]">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
-        <span className="text-xl font-bold text-[var(--brand-signature)]">MedReminder</span>
+        <span className="inline-flex min-w-0 items-center gap-2 text-xl font-bold text-[var(--brand-signature)]"><Image src="/assets/LogoMed-removebg-preview.png" alt="" width={40} height={40} className="shrink-0" />MedReminder</span>
         {desktop ? <>{navigation()}{onSignOut && <Button variant="secondary" onClick={onSignOut}>Sair</Button>}</>
           : <Button variant="secondary" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>Menu</Button>}
       </div>

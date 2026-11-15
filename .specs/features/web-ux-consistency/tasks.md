@@ -119,7 +119,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 7: Final route and quality
 
 - [x] T44: Disponibilizar edição pelo ID
-- [ ] T45: Fechar responsividade e acessibilidade entre rotas
+- [x] T45: Fechar responsividade e acessibilidade entre rotas
 - [ ] T46: Uniformizar movimento por intenção
 - [ ] T47: Publicar contrato visual do web
 
@@ -1083,10 +1083,14 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 10 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-08, SYSTEM-01, SYSTEM-02, SYSTEM-03, SYSTEM-06, SYSTEM-08, ACCESS-01, ACCESS-06, ACCESS-07, ACCESS-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T45 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 10 casos planejados sem correção formal do plano.
+- [x] As provas NAV-08, SYSTEM-01, SYSTEM-02, SYSTEM-03, SYSTEM-06, SYSTEM-08, ACCESS-01, ACCESS-06, ACCESS-07, ACCESS-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T45 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Execution**: 2026-11-15. Assumptions: preserve approved routine-app hierarchy, real font files/logo and API contracts; native browser captures precede CSS. Files: globals.css, AppShell.tsx (approved compact logo and wrapping support), tests/nonfunctional/web-ux-t45.spec.ts, tests/support/web-ux-visual.ts, captures, b7-visual-review.md and status documents. Success: named controls, calculated contrast, visible focus/radio labels, 44px targets, keyboard/modal return and no overflow or lost controls across all ten routes/four viewports.
+
+**Verified**: 11 own nonfunctional cases + 5 T44 regressions passed in one fresh-build Chrome gate with playwright.web-ux.config.ts, port 3102, workers=1/retries=0. TypeScript and lint max-warnings=0 passed. Contrast covers rendered text plus placeholder/hover/loading-disabled/error/warning/success. Font assertions wait for hydration; Retry-After fixture exposes its CORS header. No assertion relaxed, case removed or skipped. Observed captures and tool limitations are in b7-visual-review.md. Effective 200% text and reduced-motion gate remain T46.
 
 ### T46: Uniformizar movimento por intenção
 
@@ -1152,7 +1156,7 @@ Proof: run functional | WUX_NAV_06
 Proof: run functional | WUX_NAV_07
 
 **C8** - WHEN a pessoa usa o menu em viewport estreito THEN the web client SHALL permitir abrir, fechar e retornar ao conteúdo sem sobreposição do título ou deslocamento horizontal da página. (NAV-08, AC 8; T45).
-Proof: run nonfunctional | ✓ WUX_NAV_08
+Proof: run nonfunctional | WUX_NAV_08
 
 **C9** - WHEN a pessoa abre Hoje THEN the web client SHALL listar as doses do dia local ordenadas pelo instante previsto crescente, com desempate por ID. (DAY-01, AC 1; T36).
 Proof: run functional | WUX_DAY_01
@@ -1314,13 +1318,13 @@ Proof: run coverage | WUX_ACCOUNT_07
 Proof: run functional | WUX_ACCOUNT_08
 
 **C62** - The web client SHALL aplicar uma única família tipográfica de interface Kantumruy com fallback sans-serif nas telas do escopo. (SYSTEM-01, AC 1; T45).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_01
+Proof: run nonfunctional | WUX_SYSTEM_01
 
 **C63** - The web client SHALL usar tokens semânticos únicos para ação primária, texto, superfície, borda, foco, erro, alerta e sucesso. (SYSTEM-02, AC 2; T45).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_02
+Proof: run nonfunctional | WUX_SYSTEM_02
 
 **C64** - The web client SHALL reservar o rosa à identidade da marca e os estados a tokens distintos, sem usar a cor identificadora do medicamento como estado de erro ou sucesso. (SYSTEM-03, AC 3; T45).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_03
+Proof: run nonfunctional | WUX_SYSTEM_03
 
 **C65** - WHEN a mesma ação semântica aparece em telas diferentes THEN the web client SHALL apresentar o mesmo componente de botão e os mesmos estados default, hover, focus, disabled e loading. (SYSTEM-04, AC 4; T46).
 Proof: run nonfunctional | ✓ WUX_SYSTEM_04
@@ -1329,19 +1333,19 @@ Proof: run nonfunctional | ✓ WUX_SYSTEM_04
 Proof: run coverage | WUX_SYSTEM_05 associates a visible textual error with the labeled field and preserves its entered value
 
 **C67** - WHEN a interface apresenta uma ação secundária THEN the web client SHALL diferenciá-la da ação principal sem reduzir seu contraste de texto abaixo do critério de acessibilidade. (SYSTEM-06, AC 6; T45).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_06
+Proof: run nonfunctional | WUX_SYSTEM_06
 
 **C68** - The web client SHALL manter uma especificação de tokens e componentes em `DESIGN.md` com correspondência conceitual futura para mobile, sem exigir alteração desse aplicativo. (SYSTEM-07, AC 7; T47).
 Proof: walk - Ler DESIGN.md e comparar a documentação de tokens, componentes e estados com a UI implementada e a equivalência conceitual futura para mobile.
 
 **C69** - The web client SHALL apresentar carga, vazio inicial, ausência por filtro, erro recuperável e sucesso com o mesmo vocabulário e padrão de feedback entre as telas. (SYSTEM-08, AC 8; T45).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_08
+Proof: run nonfunctional | WUX_SYSTEM_08
 
 **C70** - WHEN a pessoa abre Perfil THEN the web client SHALL priorizar dados pessoais e segurança sobre elementos de personalização sem contrato, mantendo os grupos identificados por títulos. (SYSTEM-09, AC 9; T31).
 Proof: run coverage | WUX_SYSTEM_09
 
 **C71** - The web client SHALL dar nome acessível associado a cada campo, botão, seletor e controle de navegação do escopo. (ACCESS-01, AC 1; T45).
-Proof: run nonfunctional | ✓ WUX_ACCESS_01
+Proof: run nonfunctional | WUX_ACCESS_01
 
 **C72** - WHEN a pessoa usa a busca por teclado THEN the web client SHALL permitir abrir sugestões, percorrê-las por setas, selecionar por Enter e fechar por Escape com semântica de combobox/listbox. (ACCESS-02, AC 2; T18).
 Proof: run coverage | WUX_ACCESS_02
@@ -1356,13 +1360,13 @@ Proof: run coverage | WUX_ACCESS_04 excludes closed menu content from keyboard a
 Proof: run coverage | WUX_ACCESS_05 returns focus to the opener after explicit cancellation and close
 
 **C76** - The web client SHALL manter contraste de texto comum de pelo menos 4,5:1 e de texto grande de pelo menos 3:1 nos estados disponíveis. (ACCESS-06, AC 6; T45).
-Proof: run nonfunctional | ✓ WUX_ACCESS_06
+Proof: run nonfunctional | WUX_ACCESS_06
 
 **C77** - The web client SHALL fornecer indicador de foco visível e área de acionamento de pelo menos 44 x 44 CSS px para botões e opções de cor. (ACCESS-07, AC 7; T45).
-Proof: run nonfunctional | ✓ WUX_ACCESS_07
+Proof: run nonfunctional | WUX_ACCESS_07
 
 **C78** - WHEN o viewport é 320 x 568, 390 x 844, 768 x 1024 ou 1440 x 900 THEN the web client SHALL permitir usar os formulários sem rolagem horizontal da página ou controles encobertos. (ACCESS-08, AC 8; T45).
-Proof: run nonfunctional | ✓ WUX_ACCESS_08
+Proof: run nonfunctional | WUX_ACCESS_08
 
 **C79** - WHEN a pessoa amplia texto a 200% ou utiliza preferência de movimento reduzido THEN the web client SHALL preservar acesso ao conteúdo e às ações sem depender de animação. (ACCESS-09, AC 9; T46).
 Proof: run nonfunctional | ✓ WUX_ACCESS_09
