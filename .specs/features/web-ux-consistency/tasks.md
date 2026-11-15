@@ -109,7 +109,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T35: Conectar página inicial à nova entrada
 - [x] T36: Disponibilizar rota Hoje
 - [x] T37: Conectar rota Medicamentos
-- [ ] T38: Conectar cadastro de medicamento
+- [x] T38: Conectar cadastro de medicamento
 - [ ] T39: Conectar rota Histórico
 - [ ] T40: Preservar Configuracoes como Perfil
 - [ ] T41: Conectar rota de login
@@ -932,10 +932,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/novo-medicamento/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 5 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-06, FORM-01, FORM-11, FORM-14, FORM-15 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T38 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/novo-medicamento/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 5 casos planejados sem correção formal do plano.
+- [x] As provas NAV-06, FORM-01, FORM-11, FORM-14, FORM-15 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T38 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 7 passed, 0 failed. Anonymous guard, valid query prefill without overwriting edited draft, stages, literal review/timezone/four instants, exact atomic body/key and duplicate gesture, summary across internal navigation, confirmed refresh failure (GET retry only, global alarm visible), uncertain retry same body/key after remount asserted. Initial radio helper timed out against sr-only input; visible label gesture plus checked assertion corrected the harness; full rerun passed. Suspense encloses search params. No product deviation or legacy-test edits.
 
 ### T39: Conectar rota Histórico
 
@@ -1130,7 +1132,7 @@ Proof: run functional | ✓ WUX_NAV_04
 Proof: run functional | ✓ WUX_NAV_05
 
 **C6** - IF uma rota protegida é aberta sem sessão validada THEN the web client SHALL exigir login antes de permitir preenchimento de tratamento ou exibir dados privados. (NAV-06, AC 6; T38).
-Proof: run functional | ✓ WUX_NAV_06
+Proof: run functional | WUX_NAV_06
 
 **C7** - WHEN a pessoa segue um destino de retorno após autenticar THEN the web client SHALL aceitar somente caminhos relativos internos pertencentes às telas do produto. (NAV-07, AC 7; T41).
 Proof: run functional | ✓ WUX_NAV_07
@@ -1196,7 +1198,7 @@ Proof: run coverage | WUX_MED_09
 Proof: run coverage | WUX_MED_10
 
 **C28** - WHEN a pessoa inicia Adicionar medicamento THEN the web client SHALL oferecer as etapas Medicamento, Tratamento e Revisão com identificação textual da etapa atual. (FORM-01, AC 1; T38).
-Proof: run functional | ✓ WUX_FORM_01
+Proof: run functional | WUX_FORM_01
 
 **C29** - WHEN a pessoa busca no catálogo THEN the web client SHALL permitir selecionar um resultado ou seguir com cadastro manual quando não houver correspondência. (FORM-02, AC 2; T18).
 Proof: run coverage | WUX_FORM_02
@@ -1226,7 +1228,7 @@ Proof: run coverage | WUX_FORM_09
 Proof: run coverage | WUX_FORM_10
 
 **C38** - WHEN a pessoa chega à Revisão THEN the web client SHALL mostrar medicamento, dose/unidade, intervalo, início, fim exclusivo, total de doses e fuso utilizado com acesso à lista completa de instantes. (FORM-11, AC 11; T38).
-Proof: run functional | ✓ WUX_FORM_11
+Proof: run functional | WUX_FORM_11
 
 **C39** - WHEN a pessoa escolhe semana ou mês como duração THEN the web client SHALL explicitar a conversão para 7 ou 30 dias antes da revisão. (FORM-12, AC 12; T22).
 Proof: run coverage | WUX_FORM_12
@@ -1235,10 +1237,10 @@ Proof: run coverage | WUX_FORM_12
 Proof: run coverage | WUX_FORM_13
 
 **C41** - WHEN a pessoa confirma Salvar tratamento na Revisão THEN the web client SHALL usar o POST `/tratamento` existente com uma chave de idempotência por identidade e conteúdo, sem criar remédio e doses em chamadas separadas. (FORM-14, AC 14; T38).
-Proof: run functional | ✓ WUX_FORM_14
+Proof: run functional | WUX_FORM_14
 
 **C42** - WHEN o contrato confirma o tratamento completo THEN the web client SHALL apresentar resumo persistente no destino com medicamento e primeira dose criada, sem alert bloqueante seguido de tela vazia. (FORM-15, AC 15; T38).
-Proof: run functional | ✓ WUX_FORM_15
+Proof: run functional | WUX_FORM_15
 
 **C43** - IF o tratamento foi confirmado mas a atualização da lista falha THEN the web client SHALL mostrar “Tratamento salvo. Não foi possível atualizar a lista.” com ação para atualizar, sem reenviar a criação. (FORM-16, AC 16; T15).
 Proof: run coverage | WUX_FORM_16

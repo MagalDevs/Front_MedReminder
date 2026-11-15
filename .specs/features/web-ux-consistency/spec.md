@@ -388,7 +388,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | NAV-03 | Navigate the daily routine | T35 | Implemented | WUX_NAV_03; T35 browser gate 3 passed |
 | NAV-04 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-05 | Navigate the daily routine | T43 | Tasks | In Tasks |
-| NAV-06 | Navigate the daily routine | T38 | Tasks | In Tasks |
+| NAV-06 | Navigate the daily routine | T38 | Implemented | T38 browser gate 7 passed |
 | NAV-07 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-08 | Navigate the daily routine | T45 | Tasks | In Tasks |
 | DAY-01 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
@@ -410,7 +410,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | MED-08 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | MED-09 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | MED-10 | Manage medications | T17 | Implemented | T17: 4 tests passed |
-| FORM-01 | Create and review a treatment | T38 | Tasks | In Tasks |
+| FORM-01 | Create and review a treatment | T38 | Implemented | T38 browser gate 7 passed |
 | FORM-02 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
 | FORM-03 | Create and review a treatment | T21 | Implemented | WUX_FORM_03, T21 2 integration tests passed |
 | FORM-04 | Create and review a treatment | T24 | Implemented | T24: 10 integration tests passed (4 contract follow-up) |
@@ -420,11 +420,11 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | FORM-08 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-09 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
 | FORM-10 | Create and review a treatment | T7 | Implemented | T7: 4 unit tests passed |
-| FORM-11 | Create and review a treatment | T38 | Tasks | In Tasks |
+| FORM-11 | Create and review a treatment | T38 | Implemented | T38 browser gate 7 passed |
 | FORM-12 | Create and review a treatment | T22 | Implemented | T22: 3 integration tests passed |
 | FORM-13 | Create and review a treatment | T9 | Implemented | T9: 5 unit tests passed |
-| FORM-14 | Create and review a treatment | T38 | Tasks | In Tasks |
-| FORM-15 | Create and review a treatment | T38 | Tasks | In Tasks |
+| FORM-14 | Create and review a treatment | T38 | Implemented | T38 browser gate 7 passed |
+| FORM-15 | Create and review a treatment | T38 | Implemented | T38 browser gate 7 passed |
 | FORM-16 | Create and review a treatment | T15 | Implemented | T15: 9 tests passed |
 | FORM-17 | Create and review a treatment | T18 | Implemented | T18: 3 tests passed |
 | DOSE-01 | Register and correct a dose | T20 | Implemented | T20: 8 tests passed |
