@@ -52,7 +52,7 @@ export default function TreatmentWizard({ refresh, onSignOut }: { refresh: () =>
         <ol aria-label="Etapas do cadastro" className="flex flex-wrap gap-3 border-b border-[var(--border-default)] pb-4">
           {steps.map((name, index) => <li key={name} aria-current={index === step ? 'step' : undefined} className={index === step ? 'font-semibold text-[var(--action-primary)]' : 'text-[var(--text-muted)]'}>{name}</li>)}
         </ol>
-        <div ref={stageRef} tabIndex={-1} aria-label={`Etapa atual: ${steps[step]}`} className="min-w-0 rounded-[var(--radius-surface)] bg-[var(--surface-raised)] p-4 sm:p-6">
+        <div key={step} ref={stageRef} tabIndex={-1} aria-label={`Etapa atual: ${steps[step]}`} className="wux-stage min-w-0 rounded-[var(--radius-surface)] bg-[var(--surface-raised)] p-4 sm:p-6">
           <form noValidate onSubmit={advance} className="min-w-0 space-y-6">
             {Object.keys(errors).length > 0 && <RequestFeedback message={`Revise ${Object.keys(errors).length} campo(s) indicado(s) para continuar.`} />}
             {step === 0 ? <MedicationStep errors={errors} /> : step === 1 ? <TreatmentStep errors={errors} /> : <TreatmentReview />}

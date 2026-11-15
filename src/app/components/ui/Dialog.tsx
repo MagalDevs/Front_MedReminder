@@ -58,7 +58,7 @@ export default function Dialog({ open, onClose, title, description, children, in
   return createPortal(<dialog ref={ref} tabIndex={-1} aria-modal="true" aria-labelledby={titleId}
     aria-describedby={description ? descriptionId : undefined} onKeyDown={onKeyDown}
     onCancel={event => { event.preventDefault(); onClose(); }}
-    className="fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-[var(--radius-surface)] border border-[var(--border-default)] bg-[var(--surface-raised)] p-4 text-[var(--text-primary)] backdrop:bg-black/40 sm:p-6">
+    className="wux-dialog fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-[var(--radius-surface)] border border-[var(--border-default)] bg-[var(--surface-raised)] p-4 text-[var(--text-primary)] backdrop:bg-black/40 sm:p-6">
     <div className="mb-4 flex items-start justify-between gap-4">
       <h2 id={titleId} className="min-w-0 break-words text-xl font-semibold">{title}</h2>
       <Button variant="secondary" aria-label={`Fechar ${title}`} onClick={onClose}>Fechar</Button>

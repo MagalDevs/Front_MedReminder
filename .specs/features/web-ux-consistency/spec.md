@@ -447,7 +447,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | SYSTEM-01 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_01 |
 | SYSTEM-02 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_02 |
 | SYSTEM-03 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_03 |
-| SYSTEM-04 | Visual system | T46 | Tasks | In Tasks |
+| SYSTEM-04 | Visual system | T46 | Implemented | T46: 3 nonfunctional cases; WUX_SYSTEM_04 |
 | SYSTEM-05 | Visual system | T3 | Implemented | WUX_SYSTEM_05, unit gate 2 passed |
 | SYSTEM-06 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_06 |
 | SYSTEM-07 | Visual system | T47 | Tasks | In Tasks |
@@ -461,7 +461,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCESS-06 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_06 |
 | ACCESS-07 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_07 |
 | ACCESS-08 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_08 |
-| ACCESS-09 | Accessibility | T46 | Tasks | In Tasks |
+| ACCESS-09 | Accessibility | T46 | Implemented | T46: 3 nonfunctional cases; WUX_ACCESS_09 |
 | ACCESS-10 | Accessibility | T4 | Implemented | WUX_ACCESS_10, integration gate 3 passed |
 | STATE-01 | Recovery and interruptions | T5 | Implemented | WUX_STATE_01, integration gate 5 passed |
 | STATE-02 | Recovery and interruptions | T5 | Implemented | WUX_STATE_02, integration gate 5 passed |

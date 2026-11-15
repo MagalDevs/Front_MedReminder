@@ -120,7 +120,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T44: Disponibilizar edição pelo ID
 - [x] T45: Fechar responsividade e acessibilidade entre rotas
-- [ ] T46: Uniformizar movimento por intenção
+- [x] T46: Uniformizar movimento por intenção
 - [ ] T47: Publicar contrato visual do web
 
 ## Task Breakdown
@@ -1106,10 +1106,14 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas SYSTEM-04, ACCESS-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T46 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/globals.css funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas SYSTEM-04, ACCESS-09 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T46 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Execution**: 2026-11-15. Assumptions: actions and announcements are synchronous, native closed dialogs leave AX immediately, no loops or new dependency. Files: globals.css, Dialog, RequestFeedback, TreatmentWizard/RegistrationScreen stage hooks, Logo container support, tests/nonfunctional/web-ux-t46.spec.ts, captures and status documents. Read both locked transition skills completely and the modal, page-side-by-side, status-swap, soft-swap and toast recipes. Adapted only the pertinent entrance/tokens; no retained outgoing surface or timed content swap because native close/announcements must stay immediate.
+
+**Verified**: final fresh-build Chrome gate T45+T46 passed 14/14 (11+3), port 3102/config wrapper/workers1/retries0. Effective root 200% asserts body and fields 32px, doubled heading sizes, room for native date text plus icon, reflow and hit testing on all ten routes at 320px. Reduced motion asserts zero durations, visible controls, immediate menu Escape/focus return and success. Stage gestures test both preferences and retained input. 12 affected T38/T42 route cases passed; 19 affected integration cases passed including all four registration deadline/late/unmount cases. Final types/lint0 passed. Inspection found and fixed Logo overflow, spacing growth and transient disabled-button contrast; all original assertions retained. React checklist: controlled fields survive keyed stages, no hook order/identity/request semantics changed, direct imports and native focus retained. No SPEC_DEVIATION.
 
 ### T47: Publicar contrato visual do web
 
@@ -1327,7 +1331,7 @@ Proof: run nonfunctional | WUX_SYSTEM_02
 Proof: run nonfunctional | WUX_SYSTEM_03
 
 **C65** - WHEN a mesma ação semântica aparece em telas diferentes THEN the web client SHALL apresentar o mesmo componente de botão e os mesmos estados default, hover, focus, disabled e loading. (SYSTEM-04, AC 4; T46).
-Proof: run nonfunctional | ✓ WUX_SYSTEM_04
+Proof: run nonfunctional | WUX_SYSTEM_04
 
 **C66** - WHEN um campo tem erro THEN the web client SHALL apresentar mensagem textual associada sem depender somente de cor ou placeholder. (SYSTEM-05, AC 5; T3).
 Proof: run coverage | WUX_SYSTEM_05 associates a visible textual error with the labeled field and preserves its entered value
@@ -1369,7 +1373,7 @@ Proof: run nonfunctional | WUX_ACCESS_07
 Proof: run nonfunctional | WUX_ACCESS_08
 
 **C79** - WHEN a pessoa amplia texto a 200% ou utiliza preferência de movimento reduzido THEN the web client SHALL preservar acesso ao conteúdo e às ações sem depender de animação. (ACCESS-09, AC 9; T46).
-Proof: run nonfunctional | ✓ WUX_ACCESS_09
+Proof: run nonfunctional | WUX_ACCESS_09
 
 **C80** - WHILE um diálogo ou menu modal está aberto the web client SHALL manter o foco em seus controles, permitindo encerramento por Escape sem confirmar uma ação destrutiva. (ACCESS-10, AC 10; T4).
 Proof: run coverage | WUX_ACCESS_10 contains Tab and Shift+Tab and Escape cancels without confirming a destructive action

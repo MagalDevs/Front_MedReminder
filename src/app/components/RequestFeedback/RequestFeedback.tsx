@@ -56,7 +56,7 @@ export default function RequestFeedback({ message, context, kind = 'error', load
   }
 
   return (
-    <div className={`mb-4 rounded-[var(--radius-control)] border p-3 ${colors}`}>
+    <div className={`wux-feedback mb-4 rounded-[var(--radius-control)] border p-3 ${colors}`}>
       <p role={kind === 'error' || kind === 'warning' ? 'alert' : 'status'}>
         {context ? `${context}: ` : ''}{message}
       </p>

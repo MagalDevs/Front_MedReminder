@@ -9,8 +9,8 @@ interface LogoProps {
 export default function Logo({ width = 160, height = 160, heading = true }: LogoProps) {
   const Name = heading ? 'h1' : 'span';
   return (
-    <div className="flex flex-col items-center">
-      <div className="w-40 h-40 relative mb-2 flex items-center justify-center">
+    <div className="flex min-w-0 max-w-full flex-col items-center">
+      <div className="relative mb-2 flex aspect-square w-40 max-w-full items-center justify-center">
         <Image
           src="/assets/LogoMed-removebg-preview.png"
           alt="MedReminder Logo"
