@@ -385,7 +385,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | --- | --- | --- | --- | --- |
 | NAV-01 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-02 | Navigate the daily routine | T6 | Implemented | WUX_NAV_02, integration gate 3 passed |
-| NAV-03 | Navigate the daily routine | T35 | Tasks | In Tasks |
+| NAV-03 | Navigate the daily routine | T35 | Implemented | WUX_NAV_03; T35 browser gate 3 passed |
 | NAV-04 | Navigate the daily routine | T41 | Tasks | In Tasks |
 | NAV-05 | Navigate the daily routine | T43 | Tasks | In Tasks |
 | NAV-06 | Navigate the daily routine | T38 | Tasks | In Tasks |

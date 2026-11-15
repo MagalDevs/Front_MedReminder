@@ -106,7 +106,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 6: Existing route migration
 
-- [ ] T35: Conectar página inicial à nova entrada
+- [x] T35: Conectar página inicial à nova entrada
 - [ ] T36: Disponibilizar rota Hoje
 - [ ] T37: Conectar rota Medicamentos
 - [ ] T38: Conectar cadastro de medicamento
@@ -869,10 +869,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T35 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas NAV-03 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T35 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate with playwright.web-ux.config.ts: 3 passed, 0 failed. NAV-03 literal purpose/order, actual Create account/Enter navigation, catalog selection and unavailable/manual outcome asserted. Only locator ambiguity with Next route announcer corrected; no assertion weakened. Fresh build passed outside sandbox after EPERM. No product deviation.
 
 ### T36: Disponibilizar rota Hoje
 
@@ -1115,7 +1117,7 @@ Proof: run functional | ✓ WUX_NAV_01
 Proof: run coverage | WUX_NAV_02 selects each destination and renders its named screen with accessible current state
 
 **C3** - WHEN um visitante abre a página inicial THEN the web client SHALL apresentar o propósito “Organize seus medicamentos e acompanhe os horários das doses.” antes da ação principal “Criar conta”. (NAV-03, AC 3; T35).
-Proof: run functional | ✓ WUX_NAV_03
+Proof: run functional | WUX_NAV_03 public purpose precedes account creation and both destinations work
 
 **C4** - WHEN um visitante usa Entrar THEN the web client SHALL abrir o login preservando o destino interno previamente solicitado. (NAV-04, AC 4; T41).
 Proof: run functional | ✓ WUX_NAV_04
@@ -1664,6 +1666,15 @@ Cada tarefa nomeia um único arquivo/componente/módulo de produção. Seu teste
 
 Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As fases são unidades inteiras; não são divididas entre workers. Em 2026-11-14, o usuário autorizou: "execução em lotes sequenciais com subagentes". Lotes: B1=T1–T6; B2=T7–T13; B3=T14–T20; B4=T21–T27; B5=T28–T34; B6=T35–T43; B7=T44–T47. Cada lote só começa após a conclusão verificada do anterior.
 
+## Final Review Notes
+
+- T45 deve verificar a marca e os assets existentes nas telas renderizadas; AppShell usa wordmark textual. Preservar o logotipo e Kantumruy conforme a spec, sem adicionar decoração promocional.
+- T45 deve comprovar ampliação efetiva do texto a 200%, reflow e acesso aos controles. Alterar somente font-size de html não amplia texto fixado em px. As verificações devem afirmar o tamanho calculado e ausência de corte/overflow, além dos viewports e movimento reduzido definidos na spec.
+- T47 deve reconciliar metadados temporais antigos de spec/design/context, como implementação não iniciada ou restrição documental da etapa original, com as aprovações posteriores. Não alterar critérios aprovados por esse ajuste de estado.
+- Conferir propagação de falhas na linha Build final: nenhum build vermelho pode ser mascarado pelo sucesso de um comando posterior. Preservar todas as verificações.
+- Existem 44 arquivos de skills/lock preexistentes staged. Não limpar, ocultar nem incluir esses arquivos para satisfazer clean-tree. Se o gate exigir árvore limpa, verificar o HEAD comprometido em worktree isolada e registrar esse limite honestamente. Fingerprint do índice desses caminhos no despacho B6, SHA-256 dos registros git ls-files --stage unidos por LF: 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8.
+- Testes funcionais legados ainda esperam formulário monolítico, botão Salvar lembrete e capturas anteriores. As autorizações específicas em context.md cobrem T24, alarme e URL paginada; não autorizam enfraquecer testes nem migrar todas as asserções antigas sem resolver conflitos concretos.
+
 ## Final Verification Protocol
 
 1. Antes de T1, executar validate_tasks.py --execute; exige aprovações distintas de spec e Tasks e Build verde. Não registrar baseline como verde sem execução.
@@ -1677,7 +1688,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 ## Handoff
 
 **Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; T35–T47 permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 e correção autorizada em 1b7e1bc, 39 testes novos + 27 regressões afetadas; todos os lotes com Build/tipos/lint verdes. B5 /root/batch_05, T28–T34, HEAD 1b7e1bc, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc, 39 testes novos + 27 regressões. B5 /root/batch_05 returned, T28–T34 e paginação adicional em 981ae3a, 38 testes novos, gate final 89/89 e Build/tipos/lint verdes. B6 /root/batch_06, T35–T43, HEAD 981ae3a, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
 

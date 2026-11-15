@@ -11,7 +11,7 @@ export default function HomeScreen() {
     <Logo width={180} heading={false} />
     <section className="space-y-6">
       <h1 className="max-w-xl text-3xl font-semibold">Medicamentos e doses em um só lugar</h1>
-      <p className="max-w-prose text-lg text-[var(--text-muted)]">Organize seus medicamentos, consulte os horários cadastrados e acompanhe os registros de doses.</p>
+      <p className="max-w-prose text-lg text-[var(--text-muted)]">Organize seus medicamentos e acompanhe os horários das doses.</p>
       <div className="flex flex-wrap gap-4">
         <Link href="/cadastro" className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-[var(--action-primary)] bg-[var(--action-primary)] px-4 py-2 font-semibold text-[var(--action-primary-text)] hover:bg-[var(--action-primary-hover)]">Criar conta</Link>
         <Link href="/login" className="inline-flex min-h-11 items-center px-4 py-2 font-semibold text-[var(--action-primary)] underline underline-offset-4">Entrar</Link>
