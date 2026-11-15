@@ -13,18 +13,14 @@
  * - Relógio fixo em 2026-11-04T12:00:00-03:00 (page.clock.setFixedTime) e fuso
  *   America/Sao_Paulo. O CSV de medicamentos é o catálogo real servido pelo app.
  * - Dados sintéticos (ana@example.test, token-sintetico, medicamentos "Teste").
- * - Não há fluxo frontend de edição de medicamento nesta baseline: nenhum teste
- *   de edição foi escrito. O botão "Editar medicamento" só navega.
- *
- * Defeitos conhecidos ficam como test.fail() com "[BLOQUEADO ...]" no título:
- * o teste descreve o comportamento CORRETO e passa enquanto o defeito existir;
- * se for corrigido, o test.fail() reprova e deve ser convertido em teste normal.
+ * - A edição atual é coberta por web-ux-t44.spec.ts. Títulos históricos
+ *   permanecem como identificadores dos cenários, sem expected failures.
  *
  * Snapshots (FN-06): tests/functional/fluxo.spec.ts-snapshots/. As baselines
  * dependem de plataforma (sufixo -win32/-linux) e fonte; gere-as por plataforma
  * e nunca regenere para esconder regressão visual.
  */
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { PRODUCTION_API_ORIGIN, expect, test as guarded } from "../support/api-guard";
 
 const NOW = new Date("2026-11-04T12:00:00-03:00");
@@ -1064,13 +1060,15 @@ for (const viewport of VIEWPORTS) {
   test.describe(`FN-06 TEST-03 snapshots ${viewport.width}px`, () => {
     test.use({ viewport });
 
-    async function capturar(page: Page, nome: string, mask: Locator[] = []): Promise<void> {
-      await page.mouse.move(0, 0); // evita estado de hover
+    async function capturar(page: Page, nome: string): Promise<void> {
+      await page.mouse.move(0, 0);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: `.specs/features/web-ux-consistency/captures/r3-${nome}-${viewport.width}.png`, fullPage: true, animations: "disabled" });
+      const width = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
+      expect(width.document).toBeLessThanOrEqual(width.viewport);
       await expect(page).toHaveScreenshot(`${nome}-${viewport.width}.png`, {
         fullPage: true,
         animations: "disabled",
-        mask,
-        stylePath: nome === "novo-medicamento" ? "tests/functional/native-controls.css" : undefined,
       });
     }
 
@@ -1082,34 +1080,47 @@ for (const viewport of VIEWPORTS) {
 
     test(`FN-06 TEST-03 home com busca e resultados ${viewport.width}px`, async ({ page }) => {
       await page.goto("/");
-      const campo = page.getByPlaceholder("Buscar medicamento...");
+      const campo = page.getByRole("combobox", { name: "Buscar no catálogo" });
       await campo.fill("funed lor");
       await expect(page.getByText("FUNED LORATADINA", { exact: true })).toBeVisible();
       await capturar(page, "home-busca");
     });
 
-    test(`FN-06 TEST-03 novo-medicamento ${viewport.width}px`, async ({ page }) => {
+    test(`FN-06 TEST-03 novo-medicamento ${viewport.width}px`, async ({ page, api }) => {
+      usarListaVazia(api);
+      await seedSession(page);
       await page.goto(URL_NOVO_TRATAMENTO);
       await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
-      await expect(page.getByPlaceholder("Dipirona")).toHaveValue("FUNED LORATADINA");
-      const datas = page.locator('input[type="date"]');
-      const hora = page.locator('input[type="time"]');
-      await expect(datas).toHaveCount(2);
-      await expect(datas.nth(0)).toHaveValue("");
-      await expect(datas.nth(1)).toHaveValue("2026-11-04");
-      await expect(hora).toHaveCount(1);
-      await expect(hora).toHaveValue("10:00");
-      // Windows runners may render native date/time controls in a different
-      // regional format even with browser locale set. Their canonical values
-      // remain asserted above; mask only their platform-specific presentation.
-      await capturar(page, "novo-medicamento", [datas, hora]);
+      for (const label of ["Classificação", "Quantidade em estoque", "Unidade do estoque", "Validade", "URL da foto", "Motivo", "Observação"]) {
+        await expect(page.getByLabel(label, { exact: true })).toHaveValue("");
+      }
+      await expect(page.getByRole("radio")).toHaveCount(10);
+      await capturar(page, "novo-medicamento");
+      await preencherMedicamento(page);
+      await page.getByRole("button", { name: "Continuar", exact: true }).click();
+      await page.getByLabel("Primeira dose", { exact: true }).fill("2026-11-04T08:00");
+      await page.getByLabel("Quantidade por dose", { exact: true }).fill("1,5");
+      await page.getByLabel("Unidade por dose", { exact: true }).fill("mg");
+      await page.getByLabel("Intervalo em horas", { exact: true }).fill("8");
+      await page.getByLabel("Duração", { exact: true }).fill("1");
+      await expect(page.getByLabel("Unidade da duração", { exact: true })).toHaveValue("days");
+      await capturar(page, "novo-medicamento-tratamento");
+      await page.getByRole("button", { name: "Continuar", exact: true }).click();
+      await expect(page.getByRole("region", { name: "Revisão", exact: true })).toContainText("1,5 mg");
+      await page.getByRole("button", { name: "Ver todos os horários" }).click();
+      const times = page.getByRole("list", { name: "Horários previstos" }).locator("time");
+      await expect(times).toHaveCount(3);
+      expect(await times.evaluateAll(items => items.map(item => item.getAttribute("datetime")))).toEqual(["2026-11-04T11:00:00.000Z", "2026-11-04T19:00:00.000Z", "2026-11-05T03:00:00.000Z"]);
+      await expect(page.getByRole("button", { name: "Salvar tratamento", exact: true })).toBeEnabled();
+      await capturar(page, "novo-medicamento-revisao");
     });
 
     test(`FN-06 TEST-03 meus-lembretes ${viewport.width}px`, async ({ page, api }) => {
       usarAgenda(api, criarAgenda());
       await seedSession(page);
       await page.goto("/meus-lembretes");
-      await expect(page.locator("h3").filter({ hasText: "Teste" })).toHaveCount(4);
+      await expect(page.locator("h3").filter({ hasText: "Teste" })).toHaveCount(5);
+      expect(await page.locator("[data-dose-id]").evaluateAll(rows => rows.map(row => row.getAttribute("data-dose-id")))).toEqual(["105", "101", "102", "103", "104"]);
       await capturar(page, "meus-lembretes");
     });
   });

@@ -463,3 +463,32 @@ Dose/alarm gates on final sources: browser 9/9 (including all eight FN-04 rows a
 Gate: 9/9 original scenarios passed with fresh Build, port3102/workers1/retries0. Article/heading and named buttons replace legacy CSS/title selectors. Every destructive gesture opens the nominal dialog and verifies its medicine/dose consequence before confirmation; cancel still sends zero DELETE and retains three items. Exact deletion path/body/Bearer, item ordering, failure matrix and storage cleanup remain. Failures assert the complete public message inside the dialog, where its title supplies medication context. The two-read failure case explicitly fails dose/me on the agenda, which now derives medicine names from doses instead of redundantly reading remedio/me. No product edits.
 
 R3 backend-history.spec.ts: 1/1 original BEAPI-09 scenario passed with fresh Build. Fixed synthetic clock and explicit 1 comp make the original complete dose fixture truthful under DAY-08; no name/time is invented. Existing authenticated-read assertions, medication filter, registered filter, filtered-empty, reload and no-remedio request remain, with approved Estado/Registrada/Atrasada terminology. No product edits.
+
+### R3 visual baseline review
+
+Full fluxo gate: 52/52 original scenarios passed (55.5s including fresh production Build), 0 failed/skipped. Expanded inventory comparison: 129 original and 129 current browser names, missing=[], added=[]. No screenshot tolerance was changed, no viewport removed and no mask added. Removed previous native date/time masks and screenshot-only width normalization: date/time pixels now participate in regression comparison along with their canonical value assertions. Final screenshot assertions are normal hard assertions.
+
+Directly inspected all twelve original PNGs and all eighteen native candidate captures one by one. Each original viewport remains 360x800, 768x1024 or 1440x900; full-page height may grow naturally. The old 360 wizard/agenda PNGs actually overflowed to 585/578 pixels; the new documents remain at their viewport widths, with no resize or overflow hiding. Current logo/Kantumruy/teal/pink identity is preserved. Medication fields, native dates, ten named colors, notes, all treatment fields, decimal 1,5, full review, three literal schedule times and save/edit actions are visible. Agenda retains the legacy URL and all five IDs in exact time order; Today totals still count four current-day rows. New treatment/review references expand the previous monolithic form coverage.
+
+Only after that inspection were the twelve existing references replaced and six new stage references promoted by copying exact native PNG bytes. No --update-snapshots was used. Final 52-case run verified all eighteen image comparisons. Candidates below are committed beside the visual review; corresponding goldens use the same base name without r3- and append -functional-win32.png in tests/functional/fluxo.spec.ts-snapshots/.
+
+| Inspected native capture | PNG width x height | SHA-256 |
+| --- | --- | --- |
+| captures/r3-login-360.png | 360 x 804 | d6546282c22395c2acce50297eb2acafb2ae142e6977d79aa86db33af9624104 |
+| captures/r3-home-busca-360.png | 360 x 867 | 526ca6f88a41e9ba63f3ba4c169c8d159b1554492c3417eb7afb1d3a1ac58018 |
+| captures/r3-novo-medicamento-360.png | 360 x 1992 | 519f3003dc559ceb44ac5b68a57ebef00dc69dba9c20d9e353ebc53203130710 |
+| captures/r3-novo-medicamento-tratamento-360.png | 360 x 1342 | 9a0eb6f04bf247d5146080b099f6bc36c3578e406d0d002b678ab521ef28d021 |
+| captures/r3-novo-medicamento-revisao-360.png | 360 x 1886 | e9871460eaa383d0b8ef09a0b8c455aac077e4f5f0474dd6915c5058a44e014b |
+| captures/r3-meus-lembretes-360.png | 360 x 1624 | 9044501b7bbf201b79621277b820e0c2881fab8753373bdba86720a7bd3d8c59 |
+| captures/r3-login-768.png | 768 x 1024 | ca2b0674e1a62eb620d506f7a279cf5ce37149b055bb449db38c0b9b285bd6e1 |
+| captures/r3-home-busca-768.png | 768 x 1024 | 8ccbe4f1bf0c736d95499fd034f52fbfaab303c883de011344b77e156642d597 |
+| captures/r3-novo-medicamento-768.png | 768 x 1504 | 492d7d996e490d37ffb7c1b9d1342c438c63625e79c21d8a4e0575f95433c00c |
+| captures/r3-novo-medicamento-tratamento-768.png | 768 x 1024 | db338997cf8df69bb307744a1489d73c86ff34df80b391b5f531064c69e7448d |
+| captures/r3-novo-medicamento-revisao-768.png | 768 x 1270 | 9e32e5af6f8ab7740692b47f112070c4a15a67299dd7eec1f812a31c76ad8fe2 |
+| captures/r3-meus-lembretes-768.png | 768 x 1304 | d15280ee2b8efbe2b24b75fa440a38356b4918ff6e98addcd27daf5b767e2954 |
+| captures/r3-login-1440.png | 1440 x 900 | 94a34120958e55730dcdae4f6e9c31cd1b2106edf5517466ba93c8083f5e1ff3 |
+| captures/r3-home-busca-1440.png | 1440 x 900 | 278f8bfec860bef51a7006e98f368aa47deaf339a953107256240753c0a25869 |
+| captures/r3-novo-medicamento-1440.png | 1440 x 1432 | b7737302fee09a4eb68eaa54679f7940f9e43383150cd73544a5b4ed45f304dc |
+| captures/r3-novo-medicamento-tratamento-1440.png | 1440 x 930 | 0db6e0415db3b9a90290739c3cda16568a21277b2210de4b71de7740ec51199c |
+| captures/r3-novo-medicamento-revisao-1440.png | 1440 x 1246 | 71a3a25c5ea8d22acda6601c8e76e6d0af6ecc7d8331b27347f0c404d884984e |
+| captures/r3-meus-lembretes-1440.png | 1440 x 1304 | 86a226e51376ab644db73e435dc72aed8fe94d4cdd5ffd4ca2886fce24b837b2 |
