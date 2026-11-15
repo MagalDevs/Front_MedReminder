@@ -1,6 +1,6 @@
 import type { Page, TestInfo } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { cpus, totalmem, platform, release } from 'node:os';
 import { execFileSync } from 'node:child_process';
 export { test, expect } from '../support/api-guard';
@@ -66,7 +66,9 @@ export async function evidence(info: TestInfo, name: string, result: unknown) {
     cpu: cpus()[0]?.model, memoryBytes: totalmem(), timezone: 'America/Sao_Paulo',
     boundary: 'Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim', result };
   const serialized = JSON.stringify(record, null, 2) + '\n';
-  const directory = join(process.cwd(), 'docs/evidencias/2026-11-04/nonfunctional');
+  const directory = process.env.NF_EVIDENCE_DIR
+    ? resolve(process.env.NF_EVIDENCE_DIR)
+    : join(process.cwd(), 'docs/evidencias/2026-11-04/nonfunctional');
   mkdirSync(directory, { recursive: true });
   writeFileSync(join(directory, `${fileName}.json`), serialized);
   await info.attach(name, { body: serialized, contentType: 'application/json' });

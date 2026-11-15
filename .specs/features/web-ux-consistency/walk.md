@@ -31,6 +31,12 @@ Run the functional project with playwright.web-ux.config.ts and the WUX_NAV_03, 
 
 Real E2E remains unexecuted because the required isolated API is absent. A live assistive-reader session was not performed. Automated naming, focus and contrast checks do not constitute WCAG certification.
 
+## Aggregate Proof Preparation
+
+The root verified an optional NF_EVIDENCE_DIR output directory with one unchanged 360px assessment (1/1), a fresh production build and zero-warning lint of the logger. The default output remains compatible. Aggregate proof runs will place new JSON evidence outside the checked source tree, preserving the historical reports.
+
+The 44 preexisting staged skill/lock files remain outside implementation commits. Final proofs will run at the committed HEAD in an isolated clean worktree; this preserves the user's index without hiding or discarding its changes.
+
 ## Font-audit stabilization follow-up
 
 On 2026-11-15, the selective correction batch reproduced the harness race against product HEAD b71aa43: the new delayed-session regression observed the public visual helper returning ready while usuario/me was still held. The regression failed before the fix. The helper now waits for the restoration feedback to leave, for Profile Nome to contain the synthetic profile, for catalog loading to finish on Home/wizard, and for the route data already required by the fixture. Font readiness is awaited after these screen conditions.
