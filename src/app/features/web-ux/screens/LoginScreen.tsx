@@ -18,6 +18,8 @@ export default function LoginScreen({ returnTo }: { returnTo?: string | null }) 
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [visible, setVisible] = useState(false);
   const [error, setError] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [notBefore, setNotBefore] = useState(0);
   const [notice, setNotice] = useState<NavigationFeedback | null>(null); const pending = useRef<AbortController | null>(null);
+  const sessionGeneration = useRef(auth.identityGeneration);
+  useEffect(() => { sessionGeneration.current = auth.identityGeneration; }, [auth.identityGeneration]);
   const remaining = useRetryDelay(notBefore);
   const completeSignOutNavigation = auth.completeSignOutNavigation;
   useEffect(() => { completeSignOutNavigation(); }, [completeSignOutNavigation]);
@@ -26,18 +28,28 @@ export default function LoginScreen({ returnTo }: { returnTo?: string | null }) 
   async function submit(event: React.FormEvent) {
     event.preventDefault(); if (pending.current || remaining) return;
     const controller = new AbortController(); pending.current = controller;
-    const active = () => pending.current === controller && !controller.signal.aborted;
+    const previousToken = localStorage.getItem('access_token');
+    const previousGeneration = sessionGeneration.current;
+    const active = () => pending.current === controller && !controller.signal.aborted &&
+      localStorage.getItem('access_token') === previousToken && sessionGeneration.current === previousGeneration;
+    let loadingProfile = false;
     setBusy(true); setError(null); setNotice(null); clearNavigationFeedback();
     try {
       const response = await apiRequest<{ access_token: string }>('auth/login', { method: 'POST', requireAuth: false, signal: controller.signal, body: JSON.stringify({ email: email.trim(), senha: password }) });
       if (!active()) return;
       if (typeof response?.access_token !== 'string' || !response.access_token.trim()) throw new RequestContractError();
+      loadingProfile = true;
       const profile = await apiRequest<{ data: NonNullable<typeof auth.user> }>('usuario/me', { method: 'GET', requireAuth: false, signal: controller.signal, headers: { Authorization: `Bearer ${response.access_token}` } });
       if (!active()) return;
       if (!profile?.data?.id) throw new RequestContractError();
       const destination = auth.consumeReturnTarget(returnTo); auth.login(response.access_token, profile.data); setPassword(''); router.push(destination);
-    } catch (cause) { if (active()) { setError(requestErrorMessage(cause, 'login')); setNotBefore(cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : 0); } }
-    finally { if (active()) { pending.current = null; setBusy(false); } }
+    } catch (cause) { if (active()) {
+      if (loadingProfile && previousToken) auth.logout();
+      const message = requestErrorMessage(cause, loadingProfile ? 'operation' : 'login');
+      setError(loadingProfile ? `Não foi possível carregar seu perfil. Faça o login novamente. ${message ?? ''}`.trim() : message);
+      setNotBefore(cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : 0);
+    } }
+    finally { if (pending.current === controller && !controller.signal.aborted) { pending.current = null; setBusy(false); } }
   }
   return <main className="mx-auto w-full max-w-lg space-y-6 px-4 py-8 sm:py-12">
     <Link href="/" aria-label="MedReminder, página inicial" className="inline-flex min-h-11 items-center"><Logo width={140} heading={false} /></Link>

@@ -1763,3 +1763,5 @@ All 47 implementation tasks are locally implemented. This is not feature complet
 CardBusca migration complete: 23 original cases preserved, 2 spec-derived keyboard/manual cases added, gate 25/25. Remaining R1 catalog feedback and three login/session files in progress.
 
 R1 catalog feedback complete: 11/11 original cases, with manual-path gestures in existing failure matrix. Auth/login/session migrations remain.
+
+R1 auth complete: 9 existing + 2 late identity regressions, 11/11; real LoginScreen profile-failure regression fixed with token/generation guard. T29 3/3 unchanged, T41 selective browser 10/10 with fresh build, types/lint0 green. Login feedback/session migrations remain.

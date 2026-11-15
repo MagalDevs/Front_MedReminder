@@ -140,8 +140,15 @@ Observed 2026-11-15 at HEAD 24b8cc0: 75 selected/executed, 25 passed, 50 failed,
 | File | Baseline executed (pass/fail) | Migrated executed | Result | Commit |
 | --- | --- | --- | --- | --- |
 | tests/unit/CardBusca.test.tsx | 23 (0/23) | 25 | PASS; 23 preserved + ACCESS-02 and FORM-02 | f413988 |
-| tests/integration/cadastro-feedback-catalog.test.tsx | 11 (5/6) | 11 | PASS; all cases and manual failure gestures | current atomic commit; root resolves hash |
+| tests/integration/cadastro-feedback-catalog.test.tsx | 11 (5/6) | 11 | PASS; all cases and manual failure gestures | 33ecfa0 |
+| tests/integration/auth.test.tsx | 9 (7/2) | 11 | PASS; 9 preserved + 2 late identity cases | current atomic commit; root resolves hash |
 
 CardBusca gate: `npx vitest run tests/unit/CardBusca.test.tsx --reporter=verbose`, 25/25 on 2026-11-15. Only accessible selectors changed; all payload/timer/filter/duplicate assertions remain. No product change.
 
 Catalog feedback gate: `npx vitest run tests/integration/cadastro-feedback-catalog.test.tsx --reporter=verbose`, 11/11. Combobox selectors and FORM-17 manual gestures across all five existing failure parameters; original assertions retained.
+
+### R1 login product regression
+
+IT-02 reproduced a real regression after mock migration: profile failure retained a previous authenticated session and lost the contextual profile error. LoginScreen now clears that previous session only while token/generation still match the attempt. Anonymous failures remain anonymous without navigation, preserving T29. Late HTTP200/503 profile responses cannot overwrite or log out a newer identity; two new real-provider cases assert stored token/profile, rendered session and no navigation/alert. Login HTTP401 remains public and does not invalidate a prior session.
+
+Gate: auth 11/11 + unchanged T29 3/3; TypeScript and global lint0 pass. Sandbox build compiled but failed writing .next with EPERM. Authorized elevated T41 selective browser gate rebuilt the same production sources successfully and passed 10/10 on port 3102, workers=1/retries=0, controlled API. No R3 files or snapshots changed; port 3000 preserved.
