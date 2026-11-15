@@ -1,12 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { test, expect, setup, summary, evidence } from './support';
-const TARGET = process.env.NF_TARGET_URL || 'http://localhost:3001';
+const targetUrl = (baseURL: string | undefined) => {
+  const target = process.env.NF_TARGET_URL || baseURL;
+  if (!target) throw new Error('Nonfunctional target requires the configured Playwright baseURL');
+  return target;
+};
 
 test('NF-02 NF-WEB-02 ten fixed catalog queries before/after in three browser rounds', async ({ page }, info) => {
+  const TARGET = targetUrl(info.project.use.baseURL);
   await setup(page);
   await page.goto(TARGET);
-  await expect(page.getByPlaceholder('Buscar medicamento...')).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Buscar no catálogo' })).toBeVisible();
   const csv = readFileSync('public/assets/DADOS_ABERTOS_MEDICAMENTOS_LIMPO.csv', 'utf8');
   await page.addScriptTag({ path: 'node_modules/papaparse/papaparse.min.js' });
   const catalog = await page.evaluate(async () => {
@@ -65,6 +70,7 @@ test('NF-02 NF-WEB-02 ten fixed catalog queries before/after in three browser ro
 
 test('NF-02 NF-WEB-03 production routes, five cold and warm samples', async ({ browser }, info) => {
   test.setTimeout(180_000);
+  const TARGET = targetUrl(info.project.use.baseURL);
   const routes = [];
   for (const route of ['/', '/login', '/novo-medicamento', '/meus-lembretes']) {
     const cold: number[] = [], warm: number[] = [], resources = [];

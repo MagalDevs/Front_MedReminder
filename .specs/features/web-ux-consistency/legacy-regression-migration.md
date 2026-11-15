@@ -492,3 +492,27 @@ Only after that inspection were the twelve existing references replaced and six 
 | captures/r3-novo-medicamento-tratamento-1440.png | 1440 x 930 | 0db6e0415db3b9a90290739c3cda16568a21277b2210de4b71de7740ec51199c |
 | captures/r3-novo-medicamento-revisao-1440.png | 1440 x 1246 | 71a3a25c5ea8d22acda6601c8e76e6d0af6ecc7d8331b27347f0c404d884984e |
 | captures/r3-meus-lembretes-1440.png | 1440 x 1304 | 86a226e51376ab644db73e435dc72aed8fe94d4cdd5ffd4ca2886fce24b837b2 |
+
+### R3 E2E inventory before selector edits
+
+Collected 11 existing real-E2E scenarios before editing. E2E_API_URL is absent in this session; isolated API/build/commit/SQLite metadata were not invented. Collection is not execution.
+
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > cadastro A/B e login respeitam envelopes das fixtures
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > perfil PATCH retorna data, CEP vazio valida400 e senha tem resultado próprio
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > tratamento atômico e replay mesma chave não duplicam registros
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > token ausente/inválido e DTO de tratamento inválido são rejeitados sem escrita
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > senha fraca é rejeitada pelo backend e credencial anterior continua válida
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > mesma chave com outro conteúdo retorna409 sem nova dose
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > conta B não lista nem altera a dose da conta A
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > confirmação persiste após consulta e recarga do histórico no navegador
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > E2E-01 E2E-05 login e perfil pela interface persistem após reload e logout
+- e2e\backend-contract.spec.ts > BEAPI-12 contratos reais e persistência isolada > registra revisão e limite de comparação das fixtures sem dados pessoais
+- e2e\precondicao.spec.ts > pré-condição E2E: API isolada configurada
+
+### R3 nonfunctional migration
+
+Four legacy files retain all 10 collected scenarios (accessibility3, performance2, scale1, security4). First migrated gate passed 10/10 with fresh production Build in41.8s, workers1/retries0 on3102. Accessibility preserves every original route/viewport/Tab sample and adds the two missing wizard stages with real field/color/Continue/review gestures; every audited control now additionally asserts an accessible name and no horizontal overflow. The measurements remain DOM/keyboard observations, without screen-reader certification.
+
+Performance and scale use the configured Playwright baseURL instead of a stale hardcoded3001. NF_TARGET_URL remains an explicit historical-build override. Catalog retains10queries x3rounds,5parses,CSVbytes/hash,equivalence,warmup20; routes retain4routes x5cold/5warm and exact same-origin resource checks. Scale uses History's current Estado filter so the original10/100/1000 rows and exact half-registered counts are still asserted,5runs each, with page errors/network guard intact. Security retains all console secrecy/storage/401/logout comparisons, updates default Hoje and Perfil navigation, and asserts the sanitized full500 message rather than arbitrary body text. Profile storage presence is now also asserted. No target threshold or coverage floor was reduced.
+
+Artifacts are the10 r3-*.json records in docs/evidencias/2026-11-04/nonfunctional/, the existing legacy output directory; measuredAt inside each record identifies this run. They record controlled local Chrome measurements, not historical comparisons, field performance, real backend or cloud capacity.

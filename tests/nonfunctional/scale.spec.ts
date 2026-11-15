@@ -11,11 +11,11 @@ test('NF-04 NF-SCALE-01 local list 10/100/1000 records, five runs per volume', a
       page.on('pageerror', error => failures.push(error.message));
       const unexpected = await setup(page, volume, true, true);
       const start = performance.now();
-      await page.goto('http://localhost:3001/meus-lembretes');
+      await page.goto(new URL('/historico', info.project.use.baseURL).href);
       await expect(page.locator('h3').filter({ hasText: /^Medicamento NF / })).toHaveCount(volume);
       loading.push(performance.now() - start);
       const filterStart = performance.now();
-      await page.locator('select').nth(1).selectOption('true');
+      await page.getByLabel('Estado', { exact: true }).selectOption('registered');
       await expect(page.locator('h3').filter({ hasText: /^Medicamento NF / })).toHaveCount(volume / 2);
       filtering.push(performance.now() - filterStart);
       memory.push(await page.evaluate(() => (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ?? null));

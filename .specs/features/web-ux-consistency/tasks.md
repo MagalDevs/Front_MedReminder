@@ -1795,3 +1795,5 @@ R3 medication/deletion complete: 9/9 original browser scenarios, nominal dialog/
 R3 BEAPI-09 history complete: original scenario 1/1, current status/filter selectors and complete synthetic fixture, fresh Build. Snapshot review now in progress.
 
 R3 visual migration complete: 52/52 fluxo scenarios, all original names retained; 12 original images and 18 current candidates individually inspected. Original three viewports remain, wizard covers all three stages, 12 references updated +6 added, dates unmasked, no tolerance/resize. Current full browser inventory remains 129 names. NF/E2E compatibility and final affected gates remain.
+
+R3 legacy nonfunctional complete: 10/10 original cases across four files, all sample/volume/query counts preserved; accessibility also audits all three wizard stages and asserts names/overflow. Fresh Build on3102; controlled API only. E2E selector compatibility/final types/lint/inventory remain.

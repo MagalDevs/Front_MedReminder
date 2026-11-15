@@ -1,0 +1,19 @@
+{
+  "measuredAt": "2026-11-15T04:29:12.948Z",
+  "frontendCommit": "ff922c62c372ea8dc67a2dffb45860e281da0c80",
+  "measuredBuildCommit": "current working tree",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v24.21.0",
+  "browser": "chromium",
+  "browserVersion": "157.0.8103.51",
+  "os": "win32 10.0.26200",
+  "cpu": "Intel(R) Core(TM) Ultra 7 355",
+  "memoryBytes": 33688522752,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "arbitraryErrorBodyInConsole": false,
+    "passwordInConsole": false,
+    "displayedMessage": "Safe synthetic message"
+  }
+}

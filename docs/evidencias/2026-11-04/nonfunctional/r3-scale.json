@@ -1,0 +1,133 @@
+{
+  "measuredAt": "2026-11-15T04:29:12.140Z",
+  "frontendCommit": "ff922c62c372ea8dc67a2dffb45860e281da0c80",
+  "measuredBuildCommit": "current working tree",
+  "workingTree": "May contain integration changes; git diff identifies final revision",
+  "node": "v24.21.0",
+  "browser": "chromium",
+  "browserVersion": "157.0.8103.51",
+  "os": "win32 10.0.26200",
+  "cpu": "Intel(R) Core(TM) Ultra 7 355",
+  "memoryBytes": 33688522752,
+  "timezone": "America/Sao_Paulo",
+  "boundary": "Local Chromium, production Next build, intercepted synthetic API; no real backend or cloud capacity claim",
+  "result": {
+    "volumes": [
+      {
+        "volume": 10,
+        "renderedRecords": 10,
+        "loadingMs": {
+          "samples": [
+            195.6214,
+            198.39449999999852,
+            174.59029999999984,
+            200.05619999999908,
+            198.9298000000017
+          ],
+          "median": 198.39449999999852,
+          "p95NearestRank": 200.05619999999908,
+          "maximum": 200.05619999999908
+        },
+        "filteringMs": {
+          "samples": [
+            11.191900000001624,
+            13.011500000000524,
+            27.79360000000088,
+            13.85150000000067,
+            13.065999999998894
+          ],
+          "median": 13.065999999998894,
+          "p95NearestRank": 27.79360000000088,
+          "maximum": 27.79360000000088
+        },
+        "usedJSHeapBytes": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "pageErrors": [],
+        "cpuUtilization": "NOT MEASURED",
+        "renders": "DOM card count, not React render count"
+      },
+      {
+        "volume": 100,
+        "renderedRecords": 100,
+        "loadingMs": {
+          "samples": [
+            209.60180000000037,
+            206.8225999999995,
+            203.85039999999935,
+            213.74309999999969,
+            206.26729999999952
+          ],
+          "median": 206.8225999999995,
+          "p95NearestRank": 213.74309999999969,
+          "maximum": 213.74309999999969
+        },
+        "filteringMs": {
+          "samples": [
+            42.03810000000158,
+            37.54070000000138,
+            47.88980000000083,
+            35.35770000000048,
+            38.409200000001874
+          ],
+          "median": 38.409200000001874,
+          "p95NearestRank": 47.88980000000083,
+          "maximum": 47.88980000000083
+        },
+        "usedJSHeapBytes": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "pageErrors": [],
+        "cpuUtilization": "NOT MEASURED",
+        "renders": "DOM card count, not React render count"
+      },
+      {
+        "volume": 1000,
+        "renderedRecords": 1000,
+        "loadingMs": {
+          "samples": [
+            537.1625999999997,
+            558.2806000000019,
+            544.6023999999998,
+            544.9164999999994,
+            539.8814999999995
+          ],
+          "median": 544.6023999999998,
+          "p95NearestRank": 558.2806000000019,
+          "maximum": 558.2806000000019
+        },
+        "filteringMs": {
+          "samples": [
+            232.29219999999987,
+            241.83529999999882,
+            232.70590000000084,
+            233.68730000000141,
+            235.91229999999996
+          ],
+          "median": 233.68730000000141,
+          "p95NearestRank": 241.83529999999882,
+          "maximum": 241.83529999999882
+        },
+        "usedJSHeapBytes": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "pageErrors": [],
+        "cpuUtilization": "NOT MEASURED",
+        "renders": "DOM card count, not React render count"
+      }
+    ],
+    "limitations": "Single local browser; no API, database, multiuser concurrency, availability or cloud scale evidence"
+  }
+}
