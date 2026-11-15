@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fillRegistrationAccount, fillRegistrationPersonal, submitRegistration } from '../helpers/registration';
 import Cadastro from '@/app/cadastro/page';
 
 const router = vi.hoisted(() => ({ push: vi.fn() }));
@@ -24,22 +25,16 @@ function expectPrivateConsole() {
 }
 
 function fillAndSubmit(confirm = payload.senha) {
-  const { container } = render(<Cadastro />);
-  fireEvent.change(screen.getByPlaceholderText('Nome e sobrenome'), { target: { value: payload.nome } });
-  fireEvent.change(screen.getByPlaceholderText('exemplo@email.com'), { target: { value: payload.email } });
-  fireEvent.change(screen.getByPlaceholderText('000.000.000-00'), { target: { value: payload.cpf } });
-  fireEvent.change(screen.getByPlaceholderText('00000-000'), { target: { value: payload.cep } });
-  fireEvent.change(container.querySelector('input[type="date"]')!, { target: { value: payload.dataNasc } });
-  const passwords = screen.getAllByPlaceholderText('********');
-  fireEvent.change(passwords[0], { target: { value: payload.senha } });
-  fireEvent.change(passwords[1], { target: { value: confirm } });
-  fireEvent.click(screen.getByLabelText('Sou cuidador'));
-  fireEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
+  render(<Cadastro />);
+  fillRegistrationAccount(payload.email, payload.senha, confirm);
+  if (confirm !== payload.senha) return;
+  fillRegistrationPersonal(payload);
+  submitRegistration();
 }
 
 function expectRequest() {
   expect(fetch).toHaveBeenCalledExactlyOnceWith('http://cadastro-security.test.invalid/usuario', {
-    method: 'POST', headers: new Headers({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload),
+    method: 'POST', headers: new Headers({ 'Content-Type': 'application/json' }), body: JSON.stringify({ nome: payload.nome, email: payload.email, senha: payload.senha, cpf: payload.cpf, cep: payload.cep, dataNasc: payload.dataNasc, cuidador: payload.cuidador }),
     signal: expect.any(AbortSignal),
   });
 }
@@ -64,7 +59,8 @@ describe('IT-08 SEC-01 — privacidade do cadastro real', () => {
 
   it('IT-08 SEC-01 cadastro inválido mantém validação sem enviar nem expor sentinelas', () => {
     fillAndSubmit('confirmacao-divergente');
-    expect(screen.getByRole('alert')).toHaveTextContent('As senhas não coincidem');
+    expect(screen.getByText('As senhas não coincidem.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirmar senha')).toHaveAttribute('aria-invalid', 'true');
     expect(fetch).not.toHaveBeenCalled();
     expect(router.push).not.toHaveBeenCalled();
     expectPrivateConsole();

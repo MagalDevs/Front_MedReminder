@@ -1775,3 +1775,5 @@ R1 complete: session feedback 15/15 with only useSearchParams mock migration. Al
 Backend registration migrated: 8/8 original cases, exact DTO/status/security assertions preserved with approved two-step gestures. Registration feedback, privacy and treatment route remain.
 
 R2 feedback registration complete: 32/32 original cases; exact deadline, body pending, abort, concurrent gestures, late/abandon and no automatic retry retained. Privacy and treatment route remain.
+
+R2 privacy registration complete: 5/5 originals, payload/private-console/storage checks retained. Treatment route and final R2 gates remain.
