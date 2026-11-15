@@ -267,11 +267,13 @@ Observed 2026-11-15 at HEAD 8fb0f94: 76 selected/executed, 24 passed, 52 failed,
 
 | File | Baseline pass/fail | Final executed | Result | Commit |
 | --- | --- | --- | --- | --- |
-| backend-cadastro.test.tsx | 0/8 | 8 | PASS; all original scenarios | this atomic commit |
-| cadastro-feedback-registration.test.tsx | 0/32 | pending | pending | pending |
+| backend-cadastro.test.tsx | 0/8 | 8 | PASS; all original scenarios | 218c833 |
+| cadastro-feedback-registration.test.tsx | 0/32 | 32 | PASS; all original scenarios | this atomic commit |
 | seguranca-cadastro.test.tsx | 0/5 | pending | pending | pending |
 | tratamento.test.tsx | 24/7 | pending | pending | pending |
 
 Account assumptions: approved two-step UI preserves the exact registration DTO, status/error matrix, secrecy and 15,000ms lifecycle. Files: the three registration tests, minimal registration gesture helper and migration/status docs. Per-file success: all original cases selected, exact payload/status/messages/cancellation assertions retained with new controls. DTO message arrays are now presented as the complete joined alert rather than list items.
 
 R2 backend registration gate: `npx vitest run tests/integration/backend-cadastro.test.tsx --reporter=verbose`, 8/8 passed. Shared helpers fill account controls, click Continuar, fill personal controls and click Criar conta. Exact DTO (including whitespace in password), no Bearer, stored-token preservation, status-driven rate limit, all public DTO messages and diagnostic exclusion retained. Original test names remain inventory identifiers; array presentation asserts the exact joined message approved by the new screen. No product change.
+
+R2 registration feedback gate: `npx vitest run tests/integration/cadastro-feedback-registration.test.tsx --reporter=verbose`, 32/32 passed. All original names and expanded parameter rows retained. Deadline checks remain 14,999 + 1ms for headers/body, with timeout copy, actual AbortSignal, late/abandon/new-attempt isolation and no automatic retry. Form-submit events retain concurrent-submit guard coverage; the separate userEvent click/Enter journey uses new controls. REG-11 checks every personal field, returns to Conta to check email/password/confirmation, then continues. REG-13 mismatch is now exercised on Conta, where confirmation belongs. REG-14 additionally asserts the entire joined DTO message exactly. No product change.
