@@ -131,6 +131,8 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
   });
 
   test('confirmação persiste após consulta e recarga do histórico no navegador', async ({ page, request }) => {
+    // A fixture de 2030 pertence ao passado do relógio sintético deste navegador.
+    await page.clock.setFixedTime(new Date('2030-01-03T12:00:00.000Z'));
     const confirmation = await request.put(`${api}/dose/${doseId}`, { headers: headers(tokenA), data: { tomado: true } });
     expect(confirmation.status()).toBe(200);
     const list = await request.get(`${api}/dose/me`, { headers: headers(tokenA) });
@@ -138,9 +140,9 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
     await page.addInitScript((token) => localStorage.setItem('access_token', token), tokenA);
     await page.goto('/historico');
     await expect(page.getByRole('heading', { name: treatment.remedio.nome })).toBeVisible();
-    await expect(page.locator('span').filter({ hasText: /^Tomado$/ })).toBeVisible();
+    await expect(page.getByRole('article').getByText('Registrada', { exact: true })).toBeVisible();
     await page.reload();
-    await expect(page.locator('span').filter({ hasText: /^Tomado$/ })).toBeVisible();
+    await expect(page.getByRole('article').getByText('Registrada', { exact: true })).toBeVisible();
   });
 
   test('E2E-01 E2E-05 login e perfil pela interface persistem após reload e logout', async ({ page, request }) => {
@@ -148,13 +150,13 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
     await page.getByLabel('E-mail', { exact: true }).fill(emailA);
     await page.getByLabel('Senha', { exact: true }).fill(nextPassword);
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/hoje$/);
     await page.goto('/Configuracoes');
-    const name = page.getByPlaceholder('Digite seu nome completo');
+    const name = page.getByLabel('Nome', { exact: true });
     await expect(name).toHaveValue('Conta Atualizada');
     await name.fill('Conta Alterada Pela Interface');
-    await page.getByRole('button', { name: 'Salvar Alterações', exact: true }).click();
-    await expect(page.getByText('Dados atualizados com sucesso!')).toBeVisible();
+    await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
+    await expect(page.getByText('Perfil atualizado.', { exact: true })).toBeVisible();
     await page.reload();
     await expect(name).toHaveValue('Conta Alterada Pela Interface');
     const persisted = await request.get(`${api}/usuario/me`, { headers: headers(tokenA) });
