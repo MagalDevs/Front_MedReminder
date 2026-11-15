@@ -276,12 +276,12 @@ test("FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o stor
   await page.getByLabel("Senha", { exact: true }).fill(USER_PASSWORD);
   await page.getByRole("button", { name: "Entrar" }).click();
 
-  await expect(page).toHaveURL(/\/$/);
-  const menu = page.getByRole("button", { name: "User menu" });
-  await expect(menu).toContainText("Olá, Ana");
+  await expect(page).toHaveURL(/\/hoje$/);
+  await page.getByRole("link", { name: "Perfil", exact: true }).click();
+  await expect(page.getByLabel("Nome", { exact: true })).toHaveValue(USER.nome);
 
   // Requests: login público (sem Authorization) e perfil com o token recebido.
-  await expect.poll(() => api.sequence()).toEqual(["POST /auth/login", "GET /usuario/me", "GET /dose/me"]);
+  await expect.poll(() => api.sequence()).toEqual(["POST /auth/login", "GET /usuario/me", "GET /dose/me", "GET /dose/me"]);
   const [login] = api.calls("POST", "/auth/login");
   expect(login.body).toEqual({ email: USER.email, senha: USER_PASSWORD });
   expect(login.headers["content-type"]).toContain("application/json");
@@ -295,12 +295,11 @@ test("FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o stor
   expect(JSON.parse(sessao.user ?? "null")).toEqual(USER);
 
   // Menu -> Sair: volta ao login e o storage fica vazio.
-  await menu.click();
   await page.getByRole("button", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
   await expectSemSessao(page);
-  expect(api.requests).toHaveLength(3);
+  expect(api.requests).toHaveLength(4);
 });
 
 // ---------------------------------------------------------------------------
@@ -315,7 +314,7 @@ test("FN-02 TEST-03 rota protegida sem sessão não mostra conteúdo e alcança 
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Meus lembretes" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Agenda de doses", exact: true, level: 1 })).toHaveCount(0);
   await expectSemSessao(page);
   expect(api.requests).toEqual([]);
 });
@@ -329,16 +328,12 @@ test("FN-02 TEST-03 rota protegida com sessão sintética preparada exibe o cont
 
   await page.goto("/meus-lembretes");
 
-  await expect(page.getByRole("heading", { name: "Meus lembretes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Agenda de doses", exact: true, level: 1 })).toBeVisible();
   await expect(page).toHaveURL(/\/meus-lembretes$/);
-  // Leitura autenticada: lista de remédios e doses (provider + página).
-  await expect.poll(() => api.calls("GET", "/remedio/me").length).toBe(1);
-  await expect.poll(() => api.calls("GET", "/dose/me").length).toBeGreaterThanOrEqual(1);
-  const remedios = api.calls("GET", "/remedio/me");
-  expect(remedios).toHaveLength(1);
-  expect(remedios[0].headers["authorization"]).toBe(AUTH_HEADER);
+  // A agenda e o provider leem doses; os nomes vêm da relação, sem consulta redundante de medicamentos.
+  await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2);
+  expect(api.calls("GET", "/remedio/me")).toHaveLength(0);
   const doses = api.calls("GET", "/dose/me");
-  expect(doses.length).toBeGreaterThanOrEqual(1);
   for (const call of doses) expect(call.headers["authorization"]).toBe(AUTH_HEADER);
 });
 
@@ -346,11 +341,8 @@ test("FN-02 TEST-03 [BLOQUEADO FE-03] /meus-medicamentos sem sessão leva ao log
   page,
   api,
 }) => {
-  // Classificação nossa: /meus-medicamentos lista dados do usuário mas não usa
-  // ProtectedRoute (MeusMedicamentosContent/page.tsx), então hoje renderiza a
-  // página com erro de carregamento em vez de levar ao login. Passa enquanto o
-  // defeito existir (test.fail).
-  test.fail();
+  // FE-03 foi corrigido: a proteção agora é uma expectativa normal.
+  // O título histórico permanece como ID do inventário.
   await page.goto("/meus-medicamentos");
   await expect(page).toHaveURL(/\/login$/);
   expect(api.requests).toEqual([]);
@@ -365,34 +357,29 @@ test("FN-03 TEST-03 busca na home: inexistente, conhecido, seleção e navegaç�
   api,
 }) => {
   await page.goto("/");
-  const campo = page.getByPlaceholder("Buscar medicamento...");
+  const campo = page.getByRole("combobox", { name: "Buscar no catálogo" });
   await expect(campo).toBeVisible();
-
   await campo.click();
   await expect(page.getByText("Digite para buscar um medicamento")).toBeVisible();
-
-  // Inexistente no catálogo real servido pelo app.
   await campo.fill("zzxqk-inexistente");
   await expect(page.getByText("Nenhum resultado encontrado")).toBeVisible();
-
-  // Conhecido, sem diferenciar maiúsculas/minúsculas.
   await campo.fill("funed lor");
-  const linha = page.getByText("FUNED LORATADINA", { exact: true });
+  const linha = page.getByRole("option", { name: /FUNED LORATADINA/ });
   await expect(linha).toBeVisible();
-  await expect(page.getByText("ANTI-HISTAMINICOS SISTEMICOS")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Cadastrar" })).toHaveCount(0);
-
-  // Selecionar o resultado preenche a busca e oferece "Cadastrar".
+  await expect(linha).toContainText("ANTI-HISTAMINICOS SISTEMICOS");
   await linha.click();
   await expect(campo).toHaveValue("FUNED LORATADINA");
-  await page.getByRole("button", { name: "Cadastrar" }).click();
-
-  await expect(page).toHaveURL(/\/novo-medicamento\?medicamento=FUNED%20LORATADINA$/);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
-  // Nome e tipo selecionados chegam ao formulário.
-  await expect(page.getByPlaceholder("Dipirona")).toHaveValue("FUNED LORATADINA");
-  await expect(page.getByPlaceholder("Analgésico")).toHaveValue("ANTI-HISTAMINICOS SISTEMICOS");
+  await expect(page.getByRole("status")).toContainText("ANTI-HISTAMINICOS SISTEMICOS");
   expect(api.requests).toEqual([]);
+  // O catálogo público consulta; o cadastro protegido começa na agenda após autenticação.
+  await seedSession(page);
+  await page.goto(URL_NOVO_TRATAMENTO);
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
+  const busca = page.getByRole("combobox", { name: "Buscar no catálogo" });
+  await busca.fill("funed lor");
+  await page.getByRole("option", { name: /FUNED LORATADINA/ }).click();
+  await expect(page.getByLabel("Classificação", { exact: true })).toHaveValue("ANTI-HISTAMINICOS SISTEMICOS");
+  expect(api.sequence()).toEqual(["GET /usuario/me", "GET /dose/me"]);
 });
 
 /** Preenche o formulário de tratamento (nome/tipo já vêm da seleção). */

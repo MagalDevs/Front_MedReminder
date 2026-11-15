@@ -270,7 +270,7 @@ Observed 2026-11-15 at HEAD 8fb0f94: 76 selected/executed, 24 passed, 52 failed,
 | backend-cadastro.test.tsx | 0/8 | 8 | PASS; all original scenarios | 218c833 |
 | cadastro-feedback-registration.test.tsx | 0/32 | 32 | PASS; all original scenarios | d4780f6 |
 | seguranca-cadastro.test.tsx | 0/5 | 5 | PASS; all original scenarios | 6496a4a |
-| tratamento.test.tsx | 24/7 | 31 | PASS; 30 legacy unchanged + 1 route migrated | this atomic commit |
+| tratamento.test.tsx | 24/7 | 31 | PASS; 30 legacy unchanged + 1 route migrated | 6088e52 |
 
 Account assumptions: approved two-step UI preserves the exact registration DTO, status/error matrix, secrecy and 15,000ms lifecycle. Files: the three registration tests, minimal registration gesture helper and migration/status docs. Per-file success: all original cases selected, exact payload/status/messages/cancellation assertions retained with new controls. DTO message arrays are now presented as the complete joined alert rather than list items.
 
@@ -289,3 +289,155 @@ Per-file gate: `npx vitest run tests/integration/tratamento.test.tsx --reporter=
 Final four-file command: `npx vitest run tests/integration/backend-cadastro.test.tsx tests/integration/cadastro-feedback-registration.test.tsx tests/integration/seguranca-cadastro.test.tsx tests/integration/tratamento.test.tsx --reporter=verbose --reporter=json --outputFile=.specs/features/web-ux-consistency/r2-final.json`. On 2026-11-15: 4 files, 76/76 passed, 0 failed/skipped. Programmatic comparison of final fullName entries against the pre-edit expanded inventory: 76 original, 76 final, missing=[], added=[]. Temporary reporter JSON removed after comparison. `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` both exit 0.
 
 R2 made no production edits and found no product defect, so no Build/browser exception was required. No R3, snapshot, backend/mobile, real API, DB, push or deploy activity. The 44 preexisting stage records remain unchanged, SHA-256 of LF-joined git ls-files --stage records (no terminal newline): 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8. Root retains R3, final walk/proofs and independent verification.
+
+## R3 Baseline Inventory
+
+Collected before edits at HEAD 6088e52 on 2026-11-15. Expanded Playwright inventory: 129 scenarios across functional/nonfunctional projects. Original snapshot viewports: 360x800, 768x1024, 1440x900; all twelve original PNGs directly inspected before migration.
+
+- [functional] BEAPI-09 histórico usa doses autenticadas, filtros e recarga
+- [functional] FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o storage
+- [functional] FN-02 TEST-03 rota protegida sem sessão não mostra conteúdo e alcança o login
+- [functional] FN-02 TEST-03 rota protegida com sessão sintética preparada exibe o conteúdo
+- [functional] FN-02 TEST-03 [BLOQUEADO FE-03] /meus-medicamentos sem sessão leva ao login
+- [functional] FN-03 TEST-03 busca na home: inexistente, conhecido, seleção e navegação para o cadastro
+- [functional] FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e atualiza os lembretes
+- [functional] FN-03 TEST-03 formulário vazio mostra as validações e não envia mutação
+- [functional] FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local correto
+- [functional] FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo
+- [functional] FN-04 TEST-03 lembretes: filtros de período, status e medicamento mostram só os registros esperados
+- [functional] FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o estado após a nova consulta
+- [functional] FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não envia DELETE
+- [functional] FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento na lista
+- [functional] FN-05 TEST-03 sem medicamentos mostra o estado vazio com o atalho de cadastro
+- [functional] FN-07 FN-01 TEST-03 login com 401 Invalid credentials mostra "E-mail ou senha inválidos", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com 401 sem corpo mostra "E-mail ou senha inválidos", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com 403 mostra "Você não tem permissão para realizar esta ação.", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com 429 mostra "Muitas tentativas. Tente novamente mais tarde.", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com 500 mostra "O serviço está temporariamente indisponível. Tente novamente mais tarde.", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com rede interrompida mostra "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.", encerra o loading e não grava sessão
+- [functional] FN-07 FN-01 TEST-03 login com token mas perfil 500 mostra a falha do perfil e limpa a sessão
+- [functional] FN-07 FN-04 TEST-03 401 na consulta protegida inicial remove a sessão e leva ao login
+- [functional] FN-07 FN-04 TEST-03 marcar dose tomada com 403 mostra a mensagem, não confirma e não reconsulta
+- [functional] FN-07 FN-04 TEST-03 marcar dose tomada com 429 mostra a mensagem, não confirma e não reconsulta
+- [functional] FN-07 FN-04 TEST-03 marcar dose tomada com 500 mostra a mensagem, não confirma e não reconsulta
+- [functional] FN-07 FN-04 TEST-03 marcar dose tomada com rede interrompida mostra a mensagem e não confirma
+- [functional] FN-07 FN-04 TEST-03 marcar dose tomada com 401 remove a sessão e leva ao login
+- [functional] FN-07 FN-05 TEST-03 excluir medicamento com 403 avisa a falha e mantém o item
+- [functional] FN-07 FN-05 TEST-03 excluir medicamento com 429 avisa a falha e mantém o item
+- [functional] FN-07 FN-05 TEST-03 excluir medicamento com 500 avisa a falha e mantém o item
+- [functional] FN-07 FN-05 TEST-03 excluir medicamento com rede interrompida avisa a falha e mantém o item
+- [functional] FN-07 FN-05 TEST-03 excluir medicamento com 401 remove a sessão e leva ao login
+- [functional] FN-07 FN-05 TEST-03 falha ao carregar medicamentos e lembretes mostra a mensagem e encerra o loading
+- [functional] FN-07 FN-03 TEST-03 criar medicamento com 403 avisa a falha, não cria doses e libera o botão
+- [functional] FN-07 FN-03 TEST-03 criar medicamento com 429 avisa a falha, não cria doses e libera o botão
+- [functional] FN-07 FN-03 TEST-03 criar medicamento com 500 avisa a falha, não cria doses e libera o botão
+- [functional] FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria doses nem anuncia sucesso
+- [functional] FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticação e não cria doses
+- [functional] FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso
+- [functional] ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET
+- [functional] FN-06 TEST-03 snapshots 360px > FN-06 TEST-03 login 360px
+- [functional] FN-06 TEST-03 snapshots 360px > FN-06 TEST-03 home com busca e resultados 360px
+- [functional] FN-06 TEST-03 snapshots 360px > FN-06 TEST-03 novo-medicamento 360px
+- [functional] FN-06 TEST-03 snapshots 360px > FN-06 TEST-03 meus-lembretes 360px
+- [functional] FN-06 TEST-03 snapshots 768px > FN-06 TEST-03 login 768px
+- [functional] FN-06 TEST-03 snapshots 768px > FN-06 TEST-03 home com busca e resultados 768px
+- [functional] FN-06 TEST-03 snapshots 768px > FN-06 TEST-03 novo-medicamento 768px
+- [functional] FN-06 TEST-03 snapshots 768px > FN-06 TEST-03 meus-lembretes 768px
+- [functional] FN-06 TEST-03 snapshots 1440px > FN-06 TEST-03 login 1440px
+- [functional] FN-06 TEST-03 snapshots 1440px > FN-06 TEST-03 home com busca e resultados 1440px
+- [functional] FN-06 TEST-03 snapshots 1440px > FN-06 TEST-03 novo-medicamento 1440px
+- [functional] FN-06 TEST-03 snapshots 1440px > FN-06 TEST-03 meus-lembretes 1440px
+- [functional] smoke: a página inicial carrega sem requisições à API
+- [functional] WUX_NAV_03 public purpose precedes account creation and both destinations work
+- [functional] T35 public catalog selection works without private session
+- [functional] T35 unavailable catalog keeps account access and manual consultation
+- [functional] WUX_DAY_01 local day and tie IDs determine displayed order
+- [functional] WUX_DAY_03 next future dose coexists with overdue doses
+- [functional] WUX_DAY_05 successful empty today offers history and adding medication
+- [functional] T36 failed dose read stays partial and retries instead of claiming empty success
+- [functional] T36 restoring and unavailable session withholds private content until manual recovery
+- [functional] T36 anonymous today requires login before private screen
+- [functional] WUX_MED_01 name classification and expiry intersect with clear restoring all records
+- [functional] T37 medication read failure recovers to successful empty state
+- [functional] WUX_NAV_06 anonymous treatment is blocked before any input or private request
+- [functional] WUX_FORM_01 stages preserve draft and valid initial name never overwrites edits
+- [functional] WUX_FORM_11 review exposes exact dose schedule and timezone before saving
+- [functional] WUX_FORM_14 review gesture sends single atomic payload and idempotency key
+- [functional] WUX_FORM_15 confirmed summary survives internal navigation and leads to selected medication
+- [functional] T38 confirmed create with global refresh failure retries GET only and updates alarm collection
+- [functional] T38 uncertain creation freezes exact body and key across route navigation then manual retry
+- [functional] WUX_DAY_06 history includes only past instants in descending order and labels planned time
+- [functional] WUX_DAY_07 period medication and state intersect over all 102 paginated records
+- [functional] T39 partial second page failure stays labeled and retry restores complete history totals
+- [functional] WUX_ACCOUNT_05 profile PATCH includes changed allowlisted values and omits blank optionals
+- [functional] WUX_ACCOUNT_08 legacy configuration URL exposes profile initials and only supported actions
+- [functional] T40 failed profile update preserves edits and successful explicit retry confirms the result
+- [functional] WUX_NAV_01 login without pending destination opens Hoje after validated profile
+- [functional] WUX_NAV_04 requested internal treatment survives Entrar with query and remains private until login
+- [functional] WUX_NAV_07 rejects unapproved return destination https://external.example/private
+- [functional] WUX_NAV_07 rejects unapproved return destination //external.example/private
+- [functional] WUX_NAV_07 rejects unapproved return destination /login
+- [functional] WUX_NAV_07 rejects unapproved return destination /hoje/../login
+- [functional] T41 explicit internal returnTo opens the requested legacy profile route
+- [functional] T41 voluntary logout clears pending target and a new login opens Hoje
+- [functional] T41 denied login retains form and retry can authenticate without private screen on failure
+- [functional] T41 after voluntary logout a newly requested protected destination can be remembered
+- [functional] WUX_ACCOUNT_01 account and personal stages provide mandatory summary before sending
+- [functional] WUX_ACCOUNT_02 registration gesture sends exact DTO once without fictitious values
+- [functional] WUX_ACCOUNT_03 invalid CPF CEP and future birth date keep the stage and focus the indicated field
+- [functional] WUX_ACCOUNT_04 password visibility toggles accessibly without modifying either value
+- [functional] T42 server DTO messages remain visible and retry preserves personal values
+- [functional] WUX_NAV_05 all existing medication agenda history and configuration URLs show equivalent content
+- [functional] WUX_MED_04 Ver horários filters by ID despite identical names and includes future doses
+- [functional] T43 unknown valid ID shows an empty agenda while invalid ID never silently shows unrelated doses
+- [functional] WUX_MED_05 edit opens the selected item and cancel preserves its original values
+- [functional] WUX_MED_06 save sends only seven changed metadata fields to the existing ID and recovers after failure
+- [functional] WUX_MED_07 treatment remains read only with the explicit schedule limit
+- [functional] T44 invalid unsafe IDs never request an item and unauthenticated edit requires login
+- [functional] T44 failed item load offers a manual retry without an empty editable form
+- [nonfunctional] NF-01 NF-WEB-01 keyboard, labels and layout at 360px (assessment)
+- [nonfunctional] NF-01 NF-WEB-01 keyboard, labels and layout at 768px (assessment)
+- [nonfunctional] NF-01 NF-WEB-01 keyboard, labels and layout at 1440px (assessment)
+- [nonfunctional] NF-02 NF-WEB-02 ten fixed catalog queries before/after in three browser rounds
+- [nonfunctional] NF-02 NF-WEB-03 production routes, five cold and warm samples
+- [nonfunctional] NF-04 NF-SCALE-01 local list 10/100/1000 records, five runs per volume
+- [nonfunctional] NF-03 NF-WEB-04 login logging and storage exposure
+- [nonfunctional] NF-03 NF-WEB-04 raw HTTP error body absent from console
+- [nonfunctional] NF-03 NF-WEB-04 authenticated 401 clears storage
+- [nonfunctional] NF-03 NF-WEB-04 logout removes token and profile
+- [nonfunctional] WUX_T01_FONT Kantumruy is inherited by text and controls with all interface weights available
+- [nonfunctional] WUX_T01_PALETTE semantic palette preserves identity and readable default, hover, secondary, disabled and feedback pairs
+- [nonfunctional] WUX_T01_FOCUS keyboard focus has a visible semantic indicator
+- [nonfunctional] B7 observe incumbent screens at actual viewport sizes
+- [nonfunctional] WUX_NAV_08 narrow menu opens by Enter contains focus and closes with Escape returning to content
+- [nonfunctional] WUX_SYSTEM_01 interface font is Kantumruy on every route including headings and native controls
+- [nonfunctional] WUX_SYSTEM_02 actual primary fields focus and feedback use the single semantic token palette
+- [nonfunctional] WUX_SYSTEM_03 brand pink stays in identity and medication color never supplies error or success semantics
+- [nonfunctional] WUX_SYSTEM_06 secondary controls remain distinct and readable on login and authenticated forms
+- [nonfunctional] WUX_SYSTEM_08 loading empty filtered recoverable error and success share feedback vocabulary and treatment
+- [nonfunctional] WUX_ACCESS_01 every scoped field button selector and navigation control has an accessible name
+- [nonfunctional] WUX_ACCESS_06 rendered text placeholders primary hover disabled warning error and success meet contrast thresholds
+- [nonfunctional] WUX_ACCESS_07 visible focus and 44px targets include named radio labels with keyboard selection
+- [nonfunctional] WUX_ACCESS_08 forms remain reachable at all four viewport sizes with long content and modal clipping checked
+- [nonfunctional] T45 review follow-up gives natural exact counts and places history after the complete daily agenda
+- [nonfunctional] WUX_SYSTEM_04 equivalent save actions share default hover focus disabled loading and immediate feedback
+- [nonfunctional] WUX_ACCESS_09 effective 200 percent text reflows all routes and reduced motion leaves controls immediately usable
+- [nonfunctional] T46 wizard and registration stage changes keep entered values focus and immediate controls with either motion preference
+
+## R3 Execution
+
+Assumptions: migrate approved UI only, retaining all 129 collected browser scenario names and parameter rows. Existing twelve PNG references were inspected individually at native dimensions before edits. Operate guidance, frontend-design, taste and Impeccable craft-floor support the approved DESIGN.md; no promotional layout or new visual identity is introduced. Impeccable context launcher failed because engine 0.1.23 is absent; existing spec/context/design/DESIGN and craft-floor/operate/polish guidance were read directly.
+
+Files: affected functional/nonfunctional/E2E selectors and minimal test helpers, the existing functional PNG references, additional wizard-stage PNGs, this inventory and tasks.md status. No backend/mobile or test-floor changes. Success: original scenarios preserved, controlled API guard intact, each coherent journey green before commit, original viewports retained with every wizard stage captured and inspected, final TypeScript/lint0. Real E2E remains blocked without isolated API.
+
+| Journey/file | Original cases | Final executed | Result | Commit |
+| --- | --- | --- | --- | --- |
+| fluxo.spec.ts | 52 | pending | migration in progress | pending |
+| backend-history.spec.ts | 1 | pending | pending | pending |
+| legacy nonfunctional (4 files) | 10 | pending | pending | pending |
+
+R3 first journey: NAV-01/02/05/06, ACCESS-02. The public catalog is a consultation with account access; protected treatment is entered with a synthetic authenticated session and the incoming medication name, then a real option gesture fills classification. The profile name assertion moves to Perfil, where the approved UI shows the actual profile. Agenda asserts exactly two authenticated dose reads and zero redundant medication reads. The historical FE-03 scenario name stays verbatim while its obsolete expected-failure annotation is removed because NAV-06 now protects that route.
+
+Baseline fluxo: 52 executed, 9 passed and 43 failed, no skipped, with diagnostic timeout 5 seconds and workers=1/retries=0. The original expected-failure FE-03 reports unexpected pass because the product protection is fixed. First sandbox Build failed EPERM creating .next login segments; elevated fresh Build succeeded without deleting caches. Login now expects exactly four calls: POST login, GET profile, two GET doses (global provider plus Hoje), and verifies the original public/Bearer headers/body/storage assertions.
+
+R3 navigation/catalog gate: 13/13 original scenarios passed with fresh production Build, port 3102, workers=1/retries=0. No product edits. Stage fingerprint remains 44 / 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8.
