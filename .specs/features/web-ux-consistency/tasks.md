@@ -111,7 +111,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T37: Conectar rota Medicamentos
 - [x] T38: Conectar cadastro de medicamento
 - [x] T39: Conectar rota Histórico
-- [ ] T40: Preservar Configuracoes como Perfil
+- [x] T40: Preservar Configuracoes como Perfil
 - [ ] T41: Conectar rota de login
 - [ ] T42: Conectar rota de cadastro
 - [ ] T43: Preservar acesso legado aos lembretes
@@ -974,10 +974,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/Configuracoes/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas ACCOUNT-05, ACCOUNT-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T40 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/Configuracoes/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas ACCOUNT-05, ACCOUNT-08 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T40 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 3 passed, 0 failed. Legacy URL shows Perfil/current nav and initials, omits photo/recovery controls and upload. Actual Save sends exact changed-name PATCH, leaves blank optionals omitted and preserved, repeated no-op has no write, failure keeps edit and manual retry confirms result. No product deviation or legacy-test edits.
 
 ### T41: Conectar rota de login
 
@@ -1290,7 +1292,7 @@ Proof: run functional | ✓ WUX_ACCOUNT_03
 Proof: run functional | ✓ WUX_ACCOUNT_04
 
 **C58** - WHEN a pessoa altera apenas dados pessoais no Perfil THEN the web client SHALL chamar PATCH `/usuario/me` somente com os campos permitidos alterados, preservando o comportamento de omissão dos opcionais. (ACCOUNT-05, AC 5; T40).
-Proof: run functional | ✓ WUX_ACCOUNT_05
+Proof: run functional | WUX_ACCOUNT_05
 
 **C59** - WHEN a pessoa altera a senha autenticada THEN the web client SHALL enviar senha atual e nova senha somente ao endpoint existente, sem armazenar senhas no rascunho. (ACCOUNT-06, AC 6; T31).
 Proof: run coverage | WUX_ACCOUNT_06
@@ -1299,7 +1301,7 @@ Proof: run coverage | WUX_ACCOUNT_06
 Proof: run coverage | WUX_ACCOUNT_07
 
 **C61** - WHILE não existe contrato comprovado de foto de perfil ou recuperação sem sessão the web client SHALL omitir essas ações sem apresentar botões que falham ou rotas fictícias. (ACCOUNT-08, AC 8; T40).
-Proof: run functional | ✓ WUX_ACCOUNT_08
+Proof: run functional | WUX_ACCOUNT_08
 
 **C62** - The web client SHALL aplicar uma única família tipográfica de interface Kantumruy com fallback sans-serif nas telas do escopo. (SYSTEM-01, AC 1; T45).
 Proof: run nonfunctional | ✓ WUX_SYSTEM_01

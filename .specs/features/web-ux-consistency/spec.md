@@ -440,10 +440,10 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | ACCOUNT-02 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-03 | Account and profile | T42 | Tasks | In Tasks |
 | ACCOUNT-04 | Account and profile | T42 | Tasks | In Tasks |
-| ACCOUNT-05 | Account and profile | T40 | Tasks | In Tasks |
+| ACCOUNT-05 | Account and profile | T40 | Implemented | T40 browser gate 3 passed |
 | ACCOUNT-06 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
 | ACCOUNT-07 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
-| ACCOUNT-08 | Account and profile | T40 | Tasks | In Tasks |
+| ACCOUNT-08 | Account and profile | T40 | Implemented | T40 browser gate 3 passed |
 | SYSTEM-01 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-02 | Visual system | T45 | Tasks | In Tasks |
 | SYSTEM-03 | Visual system | T45 | Tasks | In Tasks |
