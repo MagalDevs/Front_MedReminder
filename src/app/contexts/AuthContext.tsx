@@ -42,6 +42,7 @@ interface AuthContextType {
   returnTarget: string;
   rememberReturnTarget: (value: string | null | undefined) => string;
   consumeReturnTarget: (value?: string | null) => string;
+  completeSignOutNavigation: () => void;
   updateProfile: (profile: Pick<User, 'id' | 'nome' | 'email' | 'cep' | 'dataNasc'>, expectedIdentity: string) => void;
 }
 
@@ -84,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [restoreNotBefore, setRestoreNotBefore] = useState(0);
   const [identityGeneration, setIdentityGeneration] = useState(0);
   const [returnTarget, setReturnTarget] = useState('/hoje');
+  const signingOut = useRef(false);
   const router = useRouter();
   const routerRef = useRef(router);
   useEffect(() => { routerRef.current = router; }, [router]);
@@ -166,6 +168,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [restorationError, restoreNotBefore]);
 
   const login = useCallback((token: string, userData?: User) => {
+    signingOut.current = false;
     generation.current++;
     setIdentityGeneration(previous => previous + 1);
     restoration.current?.abort();
@@ -182,6 +185,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = useCallback(() => {
+    signingOut.current = true;
     generation.current++;
     setIdentityGeneration(previous => previous + 1);
     restoration.current?.abort();
@@ -223,10 +227,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const rememberReturnTarget = useCallback((value: string | null | undefined) => {
+    // Identity-scoped providers remount route children during sign-out. Their
+    // guards must not recapture the departing route before login is reached.
+    if (signingOut.current) return '/hoje';
     const target = safeInternalReturnTarget(value);
     setReturnTarget(target);
     return target;
   }, []);
+  const completeSignOutNavigation = useCallback(() => { signingOut.current = false; }, []);
   const consumeReturnTarget = useCallback((value?: string | null) => {
     const target = safeInternalReturnTarget(value ?? returnTarget);
     setReturnTarget('/hoje');
@@ -263,6 +271,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         returnTarget,
         rememberReturnTarget,
         consumeReturnTarget,
+        completeSignOutNavigation,
         updateProfile,
       }}
     >

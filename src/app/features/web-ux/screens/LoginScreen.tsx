@@ -19,6 +19,8 @@ export default function LoginScreen({ returnTo }: { returnTo?: string | null }) 
   const [error, setError] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [notBefore, setNotBefore] = useState(0);
   const [notice, setNotice] = useState<NavigationFeedback | null>(null); const pending = useRef<AbortController | null>(null);
   const remaining = useRetryDelay(notBefore);
+  const completeSignOutNavigation = auth.completeSignOutNavigation;
+  useEffect(() => { completeSignOutNavigation(); }, [completeSignOutNavigation]);
   useEffect(() => { const read = () => { const next = consumeNavigationFeedback(); if (next) setNotice(next); }; read(); return subscribeNavigationFeedback(read); }, []);
   useEffect(() => () => { pending.current?.abort(); pending.current = null; }, []);
   async function submit(event: React.FormEvent) {

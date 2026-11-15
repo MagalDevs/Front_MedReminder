@@ -112,7 +112,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T38: Conectar cadastro de medicamento
 - [x] T39: Conectar rota Histórico
 - [x] T40: Preservar Configuracoes como Perfil
-- [ ] T41: Conectar rota de login
+- [x] T41: Conectar rota de login
 - [ ] T42: Conectar rota de cadastro
 - [ ] T43: Preservar acesso legado aos lembretes
 
@@ -995,10 +995,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/login/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-01, NAV-04, NAV-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T41 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/login/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas NAV-01, NAV-04, NAV-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T41 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 10 passed, 0 failed; 14 affected T13/T29 integration cases also passed. Actual login opens Hoje or validated internal target/query; external, protocol-relative, non-product and normalized paths fall back to Hoje. Denied login retains form. Logout test exposed identity-boundary remount recapturing the old route; AuthContext now suppresses capture during sign-out and LoginScreen acknowledges arrival through a stable callback. Default Hoje and a fresh protected request via browser Back are both proven. Supporting change approved by root; no product deviation or legacy-test edits.
 
 ### T42: Conectar rota de cadastro
 
@@ -1121,7 +1123,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 Cada check abaixo corresponde a exatamente um dos 91 critérios, com ID e AC da spec. Casos auxiliares de cada tarefa são adicionais; não substituem esses checks. Estados desenhados sem captura vinculante são verificados por testes e pela visita final. A leitura assistiva manual registra limitações e nunca é declarada executada antecipadamente.
 
 **C1** - WHEN a pessoa autenticada conclui o login sem destino pendente THEN the web client SHALL abrir Hoje. (NAV-01, AC 1; T41).
-Proof: run functional | ✓ WUX_NAV_01
+Proof: run functional | WUX_NAV_01
 
 **C2** - WHEN a pessoa seleciona Hoje, Medicamentos, Histórico ou Perfil THEN the web client SHALL mostrar a tela correspondente com o destino atual identificado por texto e estado acessível. (NAV-02, AC 2; T6).
 Proof: run coverage | WUX_NAV_02 selects each destination and renders its named screen with accessible current state
@@ -1130,7 +1132,7 @@ Proof: run coverage | WUX_NAV_02 selects each destination and renders its named 
 Proof: run functional | WUX_NAV_03 public purpose precedes account creation and both destinations work
 
 **C4** - WHEN um visitante usa Entrar THEN the web client SHALL abrir o login preservando o destino interno previamente solicitado. (NAV-04, AC 4; T41).
-Proof: run functional | ✓ WUX_NAV_04
+Proof: run functional | WUX_NAV_04
 
 **C5** - WHEN a pessoa usa um endereço legado de medicamentos, lembretes, histórico ou configurações THEN the web client SHALL manter acesso ao conteúdo equivalente sem erro 404. (NAV-05, AC 5; T43).
 Proof: run functional | ✓ WUX_NAV_05
@@ -1139,7 +1141,7 @@ Proof: run functional | ✓ WUX_NAV_05
 Proof: run functional | WUX_NAV_06
 
 **C7** - WHEN a pessoa segue um destino de retorno após autenticar THEN the web client SHALL aceitar somente caminhos relativos internos pertencentes às telas do produto. (NAV-07, AC 7; T41).
-Proof: run functional | ✓ WUX_NAV_07
+Proof: run functional | WUX_NAV_07
 
 **C8** - WHEN a pessoa usa o menu em viewport estreito THEN the web client SHALL permitir abrir, fechar e retornar ao conteúdo sem sobreposição do título ou deslocamento horizontal da página. (NAV-08, AC 8; T45).
 Proof: run nonfunctional | ✓ WUX_NAV_08

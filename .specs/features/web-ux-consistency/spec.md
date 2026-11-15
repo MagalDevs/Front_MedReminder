@@ -383,13 +383,13 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 
 | Requirement ID | Story | Task | Phase | Status |
 | --- | --- | --- | --- | --- |
-| NAV-01 | Navigate the daily routine | T41 | Tasks | In Tasks |
+| NAV-01 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
 | NAV-02 | Navigate the daily routine | T6 | Implemented | WUX_NAV_02, integration gate 3 passed |
 | NAV-03 | Navigate the daily routine | T35 | Implemented | WUX_NAV_03; T35 browser gate 3 passed |
-| NAV-04 | Navigate the daily routine | T41 | Tasks | In Tasks |
+| NAV-04 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
 | NAV-05 | Navigate the daily routine | T43 | Tasks | In Tasks |
 | NAV-06 | Navigate the daily routine | T38 | Implemented | T38 browser gate 7 passed |
-| NAV-07 | Navigate the daily routine | T41 | Tasks | In Tasks |
+| NAV-07 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
 | NAV-08 | Navigate the daily routine | T45 | Tasks | In Tasks |
 | DAY-01 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
 | DAY-02 | Understand today's doses and history | T26 | Implemented | T26: 10 integration tests passed |
