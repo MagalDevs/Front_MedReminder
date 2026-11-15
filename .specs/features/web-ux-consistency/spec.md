@@ -1,10 +1,10 @@
 # Web UX Consistency Specification
 
 **Approved**: 2026-11-13 - user: "aprovado"
-**Status:** Approved with the requested skills amendment
+**Status:** Implemented; verification pending (approved specification and skills amendment)
 **Date:** 2026-11-13, America/Sao_Paulo
-**Scope:** `Front_MedReminder` only; specification documents only in this request
-**Sizing:** Large; Design and Tasks follow specification approval
+**Scope:** `Front_MedReminder` only; local implementation approved on 2026-11-14
+**Sizing:** Large; Design/Tasks approved and sequential implementation recorded in tasks.md
 **Frontend baseline:** `e0421835a34dceb6ad6f985dda5eee1fcd033c25`
 **Decisions:** [context.md](context.md)
 
@@ -27,8 +27,6 @@ O web apresenta horários incompletos, frequência com significado contraditóri
 | --- | --- |
 | Alterações em `medreminder-mobile` | user: "Somente o web: Front_MedReminder". A equivalência futura será documental. |
 | Código, testes, DTOs, migrações, banco, CORS ou deploy do backend | A API é dependência de leitura; usar somente capacidades já existentes. |
-| Implementação da aplicação nesta solicitação | O usuário solicitou criar as specs. Nenhuma aprovação de implementação foi dada. |
-| Design técnico e plano de tarefas antes da aprovação desta spec | A skill exige aprovação dos requisitos antes dessas entregas. |
 | Push, service worker, alertas garantidos em segundo plano e notificações nativas | Não fazem parte da capacidade verificada do cliente web. |
 | Adiamento persistido, registro de horário real de ingestão e estados clínicos novos | O contrato de atualização da dose contém somente `tomado: boolean`. |
 | Reagendamento de doses existentes ou substituição em massa de um tratamento | Não há operação atômica de edição do tratamento equivalente ao POST de criação. |
@@ -450,7 +448,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | SYSTEM-04 | Visual system | T46 | Implemented | T46: 3 nonfunctional cases; WUX_SYSTEM_04 |
 | SYSTEM-05 | Visual system | T3 | Implemented | WUX_SYSTEM_05, unit gate 2 passed |
 | SYSTEM-06 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_06 |
-| SYSTEM-07 | Visual system | T47 | Tasks | In Tasks |
+| SYSTEM-07 | Visual system | T47 | Implemented | T47 documentary SYSTEM-07 review; Build/types/lint passed |
 | SYSTEM-08 | Visual system | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_SYSTEM_08 |
 | SYSTEM-09 | Visual system | T31 | Implemented | T31: 8 integration tests passed |
 | ACCESS-01 | Accessibility | T45 | Implemented | T45: 11 nonfunctional cases passed; WUX_ACCESS_01 |
@@ -475,7 +473,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | STATE-10 | Recovery and interruptions | T13 | Implemented | T13: 11 integration tests passed |
 | STATE-11 | Recovery and interruptions | T15 | Implemented | T15: 9 tests passed |
 
-**Coverage:** 91 critérios mapeados às 47 tarefas de [tasks.md](tasks.md); 0 sem tarefa. Design e plano de tarefas aprovados em 2026-11-14. Nenhum critério foi implementado ou verificado como comportamento da aplicação.
+**Coverage:** 91 critérios mapeados às 47 tarefas de [tasks.md](tasks.md); 0 sem tarefa. Design e plano de tarefas aprovados em 2026-11-14. A implementação e os gates por tarefa estão registrados acima e em tasks.md; a verificação independente final permanece pendente.
 
 ## Differences from the source
 
@@ -511,7 +509,7 @@ Nenhuma captura vinculante foi fornecida. A crítica autoriza corrigir os proble
 
 ## Delivery Boundary
 
-A especificação e o adendo de skills estão aprovados. [design.md](design.md) e [tasks.md](tasks.md) foram aprovados em 2026-11-14, com a solicitação de registrar as skills e os MCPs no AGENTS.md antes de implementar. Essa preparação documental foi realizada. Não foram produzidos `proofs.md` ou `verification.md`, nem iniciada implementação.
+A especificação e o adendo de skills estão aprovados. [design.md](design.md) e [tasks.md](tasks.md) foram aprovados em 2026-11-14, com a solicitação de registrar as skills e os MCPs no AGENTS.md antes de implementar. Essa preparação documental foi realizada. A implementação local T1–T47 foi executada em lotes sequenciais com commits e gates por tarefa. A migração de regressões aprovada, o percurso independente, `proofs.md`, `verification.md` e a validação final continuam pendentes; esta declaração não encerra a feature.
 
 ## Domain Execution Trace
 
@@ -541,3 +539,5 @@ A especificação e o adendo de skills estão aprovados. [design.md](design.md) 
 - B5 integration follow-up after ea1e92c: DAY-09 collector is reused by the legacy alarm with opt-in raw transport retention. 3 new cases and 89 final selected integration checks passed, including page-2 alarm, partial-failure preservation and raw default-shape compatibility; Build/types/lint passed. Specific IT07 URL expectation correction approved in context.md.
 
 - B6: T35–T43 route adapters verified through 42 functional tests with synthetic intercepted API. Four lifecycle integration cases preserve the registration 15-second deadline (headers/body), cancellation and late-response rejection. Logout capture suppression was verified through two real navigation stories. Follow-up canonical metadata transport adds one T9 test; 37 model/contract integration tests, four additional T24 boundary regressions and seven affected T38 browser cases passed. Phase Build/types/lint and final types/lint after the follow-up passed. No real-API persistence or independent visual walk is claimed; remaining T44–T47 and authorized legacy migration stay with the orchestrator.
+
+- B7: T44 edit route has 5 browser cases; T45/T46 have 12+3 nonfunctional cases after the observed copy/fixture refinement. Native captures were inspected at the four viewports, effective text 200% and reduced motion. T47 documents the actual visual contract in DESIGN.md and passes Build/types/lint. The root-owned legacy regression migration, proofs and independent verification remain pending.

@@ -2,11 +2,11 @@
 
 **Gathered:** 2026-11-13
 **Spec:** `.specs/features/web-ux-consistency/spec.md`
-**Status:** Specification approved with the requested skills amendment
+**Status:** T1–T47 implemented locally; approved legacy migration and final verification pending
 
 ## Feature Boundary
 
-Criar especificações das correções propostas na crítica profissional do MedReminder. O escopo cobre somente o cliente web `Front_MedReminder`. Esta solicitação entrega documentos, sem implementação da aplicação, mudanças no mobile ou mudanças no backend.
+A etapa inicial criou as especificações das correções propostas na crítica profissional do MedReminder. As aprovações posteriores autorizaram Design, Tasks e implementação local em lotes sequenciais. O escopo atual continua somente no cliente web `Front_MedReminder`, sem mudanças no mobile ou backend.
 
 ## Implementation Decisions
 
@@ -116,4 +116,4 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - Implementação e correções do app mobile.
 - Mudanças em endpoints, DTOs, banco de dados ou regras do backend.
 - Notificações push, alertas em segundo plano e novas garantias de sincronização.
-- Implementação, commits, publicação e deploy da aplicação nesta solicitação de especificações.
+- Push, publicação e deploy remoto, que não foram autorizados pela implementação e pelos commits locais.

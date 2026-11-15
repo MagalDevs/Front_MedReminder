@@ -8,10 +8,10 @@ Utilizar também frontend-design, taste-skill:design-taste-frontend, transitions
 
 **Spec**: [spec.md](spec.md)
 **Design**: [design.md](design.md)
-**Status**: Approved
+**Status**: Implemented; verification pending
 **Approved**: 2026-11-14 - user: "aprovado, antes de iniciar a implementação ponha as skills e mcps citados no AGENTS.md do frontend"
 **Date**: 2026-11-13
-**Build**: `npm run build; npx tsc --noEmit; npm run lint -- --max-warnings=0`
+**Build**: `npm run build && npx tsc --noEmit && npm run lint -- --max-warnings=0`
 **Run coverage**: `npm run test:coverage -- --reporter=verbose && node scripts/check-coverage.mjs`
 **Run functional**: `npm run test:functional -- --config playwright.web-ux.config.ts --reporter=list --workers=1 --retries=0`
 **Run nonfunctional**: `npm run test:nonfunctional -- --config playwright.web-ux.config.ts --reporter=list --workers=1 --retries=0`
@@ -44,12 +44,12 @@ Proveniência dos padrões: amostrados CardBusca.test.tsx, navigation-feedback.t
 | Quick | Tarefa unitária | npx vitest run CAMINHO_DO_TESTE_DA_TAREFA --reporter=verbose |
 | Full | Tarefa de integração | npx vitest run CAMINHO_DO_TESTE_DA_TAREFA --reporter=verbose |
 | Browser | Tarefa de rota ou não funcional | npm run test:TIPO -- CAMINHO_DO_TESTE_DA_TAREFA --reporter=list --workers=1 --retries=0 |
-| Build | Antes da primeira tarefa, fim de fase e tarefa documental | npm run build; npx tsc --noEmit; npm run lint -- --max-warnings=0 |
+| Build | Antes da primeira tarefa, fim de fase e tarefa documental | npm run build && npx tsc --noEmit && npm run lint -- --max-warnings=0 |
 | Final | Depois da última tarefa | check_proofs.py executa Build e os três grupos Run acima, sequencialmente, uma vez por grupo |
 
 Cada tarefa abaixo contém o comando concreto que substitui os campos explicativos desta tabela. Os comandos Quick/Full/Browser selecionam somente os testes co-localizados na tarefa. Os grupos Run finais incluem também a regressão existente. Não repetir uma bateria completa verde sem mudança/falha que justifique.
 
-Playwright usa a porta **3000** e `reuseExistingServer:false` na configuração atual. Se ela estiver ocupada por servidor do usuário, não encerrá-lo automaticamente. Resolver a disponibilidade antes do gate. Não trocar a configuração compartilhada ou reutilizar um build desconhecido para obter aprovação. E2E real depende de API isolada configurada; ausência é bloqueio registrado, não sucesso. Nenhum gate exige mudar o backend.
+A configuração compartilhada usa a porta **3000**. Os grupos Run aprovados usam `playwright.web-ux.config.ts`, porta **3102** por padrão, build fresco e `reuseExistingServer:false`. Se ela estiver ocupada por servidor do usuário, não encerrá-lo automaticamente. Resolver a disponibilidade antes do gate. Não trocar a configuração compartilhada ou reutilizar um build desconhecido para obter aprovação. E2E real depende de API isolada configurada; ausência é bloqueio registrado, não sucesso. Nenhum gate exige mudar o backend.
 
 ## Execution Plan
 
@@ -121,7 +121,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T44: Disponibilizar edição pelo ID
 - [x] T45: Fechar responsividade e acessibilidade entre rotas
 - [x] T46: Uniformizar movimento por intenção
-- [ ] T47: Publicar contrato visual do web
+- [x] T47: Publicar contrato visual do web
 
 ## Task Breakdown
 
@@ -1129,10 +1129,14 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de DESIGN.md funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] DESIGN.md corresponde aos tokens/componentes reais e explica a equivalência conceitual com mobile.
-- [ ] As provas SYSTEM-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T47 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de DESIGN.md funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] DESIGN.md corresponde aos tokens/componentes reais e explica a equivalência conceitual com mobile.
+- [x] As provas SYSTEM-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T47 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Execution**: 2026-11-15. Assumptions: document the implemented web only; mobile equivalence is conceptual and no new executable tests belong to this documentation layer. Files: DESIGN.md and spec/design/context/tasks temporal metadata. Success: real palette/type/spacing/motion, reusable components, five dose labels, seven edit metadata fields, in-memory draft/API/foreground limits and future mobile mapping agree with code and observed captures. No acceptance criterion changed.
+
+**Verified**: Build, npx tsc --noEmit and npm run lint -- --max-warnings=0 all exited 0; explicit exit checks propagated failures in the actual PowerShell invocation. The Build header and matrix now use && so a failed build cannot be masked by later lint. Documentary SYSTEM-07 review compared all 19 documented color values to globals.css, source component contracts, real rendered focus/menu/form captures and the conceptual mobile table. No test was invented to satisfy a documentation warning. Tests: none, per the approved layer matrix. Status: Implemented; verification pending.
 
 ## Checks
 
@@ -1715,9 +1719,9 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; B6 concluiu T35–T43 com 42 testes funcionais próprios e quatro integrações novas; T44–T46 implementadas com gates próprios; T47 e verificação final permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1. B2 /root/batch_02 returned, T7–T13 em f704393. B3 /root/batch_03 returned, T14–T20 em 31da0c9. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc. B5 /root/batch_05 returned, T28–T34 e paginação em 981ae3a. B6 /root/batch_06 returned, T35–T43 e normalização em e986dab, 42 funcionais novos + 4 integrações + 1 unitário, regressões afetadas e Build/tipos/lint verdes. B7 /root/batch_07, T44–T47, HEAD e986dab, envio autorizado em 2026-11-14; aguardando retorno. Migração de regressões aprovada para depois de B7; nenhum outro worker ou Verifier despachado.
-**Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
+**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; B6 concluiu T35–T43 com 42 testes funcionais próprios e quatro integrações novas; T44–T47 implementadas com gates próprios; a migração legada e a verificação final permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1. B2 /root/batch_02 returned, T7–T13 em f704393. B3 /root/batch_03 returned, T14–T20 em 31da0c9. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc. B5 /root/batch_05 returned, T28–T34 e paginação em 981ae3a. B6 /root/batch_06 returned, T35–T43 e normalização em e986dab, 42 funcionais novos + 4 integrações + 1 unitário, regressões afetadas e Build/tipos/lint verdes. B7 /root/batch_07, T44–T47, envio autorizado em 2026-11-14 e retomado por user “continue” em 2026-11-15; implementação local e gates concluídos, retorno ao root ao fim de T47. Migração de regressões aprovada para depois de B7; nenhum outro worker ou Verifier despachado.
+**Walked:** Percurso independente das nove histórias ainda pendente. B7 observou capturas nativas de rotas/estados nos quatro viewports, texto efetivo a 200% e reduced motion; resultados e limites em b7-visual-review.md. Isso não substitui o walk final do root.
 
 
 ### B5 integration support: complete legacy alarm pagination
@@ -1728,7 +1732,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 **Observed gate**: 2026-11-14, `npx vitest run tests/integration/web-ux-alarm-pagination.test.tsx tests/integration/web-ux-t11.test.tsx tests/integration/web-ux-t33.test.tsx tests/integration/web-ux-t34.test.tsx tests/integration/backend-session.test.tsx tests/integration/cadastro-feedback-reminders.test.tsx tests/integration/cadastro-feedback-doses.test.tsx tests/integration/lembretes.test.tsx tests/integration/cadastro-feedback-alarm.test.tsx tests/integration/seguranca-alerta.test.tsx --reporter=verbose` passed 89/89 across 10 files, 0 failed. Build (Webpack, 11/11 pages) already passed for these production sources; final `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` passed after the approved test correction. No test case removed or skipped; exact URL expectation was updated only after approval.
 
-**B6 contract**: useContext(LembreteContext).getLembretes(): Promise<boolean|void>, real implementation returns true only after a complete refresh and false on failure/stale/401. TreatmentWizard still requires refresh:()=>Promise<unknown>; its route adapter must refresh the global alarm, return a failed-read result when appropriate, and never repeat a confirmed POST. Screens expose MedicationEditScreen({medicationId:number}), LoginScreen({returnTo?:string|null}), RegistrationScreen(), ProfileScreen() and HomeScreen(). T35–T43 now connect the nine routes; T44 and final quality tasks remain pending. B5 added 35 task tests plus 3 integration follow-up tests; local commits only; 44 preexisting staged skill files remain untouched.
+**B6 contract (historical handoff before B7)**: useContext(LembreteContext).getLembretes(): Promise<boolean|void>, real implementation returns true only after a complete refresh and false on failure/stale/401. TreatmentWizard still requires refresh:()=>Promise<unknown>; its route adapter must refresh the global alarm, return a failed-read result when appropriate, and never repeat a confirmed POST. Screens expose MedicationEditScreen({medicationId:number}), LoginScreen({returnTo?:string|null}), RegistrationScreen(), ProfileScreen() and HomeScreen(). T35–T43 connected the nine routes at that handoff; T44 and the quality tasks were completed subsequently in B7. B5 added 35 task tests plus 3 integration follow-up tests; local commits only; 44 preexisting staged skill files remain untouched.
 
 ### B6 integration support: canonical treatment metadata
 
@@ -1747,3 +1751,9 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 **Verified**: 2026-11-15: T36+T45+T46 fresh-build Chrome gate passed 21/21 (6+12+3), T26 integration passed 10/10. Subsequent T46 gate passed 3/3 after adding Tab-to-Sair/focused/in-viewport assertions at 200%, followed by Escape restoring Menu. The menu can scroll; Sair need not fit the first frame. Reviewed updated Today 320/390, medications 1440 and editor 200% captures. No assertion relaxed or removed.
 
 **Resume**: user “continue”, 2026-11-15, resumes B7 after a usage-limit interruption. T44 a86f850, T45 3b00676 and T46 57b2abf are committed; this follow-up is complete, T47 remains next. Final proofs, independent walk/Verifier and approved legacy migration remain orchestrator-owned.
+
+### B7 return checkpoint
+
+T44 a86f850: 5 functional; T45 3b00676: 11 nonfunctional; T46 57b2abf: 3 nonfunctional; visual follow-up da2e1b5 adds the twelfth T45 case and preserves the three T46 cases. Final affected browser gate: 21/21; targeted 200% Sair follow-up: 3/3; T26 follow-up: 10/10. T46 also verified 12 affected account/treatment routes and 19 affected integration cases. T47 documentary Build/types/lint0 passed on 2026-11-15. Captures actually inspected and limits are in b7-visual-review.md.
+
+All 47 implementation tasks are locally implemented. This is not feature completion: root must perform approved legacy migration R1/R2/R3, aggregate proofs, independent story walking, Verifier and final validation. No push/deploy, real-API persistence, assistive-reader certification or backend/mobile change is claimed. Preexisting 44 skill/lock stage records remain untouched.

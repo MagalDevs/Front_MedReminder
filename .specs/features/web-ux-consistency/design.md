@@ -6,11 +6,11 @@
 **Date**: 2026-11-13, America/Sao_Paulo
 **Scope**: Front_MedReminder only
 **Product approval**: user: "aprovado". A confirmação posterior mantém o adendo de skills.
-**Implementation**: not started
+**Implementation**: T1–T47 implemented locally; final verification pending (2026-11-15)
 
 ## Architecture Overview
 
-Manter Next.js App Router, React Context, Fetch e as dependências existentes. Acrescentar módulos locais em `src/app/features/web-ux/`, componentes reutilizáveis em `src/app/components/ui/` e adaptadores pequenos nas rotas existentes. Os nomes de arquivos novos abaixo são destinos propostos, não arquivos já implementados.
+Manter Next.js App Router, React Context, Fetch e as dependências existentes. Acrescentar módulos locais em `src/app/features/web-ux/`, componentes reutilizáveis em `src/app/components/ui/` e adaptadores pequenos nas rotas existentes. Os destinos abaixo foram propostos no design aprovado. A implementação atual e seus valores reais estão documentados em DESIGN.md, na raiz do web.
 
 Não existia `.specs/STATE.md` ao iniciar esta etapa. Nenhuma decisão global anterior foi encontrada nesse arquivo. Os contratos e as decisões aprovadas estão na spec e em context.md.
 
@@ -228,7 +228,7 @@ sequenceDiagram
 
 ## Verification Design
 
-As provas serão escritas junto ao código de cada tarefa. Nenhuma prova da aplicação foi executada nesta entrega documental.
+As provas foram escritas junto ao código de cada tarefa; os resultados observados constam em tasks.md. Provas agregadas, migração de regressões, percurso independente e Verifier ainda estão pendentes.
 
 - Unit: tabelas literais de instantes/valores para regras; não usar a função sob teste para fabricar o esperado.
 - Integration: módulos reais com fronteira de rede simulada, payloads exatos, timers controlados e contas A/B sintéticas.
@@ -248,7 +248,7 @@ As provas serão escritas junto ao código de cada tarefa. Nenhuma prova da apli
 | Seleção de hoje exclui atrasadas | contexts/lembreteContext.tsx:104 | Próxima ação oculta | Compartilhar selectAgenda e relógio testados |
 | Barra lateral invisível ainda focável | components/Sidebar/sidebar.tsx:38 | Navegação de teclado incorreta | AppShell novo com conteúdo fechado fora da árvore acessível |
 | Fontes globais Geist e classes locais Kantumruy | layout.tsx:2; globals.css:18 | Tipografia diverge | Tokens e herança global deliberada; verificar estilos calculados |
-| Documentos de teste históricos divergentes | tests/README.md; docs/PLANO_TESTES.md | Comando/porta errados | Usar manifest e configs atuais: Playwright porta 3000, sem reutilização |
+| Documentos de teste históricos divergentes | tests/README.md; docs/PLANO_TESTES.md | Comando/porta errados | Usar manifest e configs atuais: configuração compartilhada porta 3000; wrapper aprovado porta 3102, sem reutilização |
 | Baseline de imagens vai mudar | tests/functional/fluxo.spec.ts-snapshots | Atualização indiscriminada esconde defeito | Revisão por tela/tarefa, sem aumentar tolerância para passar |
 | Tasks exige nomes de prova futuros | tasks.md Checks | Aprovação documental pode parecer teste executado | Identificar nomes como esperados; copiar saída real e provar seleção durante Execute |
 | Foto de medicamento obrigatória no DTO | Integração atual | UI não pode omitir campo ou inventar upload | Preservar formato aceito e fallback visual; eventual lacuna de URL é bloqueio explícito |
