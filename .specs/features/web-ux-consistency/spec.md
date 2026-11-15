@@ -387,7 +387,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | NAV-02 | Navigate the daily routine | T6 | Implemented | WUX_NAV_02, integration gate 3 passed |
 | NAV-03 | Navigate the daily routine | T35 | Implemented | WUX_NAV_03; T35 browser gate 3 passed |
 | NAV-04 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
-| NAV-05 | Navigate the daily routine | T43 | Tasks | In Tasks |
+| NAV-05 | Navigate the daily routine | T43 | Implemented | T43 browser gate 3 passed |
 | NAV-06 | Navigate the daily routine | T38 | Implemented | T38 browser gate 7 passed |
 | NAV-07 | Navigate the daily routine | T41 | Implemented | T41 browser gate 10 passed |
 | NAV-08 | Navigate the daily routine | T45 | Tasks | In Tasks |
@@ -403,7 +403,7 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | MED-01 | Manage medications | T37 | Implemented | T37 browser gate 2 passed |
 | MED-02 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
 | MED-03 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
-| MED-04 | Manage medications | T43 | Tasks | In Tasks |
+| MED-04 | Manage medications | T43 | Implemented | T43 browser gate 3 passed |
 | MED-05 | Manage medications | T44 | Tasks | In Tasks |
 | MED-06 | Manage medications | T44 | Tasks | In Tasks |
 | MED-07 | Manage medications | T44 | Tasks | In Tasks |

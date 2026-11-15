@@ -114,7 +114,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T40: Preservar Configuracoes como Perfil
 - [x] T41: Conectar rota de login
 - [x] T42: Conectar rota de cadastro
-- [ ] T43: Preservar acesso legado aos lembretes
+- [x] T43: Preservar acesso legado aos lembretes
 
 ### Phase 7: Final route and quality
 
@@ -1037,10 +1037,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/meus-lembretes/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas NAV-05, MED-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T43 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/meus-lembretes/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas NAV-05, MED-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T43 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 3 passed, 0 failed. Four legacy URLs show equivalent headings/content without 404; Ver horários selects ID 8 despite identical names, retains tomorrow doses and offers actual Ver Hoje navigation. Unknown ID has successful empty agenda; malformed ID has explicit error without unrelated doses. Phase Build, npx tsc --noEmit and lint --max-warnings=0 all passed sequentially. No product deviation. User-approved legacy regression migration metadata is included; execution remains with the orchestrator after B7.
 
 ### Phase 7: Final route and quality
 
@@ -1137,7 +1139,7 @@ Proof: run functional | WUX_NAV_03 public purpose precedes account creation and 
 Proof: run functional | WUX_NAV_04
 
 **C5** - WHEN a pessoa usa um endereço legado de medicamentos, lembretes, histórico ou configurações THEN the web client SHALL manter acesso ao conteúdo equivalente sem erro 404. (NAV-05, AC 5; T43).
-Proof: run functional | ✓ WUX_NAV_05
+Proof: run functional | WUX_NAV_05
 
 **C6** - IF uma rota protegida é aberta sem sessão validada THEN the web client SHALL exigir login antes de permitir preenchimento de tratamento ou exibir dados privados. (NAV-06, AC 6; T38).
 Proof: run functional | WUX_NAV_06
@@ -1185,7 +1187,7 @@ Proof: run coverage | WUX_MED_02
 Proof: run coverage | WUX_MED_03
 
 **C21** - WHEN a pessoa usa Ver horários de um medicamento THEN the web client SHALL abrir suas doses com filtro pelo ID do medicamento selecionado. (MED-04, AC 4; T43).
-Proof: run functional | ✓ WUX_MED_04
+Proof: run functional | WUX_MED_04
 
 **C22** - WHEN a pessoa usa Editar medicamento THEN the web client SHALL abrir um formulário preenchido do item selecionado, sem navegar para a lista de doses. (MED-05, AC 5; T44).
 Proof: run functional | ✓ WUX_MED_05
@@ -1687,7 +1689,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 - T47 deve reconciliar metadados temporais antigos de spec/design/context, como implementação não iniciada ou restrição documental da etapa original, com as aprovações posteriores. Não alterar critérios aprovados por esse ajuste de estado.
 - Conferir propagação de falhas na linha Build final: nenhum build vermelho pode ser mascarado pelo sucesso de um comando posterior. Preservar todas as verificações.
 - Existem 44 arquivos de skills/lock preexistentes staged. Não limpar, ocultar nem incluir esses arquivos para satisfazer clean-tree. Se o gate exigir árvore limpa, verificar o HEAD comprometido em worktree isolada e registrar esse limite honestamente. Fingerprint do índice desses caminhos no despacho B6, SHA-256 dos registros git ls-files --stage unidos por LF: 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8.
-- Testes funcionais legados ainda esperam formulário monolítico, botão Salvar lembrete e capturas anteriores. As autorizações específicas em context.md cobrem T24, alarme e URL paginada; não autorizam enfraquecer testes nem migrar todas as asserções antigas sem resolver conflitos concretos.
+- O usuário aprovou a migração dos testes e capturas legados com "Sim, migrar testes e capturas". Executar o plano [legacy-regression-migration.md](legacy-regression-migration.md) após B7, conforme [context.md](context.md), preservando todos os cenários e asserções de negócio.
 
 ## Final Verification Protocol
 
@@ -1701,7 +1703,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 ## Handoff
 
-**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; T35–T47 permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
+**Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; B6 concluiu T35–T43 com 42 testes funcionais próprios e quatro integrações novas; T44–T47 permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
 **Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc, 39 testes novos + 27 regressões. B5 /root/batch_05 returned, T28–T34 e paginação adicional em 981ae3a, 38 testes novos, gate final 89/89 e Build/tipos/lint verdes. B6 /root/batch_06, T35–T43, HEAD 981ae3a, envio autorizado em 2026-11-14; aguardando retorno. Nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
@@ -1714,4 +1716,4 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 
 **Observed gate**: 2026-11-14, `npx vitest run tests/integration/web-ux-alarm-pagination.test.tsx tests/integration/web-ux-t11.test.tsx tests/integration/web-ux-t33.test.tsx tests/integration/web-ux-t34.test.tsx tests/integration/backend-session.test.tsx tests/integration/cadastro-feedback-reminders.test.tsx tests/integration/cadastro-feedback-doses.test.tsx tests/integration/lembretes.test.tsx tests/integration/cadastro-feedback-alarm.test.tsx tests/integration/seguranca-alerta.test.tsx --reporter=verbose` passed 89/89 across 10 files, 0 failed. Build (Webpack, 11/11 pages) already passed for these production sources; final `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` passed after the approved test correction. No test case removed or skipped; exact URL expectation was updated only after approval.
 
-**B6 contract**: useContext(LembreteContext).getLembretes(): Promise<boolean|void>, real implementation returns true only after a complete refresh and false on failure/stale/401. TreatmentWizard still requires refresh:()=>Promise<unknown>; its route adapter must refresh the global alarm, return a failed-read result when appropriate, and never repeat a confirmed POST. Screens expose MedicationEditScreen({medicationId:number}), LoginScreen({returnTo?:string|null}), RegistrationScreen(), ProfileScreen() and HomeScreen(). T35 onward remains unconnected. B5 added 35 task tests plus 3 integration follow-up tests; local commits only; 44 preexisting staged skill files remain untouched.
+**B6 contract**: useContext(LembreteContext).getLembretes(): Promise<boolean|void>, real implementation returns true only after a complete refresh and false on failure/stale/401. TreatmentWizard still requires refresh:()=>Promise<unknown>; its route adapter must refresh the global alarm, return a failed-read result when appropriate, and never repeat a confirmed POST. Screens expose MedicationEditScreen({medicationId:number}), LoginScreen({returnTo?:string|null}), RegistrationScreen(), ProfileScreen() and HomeScreen(). T35–T43 now connect the nine routes; T44 and final quality tasks remain pending. B5 added 35 task tests plus 3 integration follow-up tests; local commits only; 44 preexisting staged skill files remain untouched.

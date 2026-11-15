@@ -100,6 +100,13 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - O usuário respondeu: "Sim, alinhar o teste à paginação". Atualização dessa expectativa autorizada, mantendo as demais verificações e sem reduzir cenários.
 - Após a interrupção de uso, o usuário confirmou a retomada: "continue". O gate final selecionado passou em 89 casos, sem falhas, seguido de TypeScript e lint global verdes. O Build das fontes corrigidas também passou. O commit corretivo inclui a expectativa aprovada e preserva os 44 arquivos de skills já preparados no índice. B6 ainda não foi despachado.
 
+### Legacy Regression Migration Authorization
+
+- Em 2026-11-14, o usuário respondeu: "Sim, migrar testes e capturas" à execução do plano em `legacy-regression-migration.md`.
+- A migração adapta retorno `/hoje`, cadastro em etapas, combobox e capturas do novo visual. Preserva todos os cenários, payloads, timeout de 15 segundos, idempotência e isolamento; falhas reais devem ser corrigidas no produto.
+- Capturas devem ser inspecionadas nos tamanhos originais antes de atualizar referências. Não há autorização para reduzir tolerância de qualidade, aumentar máscaras, eliminar casos ou declarar E2E real com API interceptada.
+- O trabalho permanece sequencial: concluir B6 e B7, migrar as regressões autorizadas em lotes suplementares conforme necessário e executar as provas e a verificação independente finais.
+
 ## Deferred Ideas
 
 - Implementação e correções do app mobile.
