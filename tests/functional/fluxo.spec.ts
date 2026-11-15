@@ -659,7 +659,14 @@ test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o 
 // ---------------------------------------------------------------------------
 
 function cartaoDeMedicamento(page: Page, nome: string) {
-  return page.locator("div.p-5", { has: page.getByRole("heading", { name: nome }) });
+  return page.getByRole("article").filter({ has: page.getByRole("heading", { name: nome, exact: true }) });
+}
+
+async function confirmarExclusao(page: Page, nome: string) {
+  await cartaoDeMedicamento(page, nome).getByRole("button", { name: "Excluir medicamento", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: `Excluir ${nome}?`, exact: true });
+  await expect(dialog).toContainText(`Excluir ${nome} também remove todas as suas doses.`);
+  await dialog.getByRole("button", { name: "Confirmar exclusão", exact: true }).click();
 }
 
 test("FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não envia DELETE", async ({
@@ -671,31 +678,29 @@ test("FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não
   await seedSession(page);
   await page.goto("/meus-medicamentos");
 
-  const titulos = page.locator("h3").filter({ hasText: "Teste" });
+  const titulos = page.getByRole("article").getByRole("heading");
   await expect(titulos).toHaveText(["Dipirona Teste", "Amoxicilina Teste", "Losartana Teste"]);
   await expect(cartaoDeMedicamento(page, "Dipirona Teste")).toContainText("30 mg");
   const [lista] = api.calls("GET", "/remedio/me");
   expect(lista.headers["authorization"]).toBe(AUTH_HEADER);
 
   // Cancelar a confirmação: nada é enviado e a lista permanece.
-  dialogs.confirmResult = false;
-  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByTitle("Excluir medicamento").click();
-  await expect.poll(() => dialogs.messages).toEqual([
-    "confirm: Tem certeza que deseja excluir este medicamento?",
-  ]);
+  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByRole("button", { name: "Excluir medicamento", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Excluir Amoxicilina Teste?" })).toContainText("Excluir Amoxicilina Teste também remove todas as suas doses.");
+  await page.getByRole("button", { name: "Cancelar", exact: true }).click();
   expect(api.calls("DELETE", /^\/remedio\//)).toHaveLength(0);
   await expect(titulos).toHaveCount(3);
 
   // Confirmar: DELETE /remedio/2 e só esse cartão sai da lista.
-  dialogs.confirmResult = true;
-  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByTitle("Excluir medicamento").click();
+  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByRole("button", { name: "Excluir medicamento", exact: true }).click();
+  await page.getByRole("button", { name: "Confirmar exclusão", exact: true }).click();
   await expect(titulos).toHaveText(["Dipirona Teste", "Losartana Teste"]);
   const deletes = api.calls("DELETE", /^\/remedio\//);
   expect(deletes).toHaveLength(1);
   expect(deletes[0].path).toBe("/remedio/2");
   expect(deletes[0].headers["authorization"]).toBe(AUTH_HEADER);
   expect(deletes[0].body).toBeUndefined();
-  expect(dialogs.messages).toHaveLength(2);
+  expect(dialogs.messages).toEqual([]);
 });
 
 test("FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento na lista", async ({
@@ -708,14 +713,12 @@ test("FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento n
   await seedSession(page);
   await page.goto("/meus-medicamentos");
 
-  const titulos = page.locator("h3").filter({ hasText: "Teste" });
+  const titulos = page.getByRole("article").getByRole("heading");
   await expect(titulos).toHaveCount(3);
-  await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
+  await confirmarExclusao(page, "Dipirona Teste");
 
-  await expect.poll(() => dialogs.messages).toEqual([
-    "confirm: Tem certeza que deseja excluir este medicamento?",
-  ]);
-  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
+  expect(dialogs.messages).toEqual([]);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(titulos).toHaveCount(3);
   expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
 });
@@ -729,8 +732,8 @@ test("FN-05 TEST-03 sem medicamentos mostra o estado vazio com o atalho de cadas
   await seedSession(page);
   await page.goto("/meus-medicamentos");
 
-  await expect(page.getByRole("heading", { name: "Nenhum medicamento encontrado" })).toBeVisible();
-  await page.getByRole("button", { name: "Adicionar medicamento" }).click();
+  await expect(page.getByText("Nenhum medicamento cadastrado", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Adicionar medicamento", exact: true }).click();
   await expect(page).toHaveURL(/\/novo-medicamento$/);
 });
 
@@ -889,14 +892,12 @@ for (const status of STATUS_DE_ERRO) {
     await seedSession(page);
     await page.goto("/meus-medicamentos");
 
-    const titulos = page.locator("h3").filter({ hasText: "Teste" });
+    const titulos = page.getByRole("article").getByRole("heading");
     await expect(titulos).toHaveCount(3);
-    await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
+    await confirmarExclusao(page, "Dipirona Teste");
 
-    await expect.poll(() => dialogs.messages).toEqual([
-      "confirm: Tem certeza que deseja excluir este medicamento?",
-    ]);
-    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao excluir medicamento: ${MENSAGEM_POR_STATUS[status]}`);
+    expect(dialogs.messages).toEqual([]);
+    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(MENSAGEM_POR_STATUS[status]);
     await expect(titulos).toHaveCount(3);
     expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
   });
@@ -912,12 +913,12 @@ test("FN-07 FN-05 TEST-03 excluir medicamento com rede interrompida avisa a falh
   await seedSession(page);
   await page.goto("/meus-medicamentos");
 
-  const titulos = page.locator("h3").filter({ hasText: "Teste" });
+  const titulos = page.getByRole("article").getByRole("heading");
   await expect(titulos).toHaveCount(3);
-  await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
+  await confirmarExclusao(page, "Dipirona Teste");
 
-  await expect.poll(() => dialogs.messages).toEqual(["confirm: Tem certeza que deseja excluir este medicamento?"]);
-  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
+  expect(dialogs.messages).toEqual([]);
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(titulos).toHaveCount(3);
 });
 
@@ -929,10 +930,10 @@ test("FN-07 FN-05 TEST-03 excluir medicamento com 401 remove a sessão e leva ao
   api.on("DELETE", "/remedio/1", { status: 401, json: { message: "Token expirado" } });
   await seedSession(page);
   await page.goto("/meus-medicamentos");
-  await expect(page.locator("h3").filter({ hasText: "Teste" })).toHaveCount(3);
+  await expect(page.getByRole("article").getByRole("heading")).toHaveCount(3);
   page.on("dialog", (dialog) => void dialog.accept().catch(ignorarCorridaDeNavegacao));
 
-  await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
+  await confirmarExclusao(page, "Dipirona Teste");
 
   await expect(page).toHaveURL(/\/login$/);
   await expectSemSessao(page);
@@ -952,10 +953,9 @@ test("FN-07 FN-05 TEST-03 falha ao carregar medicamentos e lembretes mostra a me
   ).toHaveText("Ao carregar medicamentos: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(page.locator(".animate-spin")).toHaveCount(0);
 
+  api.on("GET", "/dose/me", { status: 500 });
   await page.goto("/meus-lembretes");
-  await expect(
-    page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
-  ).toHaveText("Ao carregar medicamentos dos lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
+  await expect(page.locator("main").getByRole("alert")).toHaveText("Ao carregar doses: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(page.locator(".animate-spin")).toHaveCount(0);
 });
 
