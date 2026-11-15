@@ -143,7 +143,7 @@ Observed 2026-11-15 at HEAD 24b8cc0: 75 selected/executed, 25 passed, 50 failed,
 | tests/integration/cadastro-feedback-catalog.test.tsx | 11 (5/6) | 11 | PASS; all cases and manual failure gestures | 33ecfa0 |
 | tests/integration/auth.test.tsx | 9 (7/2) | 11 | PASS; 9 preserved + 2 late identity cases | 3dce2ee |
 | tests/integration/cadastro-feedback-login.test.tsx | 17 (0/17) | 17 | PASS; every original parameter/scenario preserved | 7eaf560 |
-| tests/integration/cadastro-feedback-session.test.tsx | 15 (13/2) | 15 | PASS; only Next search-param mock added | current atomic commit; root resolves hash |
+| tests/integration/cadastro-feedback-session.test.tsx | 15 (13/2) | 15 | PASS; only Next search-param mock added | 8fb0f94 |
 
 CardBusca gate: `npx vitest run tests/unit/CardBusca.test.tsx --reporter=verbose`, 25/25 on 2026-11-15. Only accessible selectors changed; all payload/timer/filter/duplicate assertions remain. No product change.
 
@@ -170,3 +170,108 @@ Session assumption: useSearchParams is required by the real /login wrapper; no s
 Final command: `npx vitest run tests/unit/CardBusca.test.tsx tests/integration/cadastro-feedback-catalog.test.tsx tests/integration/auth.test.tsx tests/integration/cadastro-feedback-login.test.tsx tests/integration/cadastro-feedback-session.test.tsx --reporter=verbose`. Result on 2026-11-15: 5 files, 79/79 passed, 0 failed/skipped. Baseline was 75 (25 pass/50 fail); all 75 expanded original names/IDs are still selected, plus 4 cases (2 catalog keyboard/manual, 2 late login identity). Final `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` passed. No additional production changes after the fresh T41 Build and 10/10 browser run.
 
 Preserved index: 44 stage records; SHA-256 of git ls-files --stage joined by LF (no terminal newline) is 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8. Commits use exact --only paths. R2/R3, aggregate proofs, independent walk, Verifier and final feature validation remain root-owned; no push/deploy, real API writes, backend/mobile edits or snapshots.
+
+## R2 Baseline Inventory
+
+Observed 2026-11-15 at HEAD 8fb0f94: 76 selected/executed, 24 passed, 52 failed, 0 skipped. Every expanded original name/ID and parameter row follows, collected before edits. Treatment has 30 direct legacy component cases and one route case.
+
+### tests/integration/backend-cadastro.test.tsx
+
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-01 BEAPI-12 sucesso envia DTO exato sem Bearer para http://cadastro.test.invalid
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-01 BEAPI-12 sucesso envia DTO exato sem Bearer para https://outro-cadastro.test.invalid/
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 BEAPI-12 validação 400 apresenta cada mensagem do array como item de lista
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 status 429 com corpo ilegível exibe os segundos do Retry-After sem reenvio
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 status 429 sem Retry-After oferece espera sem inventar duração
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 número 429 no texto de uma validação 400 não vira rate limit
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 indisponibilidade 503 apresenta mensagem segura
+- BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend BEAPI-02 indisponibilidade rede apresenta mensagem segura
+
+### tests/integration/cadastro-feedback-registration.test.tsx
+
+- NET-01 cadastro feedback REG-02 origem isolada ausente ou inválida: 
+- NET-01 cadastro feedback REG-02 origem isolada ausente ou inválida: origem inválida
+- NET-01 cadastro feedback REG-04 mostra loading e desabilita imediatamente
+- NET-01 cadastro feedback REG-06 clique e Enter simultâneos enviam apenas uma requisição
+- NET-01 cadastro feedback REG-06 gestos reais de clique e Enter preservam um único envio pendente
+- NET-01 cadastro feedback REG-10 prazo exato e mensagem integral com headers pendente
+- NET-01 cadastro feedback REG-10 prazo exato e mensagem integral com body pendente
+- NET-01 cadastro feedback REG-11 recupera botão e preserva campos após 400
+- NET-01 cadastro feedback REG-11 recupera botão e preserva campos após 409
+- NET-01 cadastro feedback REG-11 recupera botão e preserva campos após 500
+- NET-01 cadastro feedback REG-11 recupera botão e preserva campos após network
+- NET-01 cadastro feedback REG-11 recupera botão e preserva campos após timeout
+- NET-01 cadastro feedback REG-12 conclusão antiga durante nova tentativa não navega nem altera loading
+- NET-01 cadastro feedback REG-07 HTTP201 publica registered e navega sem login automático
+- NET-01 cadastro feedback REG-07 status 200 não confirma cadastro
+- NET-01 cadastro feedback REG-07 status 202 não confirma cadastro
+- NET-01 cadastro feedback REG-07 status 204 não confirma cadastro
+- NET-01 cadastro feedback REG-10 deadline termina exatamente em15000ms e aborta
+- NET-01 cadastro feedback REG-10 deadline inclui leitura do corpo
+- NET-01 cadastro feedback REG-10 abort do fetch provocado pelo deadline mantém mensagem de timeout
+- NET-01 cadastro feedback REG-12 ignora sucesso tardio mesmo se fetch ignorar abort
+- NET-01 cadastro feedback REG-12 unmount aborta sem publicar erro ou aviso
+- NET-01 cadastro feedback REG-13 validação local não deixa botão bloqueado
+- NET-01 cadastro feedback REG-14 HTTP400 apresenta mensagens públicas
+- NET-01 cadastro feedback REG-14 HTTP409 apresenta mensagens públicas
+- NET-01 cadastro feedback REG-14 HTTP422 apresenta mensagens públicas
+- NET-01 cadastro feedback REG-15 HTTP429 respeita Retry-After zero
+- NET-01 cadastro feedback REG-16 HTTP500 recupera botão sem conteúdo técnico
+- NET-01 cadastro feedback REG-16 HTTP503 recupera botão sem conteúdo técnico
+- NET-01 cadastro feedback ERR-01 REG-16 falha de rede permite nova tentativa e limpa erro anterior
+- NET-01 cadastro feedback REG-13 timeout não reenvia automaticamente depois de restaurar botão
+- NET-01 cadastro feedback REG-17 JSON inválido201 não navega nem expõe diagnóstico
+
+### tests/integration/seguranca-cadastro.test.tsx
+
+- IT-08 SEC-01 — privacidade do cadastro real IT-08 SEC-01 cadastro válido mantém payload e navegação sem expor sentinelas
+- IT-08 SEC-01 — privacidade do cadastro real IT-08 SEC-01 cadastro inválido mantém validação sem enviar nem expor sentinelas
+- IT-08 SEC-01 — privacidade do cadastro real IT-08 SEC-01 falha HTTP mantém payload e mensagem Email já cadastrado: sentinela-cadastro… sem log pessoal
+- IT-08 SEC-01 — privacidade do cadastro real IT-08 SEC-01 falha HTTP mantém payload e mensagem Erro ao cadastrar. Tente novamente. sem log pessoal
+- IT-08 SEC-01 — privacidade do cadastro real IT-08 SEC-01 falha de rede mantém mensagem genérica sem imprimir Error sensível
+
+### tests/integration/tratamento.test.tsx
+
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 campos vazios mostram as mensagens e não enviam mutação
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 valores zero mostram 'maior que zero' e não enviam mutação
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 horário inicial ausente mostra a mensagem e não envia mutação
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 nome em branco mostra a mensagem e não envia mutação
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 fixture válida prossegue e limpa as mensagens de erro
+- UT-12 TEST-01 validação do formulário de tratamento UT-12 TEST-01 sem token não envia mutação e pede login
+- UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo) UT-13 TEST-01 início 04/11 08:00, intervalo 8h, duração 1 dia: doses 04/11 08:00, 04/11 16:00 e 05/11 00:00; 05/11 08:00 exclusivo
+- UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo) UT-13 TEST-01 08:00, a cada 12h, 1 dia -> 08:00 e 20:…
+- UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo) UT-13 TEST-01 08:00, a cada 24h, 1 semana -> 7 doses …
+- UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo) UT-13 TEST-01 BEAPI-08 [regressão D-01] doses locais >= 21:00 mantêm o dia local: 10:30, a cada 6h, 1 dia
+- UT-13 TEST-01 cálculo de horários (04/11/2026, America/Sao_Paulo) UT-13 TEST-01 BEAPI-08 [regressão D-02] horaInicio de 30/11/2026 08:00 enviada com relógio em 31/10/2026
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 BEAPI-07 ordem POST tratamento -> GET lista; cada dose usa o ID criado e o horário esperado; recarga exibe os dados persistidos
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 payload do medicamento preserva unidades, cor, validade e valores do formulário
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #FF0000 é enviada como 'Vermelho'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #4B00FF é enviada como 'Azul'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #FFFF00 é enviada como 'Amarelo'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #FFA500 é enviada como 'Laranja'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #00CFFF é enviada como 'Azul claro'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #FFFFFF é enviada como 'Branco'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #00FF7F é enviada como 'Verde claro'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #006400 é enviada como 'Verde escuro'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #000000 é enviada como 'Preto'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 cor #DA70D6 é enviada como 'Orquídea'
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 campos opcionais vazios usam os padrões atuais (motivo, classificação, observação)
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 após o sucesso o formulário volta aos valores iniciais
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 enquanto grava, o botão mostra 'Salvando...' e fica desabilitado; duplo clique envia um único cadastro
+- IT-05 TEST-02 criação do tratamento (formulário + contextos + cliente real) IT-05 TEST-02 fluxo pela página: medicamento vindo da busca (?medicamento=) preenche nome e tipo e vai no payload
+- IT-05 BEAPI-07 BEAPI-08 falha no tratamento IT-05 BEAPI-07 falha transacional {"remedio":"erro500"} não cria nada, não recarrega e preserva o formulário
+- IT-05 BEAPI-07 BEAPI-08 falha no tratamento IT-05 BEAPI-07 falha transacional {"doses":"erro500"} não cria nada, não recarrega e preserva o formulário
+- IT-05 BEAPI-07 BEAPI-08 falha no tratamento IT-05 BEAPI-07 envelope sem data.remedio não confirma sucesso
+- IT-05 BEAPI-07 BEAPI-08 falha no tratamento IT-13 BEAPI-07 FE-08 reenvio após resposta incerta não duplica o medicamento
+
+## R2 Execution
+
+| File | Baseline pass/fail | Final executed | Result | Commit |
+| --- | --- | --- | --- | --- |
+| backend-cadastro.test.tsx | 0/8 | 8 | PASS; all original scenarios | this atomic commit |
+| cadastro-feedback-registration.test.tsx | 0/32 | pending | pending | pending |
+| seguranca-cadastro.test.tsx | 0/5 | pending | pending | pending |
+| tratamento.test.tsx | 24/7 | pending | pending | pending |
+
+Account assumptions: approved two-step UI preserves the exact registration DTO, status/error matrix, secrecy and 15,000ms lifecycle. Files: the three registration tests, minimal registration gesture helper and migration/status docs. Per-file success: all original cases selected, exact payload/status/messages/cancellation assertions retained with new controls. DTO message arrays are now presented as the complete joined alert rather than list items.
+
+R2 backend registration gate: `npx vitest run tests/integration/backend-cadastro.test.tsx --reporter=verbose`, 8/8 passed. Shared helpers fill account controls, click Continuar, fill personal controls and click Criar conta. Exact DTO (including whitespace in password), no Bearer, stored-token preservation, status-driven rate limit, all public DTO messages and diagnostic exclusion retained. Original test names remain inventory identifiers; array presentation asserts the exact joined message approved by the new screen. No product change.

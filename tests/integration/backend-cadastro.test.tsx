@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fillRegistrationAccount, fillRegistrationPersonal, submitRegistration } from '../helpers/registration';
 import Cadastro from '@/app/cadastro/page';
 import {
   arrayErrorFixture,
@@ -31,16 +32,10 @@ function jsonResponse(body: unknown, status: number, headers: HeadersInit = {}) 
 }
 
 function submit() {
-  const { container } = render(<Cadastro />);
-  fireEvent.change(screen.getByPlaceholderText('Nome e sobrenome'), { target: { value: payload.nome } });
-  fireEvent.change(screen.getByPlaceholderText('exemplo@email.com'), { target: { value: payload.email } });
-  fireEvent.change(screen.getByPlaceholderText('000.000.000-00'), { target: { value: '000.000.000-00' } });
-  fireEvent.change(screen.getByPlaceholderText('00000-000'), { target: { value: '01001-000' } });
-  fireEvent.change(container.querySelector('input[type="date"]')!, { target: { value: payload.dataNasc } });
-  for (const input of screen.getAllByPlaceholderText('********')) {
-    fireEvent.change(input, { target: { value: payload.senha } });
-  }
-  fireEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
+  render(<Cadastro />);
+  fillRegistrationAccount(payload.email, payload.senha);
+  fillRegistrationPersonal({ ...payload, cpf: '000.000.000-00', cep: '01001-000' });
+  submitRegistration();
 }
 
 describe('BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos do backend', () => {
@@ -83,8 +78,7 @@ describe('BEAPI-01 BEAPI-02 BEAPI-12 — cadastro pelo cliente real e contratos 
 
     submit();
 
-    const items = within(await screen.findByRole('alert')).getAllByRole('listitem');
-    expect(items.map((item) => item.textContent)).toEqual(body.message);
+    expect((await screen.findByRole('alert')).textContent).toBe((body.message as string[]).join(' '));
     expect(router.push).not.toHaveBeenCalled();
     expect(fetch).toHaveBeenCalledTimes(1);
   });
