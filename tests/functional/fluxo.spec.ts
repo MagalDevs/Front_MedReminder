@@ -387,22 +387,33 @@ async function preencherTratamento(
   page: Page,
   opcoes: { horaInicial: string; intervalo: string; duracao: string },
 ): Promise<void> {
-  await page.getByPlaceholder("30").fill("30");
-  await page.locator("select").nth(0).selectOption("comp"); // unidade da caixa
-  await page.locator('input[type="date"]').nth(0).fill("2027-01-31"); // validade
-  await page.locator('[style*="rgb(75, 0, 255)"]').click(); // cor Azul (#4B00FF)
-  await page.getByPlaceholder("Dor de cabeça").fill("Rinite sintética");
-  await page.locator('input[type="time"]').fill(opcoes.horaInicial);
-  await page.getByPlaceholder("500").fill("500");
-  await page.locator("select").nth(1).selectOption("ml"); // unidade da dosagem
-  await page.getByPlaceholder("6 (horas)").fill(opcoes.intervalo);
-  await page.getByPlaceholder("7", { exact: true }).fill(opcoes.duracao);
-  await page.getByPlaceholder("Tomar após as refeições").fill("Tomar após as refeições");
+  await preencherMedicamento(page);
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await page.getByLabel("Primeira dose", { exact: true }).fill(`2026-11-04T${opcoes.horaInicial}`);
+  await page.getByLabel("Quantidade por dose", { exact: true }).fill("500");
+  await page.getByLabel("Unidade por dose", { exact: true }).fill("ml");
+  await page.getByLabel("Intervalo em horas", { exact: true }).fill(opcoes.intervalo);
+  await page.getByLabel("Duração", { exact: true }).fill(opcoes.duracao);
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+}
+
+async function preencherMedicamento(page: Page) {
+  const busca = page.getByRole("combobox", { name: "Buscar no catálogo" });
+  await busca.fill("funed lor");
+  await page.getByRole("option", { name: /FUNED LORATADINA/ }).click();
+  await page.getByLabel("Quantidade em estoque", { exact: true }).fill("30");
+  await page.getByLabel("Unidade do estoque", { exact: true }).fill("comp");
+  await page.getByLabel("Validade", { exact: true }).fill("2027-01-31");
+  await page.getByLabel("URL da foto", { exact: true }).fill("https://example.com/image.jpg");
+  await page.locator("label").filter({ has: page.getByRole("radio", { name: "Azul", exact: true }) }).click();
+  await expect(page.getByRole("radio", { name: "Azul", exact: true })).toBeChecked();
+  await page.getByLabel("Motivo", { exact: true }).fill("Rinite sintética");
+  await page.getByLabel("Observação", { exact: true }).fill("Tomar após as refeições");
 }
 
 function respostaTratamento(call: ApiCall, id = 777): Reply {
   const body = call.body as { remedio: object; doses: string[] };
-  return { json: { data: { remedio: { ...body.remedio, id }, doses: body.doses.map((data_dose, index) => ({ id: index + 1, data_dose })) } } };
+  return { json: { data: { remedio: { ...body.remedio, id }, doses: body.doses.map((data_dose, index) => ({ id: index + 1, remedioId: id, tomado: false, data_dose })) } } };
 }
 
 const URL_NOVO_TRATAMENTO = "/novo-medicamento?medicamento=FUNED%20LORATADINA";
@@ -417,11 +428,12 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
+  await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
 
-  await expect.poll(() => dialogs.messages).toEqual(["alert: Lembrete e doses salvos com sucesso!"]);
+  await expect(page.getByText("Tratamento salvo.", { exact: true })).toBeVisible();
+  expect(dialogs.messages).toEqual([]);
 
   // Medicamento: método, URL, headers e body.
   const [criarRemedio] = api.calls("POST", "/tratamento");
@@ -431,7 +443,7 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
     nome: "FUNED LORATADINA",
     quantidadeCaixa: 30,
     dataValidade: "2027-01-31",
-    quantidadeDiaria: 8, // recebe o INTERVALO em horas (ver achado cardCadastrar.tsx:225)
+    quantidadeDiaria: 3, // FORM-05: ceil(24 / 8), mantendo os instantes exatos
     foto: "https://example.com/image.jpg",
     classificacao: "ANTI-HISTAMINICOS SISTEMICOS",
     horaInicio: "2026-11-04T11:00:00.000Z",
@@ -460,8 +472,17 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
     "POST /tratamento",
     "GET /dose/me", // atualização após gravar
   ]);
-  await expect(page.getByPlaceholder("Dipirona")).toHaveValue("");
-  await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
+  const summary = page.getByRole("region", { name: "Tratamento confirmado" });
+  await expect(summary).toContainText("FUNED LORATADINA");
+  await expect(summary.locator("time")).toHaveAttribute("datetime", "2026-11-04T11:00:00.000Z");
+  await page.getByRole("button", { name: "Adicionar outro medicamento" }).click();
+  // O parâmetro vigente preenche somente o nome do novo rascunho pristine.
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
+  for (const label of ["Classificação", "Quantidade em estoque", "Unidade do estoque", "Validade", "URL da foto", "Motivo", "Observação"]) {
+    await expect(page.getByLabel(label, { exact: true })).toHaveValue("");
+  }
+  await expect(page.getByRole("radio", { checked: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Continuar", exact: true })).toBeEnabled();
 });
 
 test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutação", async ({
@@ -473,16 +494,23 @@ test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutaç
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
-
-  await expect.poll(() => dialogs.messages).toEqual([
-    "alert: Por favor, corrija os erros no formulário",
-  ]);
-  await expect(page.getByText("Dosagem é obrigatória")).toBeVisible();
-  await expect(page.getByText("Quantidade é obrigatória")).toBeVisible();
-  await expect(page.getByText("Duração é obrigatória")).toBeVisible();
-  await expect(page.getByText("Intervalo é obrigatório")).toBeVisible();
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(page.getByText("Informe um inteiro positivo seguro", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Quantidade em estoque", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  await preencherMedicamento(page);
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await page.getByLabel("Primeira dose", { exact: true }).fill("");
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(page.getByText("Informe uma quantidade maior que zero, usando vírgula ou ponto para decimais", { exact: true })).toBeVisible();
+  await expect(page.getByText("Data ou horário da primeira dose inválido", { exact: true })).toBeVisible();
+  await page.getByLabel("Primeira dose", { exact: true }).fill("2026-11-04T08:00");
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(page.getByLabel("Intervalo em horas", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  await page.getByLabel("Intervalo em horas", { exact: true }).fill("8");
+  await page.getByRole("button", { name: "Continuar", exact: true }).click();
+  await expect(page.getByLabel("Duração", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  expect(dialogs.messages).toEqual([]);
+  expect(api.calls("POST", "/tratamento")).toHaveLength(0);
   expect(api.calls("POST", "/remedio")).toHaveLength(0);
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
 });
@@ -497,10 +525,11 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "22:00", intervalo: "8", duracao: "1" });
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
-  await expect.poll(() => dialogs.messages.length).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
+  await expect(page.getByText("Tratamento salvo.", { exact: true })).toBeVisible();
+  expect(dialogs.messages).toEqual([]);
 
   // Correto: 04/11 22:00, 05/11 06:00 e 05/11 14:00 locais.
   const [criarDoses] = api.calls("POST", "/tratamento");
@@ -516,14 +545,16 @@ test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ pag
   api.on("POST", "/tratamento", (call, index) => index === 0 ? { abort: true } : respostaTratamento(call, 779));
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
-  const salvar = page.getByRole("button", { name: "Salvar lembrete" });
+  const salvar = page.getByRole("button", { name: "Salvar tratamento", exact: true });
   await salvar.click();
-  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
-  await expect(salvar).toBeEnabled();
-  await salvar.click();
-  await expect.poll(() => dialogs.messages.at(-1)).toBe("alert: Lembrete e doses salvos com sucesso!");
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível confirmar o resultado. Tente a mesma intenção novamente ou consulte os registros.");
+  const retry = page.getByRole("button", { name: "Tentar novamente", exact: true });
+  await expect(retry).toBeEnabled();
+  await retry.click();
+  await expect(page.getByText("Tratamento salvo.", { exact: true })).toBeVisible();
+  expect(dialogs.messages).toEqual([]);
   const calls = api.calls("POST", "/tratamento");
   expect(calls).toHaveLength(2);
   expect(calls[0].headers["idempotency-key"]).toMatch(/^[a-zA-Z0-9._:-]{1,128}$/);
@@ -943,20 +974,21 @@ for (const status of STATUS_DE_ERRO) {
     api.on("POST", "/tratamento", { status });
     await seedSession(page);
     await page.goto(URL_NOVO_TRATAMENTO);
-    await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+    await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
     await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
 
-    await page.getByRole("button", { name: "Salvar lembrete" }).click();
+    await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
 
-    const mensagem = MENSAGEM_POR_STATUS[status];
+    expect(api.calls("POST", "/tratamento")).toHaveLength(1);
     // Uma falha da operação atômica produz um aviso.
-    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao salvar tratamento: ${mensagem}`);
+    await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível confirmar o resultado. Tente a mesma intenção novamente ou consulte os registros.");
     expect(dialogs.messages).toEqual([]);
-    await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Tentar novamente", exact: true })).toBeEnabled();
     expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
     expect(dialogs.messages.join("\n")).not.toContain("sucesso");
     // Formulário preservado para nova tentativa.
-    await expect(page.getByPlaceholder("500")).toHaveValue("500");
+    await expect(page.getByRole("region", { name: "Revisão", exact: true })).toContainText("500 ml");
+    await expect(page.getByRole("button", { name: "Salvar tratamento", exact: true })).toHaveCount(0);
   });
 }
 
@@ -969,13 +1001,13 @@ test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria dose
   api.on("POST", "/tratamento", { abort: true });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
 
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
+  await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
 
-  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
-  await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível confirmar o resultado. Tente a mesma intenção novamente ou consulte os registros.");
+  await expect(page.getByRole("button", { name: "Tentar novamente", exact: true })).toBeEnabled();
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
   expect(dialogs.messages.join("\n")).not.toContain("sucesso");
 });
@@ -989,10 +1021,10 @@ test("FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticaç
   api.on("POST", "/tratamento", { status: 401, json: { message: "Token expirado" } });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
 
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
+  await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
 
   await expect(page).toHaveURL(/\/login$/);
   await expectSemSessao(page);
@@ -1010,14 +1042,14 @@ test("FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso", async (
   api.on("POST", "/tratamento", { status: 500 });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
-  await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+  await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
 
-  await page.getByRole("button", { name: "Salvar lembrete" }).click();
+  await page.getByRole("button", { name: "Salvar tratamento", exact: true }).click();
 
-  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
+  await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Não foi possível confirmar o resultado. Tente a mesma intenção novamente ou consulte os registros.");
   expect(dialogs.messages).toEqual([]);
-  await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Tentar novamente", exact: true })).toBeEnabled();
   expect(dialogs.messages.join("\n")).not.toContain("sucesso");
   // Sem sucesso: nenhuma reconsulta de lembretes além da carga inicial.
   expect(api.calls("GET", "/dose/me")).toHaveLength(1);
@@ -1063,7 +1095,7 @@ for (const viewport of VIEWPORTS) {
 
     test(`FN-06 TEST-03 novo-medicamento ${viewport.width}px`, async ({ page }) => {
       await page.goto(URL_NOVO_TRATAMENTO);
-      await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
+      await expect(page.getByLabel("Nome do medicamento", { exact: true })).toHaveValue("FUNED LORATADINA");
       await expect(page.getByPlaceholder("Dipirona")).toHaveValue("FUNED LORATADINA");
       const datas = page.locator('input[type="date"]');
       const hora = page.locator('input[type="time"]');

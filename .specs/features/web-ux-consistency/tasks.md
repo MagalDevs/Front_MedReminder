@@ -1785,3 +1785,5 @@ R2 complete: backend registration 218c833 (8/8), registration feedback d4780f6 (
 ### R3 progress
 
 Navigation/catalog migration: 13/13 original browser scenarios passed, fresh Build on 3102, original names/IDs retained. Full R3 inventory of 129 scenarios and twelve inspected original PNGs recorded in legacy-regression-migration.md. Treatment/dose/medication/visual/nonfunctional migrations remain.
+
+R3 treatment journey complete: original 10/10 scenarios, exact payload/schedule/idempotency and full validation preserved through the three approved stages. No product change; dose/medication/visual/nonfunctional journeys remain.
