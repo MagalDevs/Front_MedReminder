@@ -1777,3 +1777,7 @@ Backend registration migrated: 8/8 original cases, exact DTO/status/security ass
 R2 feedback registration complete: 32/32 original cases; exact deadline, body pending, abort, concurrent gestures, late/abandon and no automatic retry retained. Privacy and treatment route remain.
 
 R2 privacy registration complete: 5/5 originals, payload/private-console/storage checks retained. Treatment route and final R2 gates remain.
+
+### R2 return checkpoint
+
+R2 complete: backend registration 218c833 (8/8), registration feedback d4780f6 (32/32), privacy 6496a4a (5/5), treatment route in this atomic commit (31/31). Final four-file gate 76/76; every original expanded fullName is preserved (missing/added both empty), 30 direct legacy treatment scenarios unchanged. Final TypeScript and global lint0 pass. No product defect or production edit; no Build/browser exception needed. 44 preexisting stage records retain the recorded SHA-256. Root continues R3 and final verification.

@@ -269,8 +269,8 @@ Observed 2026-11-15 at HEAD 8fb0f94: 76 selected/executed, 24 passed, 52 failed,
 | --- | --- | --- | --- | --- |
 | backend-cadastro.test.tsx | 0/8 | 8 | PASS; all original scenarios | 218c833 |
 | cadastro-feedback-registration.test.tsx | 0/32 | 32 | PASS; all original scenarios | d4780f6 |
-| seguranca-cadastro.test.tsx | 0/5 | 5 | PASS; all original scenarios | this atomic commit |
-| tratamento.test.tsx | 24/7 | pending | pending | pending |
+| seguranca-cadastro.test.tsx | 0/5 | 5 | PASS; all original scenarios | 6496a4a |
+| tratamento.test.tsx | 24/7 | 31 | PASS; 30 legacy unchanged + 1 route migrated | this atomic commit |
 
 Account assumptions: approved two-step UI preserves the exact registration DTO, status/error matrix, secrecy and 15,000ms lifecycle. Files: the three registration tests, minimal registration gesture helper and migration/status docs. Per-file success: all original cases selected, exact payload/status/messages/cancellation assertions retained with new controls. DTO message arrays are now presented as the complete joined alert rather than list items.
 
@@ -279,3 +279,13 @@ R2 backend registration gate: `npx vitest run tests/integration/backend-cadastro
 R2 registration feedback gate: `npx vitest run tests/integration/cadastro-feedback-registration.test.tsx --reporter=verbose`, 32/32 passed. All original names and expanded parameter rows retained. Deadline checks remain 14,999 + 1ms for headers/body, with timeout copy, actual AbortSignal, late/abandon/new-attempt isolation and no automatic retry. Form-submit events retain concurrent-submit guard coverage; the separate userEvent click/Enter journey uses new controls. REG-11 checks every personal field, returns to Conta to check email/password/confirmation, then continues. REG-13 mismatch is now exercised on Conta, where confirmation belongs. REG-14 additionally asserts the entire joined DTO message exactly. No product change.
 
 R2 privacy gate: `npx vitest run tests/integration/seguranca-cadastro.test.tsx --reporter=verbose`, 5/5 passed. Sentinels across all five console methods, nested objects and Error stack remain unchanged; exact request fields, no auto-login/storage and server/network failure checks remain. The invalid-confirmation case checks the associated inline error and aria-invalid on Conta before any request; valid cases continue through Dados pessoais. Exact serialized object order follows the approved DTO writer while every literal field value remains independently expected. No product change.
+
+### R2 treatment route and final gate
+
+Assumption: only the page journey migrated; the 30 direct CardCadastrar component cases and their assertions remain unchanged. Files: tratamento.test.tsx and migration/status docs. Success: route uses real AuthProvider, TreatmentDraftBoundary and LembreteProvider, catalog gesture, all three stages, literal exact payload and refreshed list. The minimal harness now routes API calls by URL.pathname so the existing collector query is accepted; route assertions verify both reads use exactly ?limit=100&order=ASC&page=1. Local matchMedia fixture supports the real AppShell. All unexpected API paths still reject.
+
+Per-file gate: `npx vitest run tests/integration/tratamento.test.tsx --reporter=verbose`, 31/31 passed. The incoming name remains asserted before actual selection; the option gesture fills classification. Required stock unit/photo/color are supplied through controls. The route asserts decimal 1,5 -> canonical 1.5 mg, ceil(24/8)=3, literal three ISO instants with exclusive end, exact metadata, Bearer/key, persistent success and reloaded rows. The old blocking-alert expectation is now the approved persistent confirmation and an explicit no-alert check. All legacy idempotency, transactional failure, timing, payload and double-submit cases are intact.
+
+Final four-file command: `npx vitest run tests/integration/backend-cadastro.test.tsx tests/integration/cadastro-feedback-registration.test.tsx tests/integration/seguranca-cadastro.test.tsx tests/integration/tratamento.test.tsx --reporter=verbose --reporter=json --outputFile=.specs/features/web-ux-consistency/r2-final.json`. On 2026-11-15: 4 files, 76/76 passed, 0 failed/skipped. Programmatic comparison of final fullName entries against the pre-edit expanded inventory: 76 original, 76 final, missing=[], added=[]. Temporary reporter JSON removed after comparison. `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` both exit 0.
+
+R2 made no production edits and found no product defect, so no Build/browser exception was required. No R3, snapshot, backend/mobile, real API, DB, push or deploy activity. The 44 preexisting stage records remain unchanged, SHA-256 of LF-joined git ls-files --stage records (no terminal newline): 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8. Root retains R3, final walk/proofs and independent verification.

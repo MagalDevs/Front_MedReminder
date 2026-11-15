@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest"
 import ConfigurarLembrete from "@/app/components/CardCadastrar/cardCadastrar";
 import { AuthProvider, useAuth } from "@/app/contexts/AuthContext";
 import { LembreteContext, LembreteProvider } from "@/app/contexts/lembreteContext";
+import TreatmentDraftBoundary from "@/app/features/web-ux/contexts/TreatmentDraftBoundary";
 import Pagina from "@/app/novo-medicamento/page";
 import { API_URL } from "@/app/utils/api";
 import { treatmentResponseFixture, getProfileFixture, type TreatmentRequest } from "../fixtures/backend-contracts";
@@ -87,7 +88,7 @@ function criarApi(config: Config = {}) {
       if (!url.startsWith(API_URL)) {
         throw new Error(`Fetch fora da API simulada: ${metodo} ${url}`);
       }
-      const caminho = url.slice(API_URL.length);
+      const caminho = new URL(url).pathname;
       chamadas.push({ metodo, caminho, corpo, cabecalhos });
 
       if (metodo === "GET" && caminho === "/dose/me") {
@@ -266,6 +267,7 @@ let alerta: MockInstance<(mensagem?: unknown) => void>;
 
 beforeEach(() => {
   // Isolamento: relógio, fuso, sessão, alert e logs de erro esperados.
+  vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: true, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() })));
   instalarRelogio();
   expect(new Date().getTimezoneOffset()).toBe(180);
   sessao();
@@ -639,27 +641,46 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
   it("IT-05 TEST-02 fluxo pela página: medicamento vindo da busca (?medicamento=) preenche nome e tipo e vai no payload", async () => {
     parametrosBusca.atual = new URLSearchParams("medicamento=Dipirona");
     const api = criarApi();
-    const { container } = render(
+    render(
       <AuthProvider>
-      <EstadoSessao />
-        <LembreteProvider>
-          <Pagina />
-        </LembreteProvider>
+        <EstadoSessao />
+        <TreatmentDraftBoundary>
+          <LembreteProvider><Pagina /><ListaLembretes /></LembreteProvider>
+        </TreatmentDraftBoundary>
       </AuthProvider>,
     );
-
-    // CSV simulado: o item "DIPIRONA" é selecionado e o formulário recebe nome e tipo.
-    await waitFor(() => expect(screen.getByPlaceholderText("Dipirona")).toHaveValue("DIPIRONA"));
-    expect(screen.getByPlaceholderText("Analgésico")).toHaveValue("Analgésico");
-
-    preencher(container, { ...VALIDOS, nome: undefined });
-    await salvar();
-
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
-    expect((api.posts("/tratamento")[0].corpo as TreatmentRequest).remedio).toMatchObject({
-      nome: "DIPIRONA",
-      classificacao: "Analgésico",
+    await aguardarSessao();
+    // The route preserves the incoming name; selecting the real CSV option adds its classification.
+    expect(await screen.findByLabelText('Nome do medicamento')).toHaveValue('Dipirona');
+    fireEvent.change(screen.getByRole('combobox', { name: 'Buscar no catálogo' }), { target: { value: 'Dipirona' } });
+    fireEvent.click(await screen.findByRole('option', { name: 'DIPIRONA Analgésico' }));
+    await waitFor(() => expect(screen.getByLabelText('Nome do medicamento')).toHaveValue('DIPIRONA'));
+    expect(screen.getByLabelText('Classificação')).toHaveValue('Analgésico');
+    const fill = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    fill('Quantidade em estoque', '30'); fill('Unidade do estoque', 'comprimidos'); fill('Validade', '2027-12-31'); fill('URL da foto', 'https://example.test/dipirona.png');
+    fireEvent.click(screen.getByRole('radio', { name: 'Azul' }));
+    expect(api.rotulos()).toEqual(['GET /dose/me']);
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByRole('list', { name: 'Etapas do cadastro' }).querySelector('[aria-current="step"]')).toHaveTextContent('Tratamento');
+    fill('Quantidade por dose', '1,5'); fill('Unidade por dose', 'mg'); fill('Primeira dose', '2026-11-04T08:00'); fill('Intervalo em horas', '8'); fill('Duração', '1');
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByRole('list', { name: 'Etapas do cadastro' }).querySelector('[aria-current="step"]')).toHaveTextContent('Revisão');
+    expect(screen.getByText('America/Sao_Paulo')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar tratamento' }));
+    expect(await screen.findByText('Tratamento salvo.')).toBeInTheDocument();
+    expect(alerta).not.toHaveBeenCalled();
+    expect(api.rotulos()).toEqual(['GET /dose/me', 'POST /tratamento', 'GET /dose/me']);
+    const reads = vi.mocked(fetch).mock.calls.filter(([input]) => String(input).includes('/dose/me'));
+    expect(reads.map(([input]) => new URL(String(input)).search)).toEqual(['?limit=100&order=ASC&page=1', '?limit=100&order=ASC&page=1']);
+    const posts = api.posts('/tratamento');
+    expect(posts).toHaveLength(1);
+    expect(posts[0].corpo).toEqual({
+      remedio: { nome: 'DIPIRONA', classificacao: 'Analgésico', quantidadeCaixa: 30, unidadeMedida: 'comprimidos', dataValidade: '2027-12-31', foto: 'https://example.test/dipirona.png', cor: 'Azul', motivo: 'Não especificado', observacao: '', quantidadeDose: '1.5 mg', quantidadeDiaria: 3, quantidadeDias: 1, horaInicio: '2026-11-04T11:00:00.000Z' },
+      doses: ['2026-11-04T11:00:00.000Z', '2026-11-04T19:00:00.000Z', '2026-11-05T03:00:00.000Z'],
     });
+    expect(posts[0].cabecalhos.get('Authorization')).toBe('Bearer token-sintetico');
+    expect(posts[0].cabecalhos.get('Idempotency-Key')).toBeTruthy();
+    expect(within(screen.getByRole('list', { name: 'lembretes-recarregados' })).getAllByRole('listitem').map(item => item.textContent)).toEqual(['DIPIRONA|2026-11-04T11:00:00.000Z', 'DIPIRONA|2026-11-04T19:00:00.000Z', 'DIPIRONA|2026-11-05T03:00:00.000Z']);
   });
 });
 
