@@ -139,6 +139,9 @@ Observed 2026-11-15 at HEAD 24b8cc0: 75 selected/executed, 25 passed, 50 failed,
 
 | File | Baseline executed (pass/fail) | Migrated executed | Result | Commit |
 | --- | --- | --- | --- | --- |
-| tests/unit/CardBusca.test.tsx | 23 (0/23) | 25 | PASS; 23 preserved + ACCESS-02 and FORM-02 | current atomic commit; root resolves hash |
+| tests/unit/CardBusca.test.tsx | 23 (0/23) | 25 | PASS; 23 preserved + ACCESS-02 and FORM-02 | f413988 |
+| tests/integration/cadastro-feedback-catalog.test.tsx | 11 (5/6) | 11 | PASS; all cases and manual failure gestures | current atomic commit; root resolves hash |
 
 CardBusca gate: `npx vitest run tests/unit/CardBusca.test.tsx --reporter=verbose`, 25/25 on 2026-11-15. Only accessible selectors changed; all payload/timer/filter/duplicate assertions remain. No product change.
+
+Catalog feedback gate: `npx vitest run tests/integration/cadastro-feedback-catalog.test.tsx --reporter=verbose`, 11/11. Combobox selectors and FORM-17 manual gestures across all five existing failure parameters; original assertions retained.
