@@ -107,7 +107,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 ### Phase 6: Existing route migration
 
 - [x] T35: Conectar página inicial à nova entrada
-- [ ] T36: Disponibilizar rota Hoje
+- [x] T36: Disponibilizar rota Hoje
 - [ ] T37: Conectar rota Medicamentos
 - [ ] T38: Conectar cadastro de medicamento
 - [ ] T39: Conectar rota Histórico
@@ -890,10 +890,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/hoje/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas DAY-01, DAY-03, DAY-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T36 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/hoje/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas DAY-01, DAY-03, DAY-05 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T36 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate with isolated config: 6 passed, 0 failed. Local ordering/tie IDs, next plus overdue, empty links, partial/read retry, delayed/unavailable session recovery and anonymous guard asserted. Shared guard preserves spinner and omits private content until validated; remembers internal initial target, leaves AuthProvider logout reset intact. 3 affected IT-03 integration cases passed (test-name selection, remaining cases unmodified). Supporting synthetic fixture keeps unexpected API requests blocked. No product deviation.
 
 ### T37: Conectar rota Medicamentos
 
@@ -1135,19 +1137,19 @@ Proof: run functional | ✓ WUX_NAV_07
 Proof: run nonfunctional | ✓ WUX_NAV_08
 
 **C9** - WHEN a pessoa abre Hoje THEN the web client SHALL listar as doses do dia local ordenadas pelo instante previsto crescente, com desempate por ID. (DAY-01, AC 1; T36).
-Proof: run functional | ✓ WUX_DAY_01
+Proof: run functional | WUX_DAY_01
 
 **C10** - WHEN uma dose é apresentada THEN the web client SHALL exibir nome do medicamento, quantidade com unidade, data, hora prevista em HH:mm e estado conforme Product Rules. (DAY-02, AC 2; T26).
 Proof: run coverage | WUX_DAY_02
 
 **C11** - WHEN há doses Programadas no dia THEN the web client SHALL identificar como próxima dose a de menor instante futuro, sem ocultar as doses Atrasadas. (DAY-03, AC 3; T36).
-Proof: run functional | ✓ WUX_DAY_03
+Proof: run functional | WUX_DAY_03
 
 **C12** - WHEN o relógio cruza um horário previsto ou meia-noite local com a página visível THEN the web client SHALL recalcular os estados e o conjunto do dia em até um segundo, recalculando também ao retomar uma aba oculta antes de aceitar registro. (DAY-04, AC 4; T10).
 Proof: run coverage | WUX_DAY_04
 
 **C13** - WHEN Hoje recebe lista vazia com sucesso THEN the web client SHALL exibir “Nenhuma dose prevista para hoje” com ações para Histórico e Adicionar medicamento. (DAY-05, AC 5; T36).
-Proof: run functional | ✓ WUX_DAY_05
+Proof: run functional | WUX_DAY_05
 
 **C14** - WHEN a pessoa abre Histórico THEN the web client SHALL apresentar doses até o relógio atual em ordem decrescente, com a data explicitamente rotulada como horário previsto. (DAY-06, AC 6; T39).
 Proof: run functional | ✓ WUX_DAY_06
