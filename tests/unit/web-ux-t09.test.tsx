@@ -3,6 +3,15 @@ import { buildSchedule, buildTreatmentPayload, DOSE_AMOUNT_ERROR, parseDoseAmoun
 
 const draft: TreatmentDraft = { medicationName: 'Medicamento A', classification: '', stock: '30', expiry: '2027-12-31', amount: '1,5', unit: 'mg', boxUnit: 'comp', color: 'Azul', reason: '', notes: '', photo: 'https://example.com/image.jpg', firstDoseAt: '2026-11-13T08:00:00-03:00', intervalHours: '6', duration: '1', durationUnit: 'days' };
 describe('treatment model', () => {
+  it('T9 canonical transport uses the same trimmed stock unit color and photo URL as validation', () => {
+    const padded = { ...draft, boxUnit: '  comprimidos  ', color: '  Azul  ', photo: '  https://example.test/photo.png  ' };
+    expect(validateDraft(padded).valid).toBe(true);
+    expect(buildTreatmentPayload(padded).remedio).toMatchObject({ unidadeMedida: 'comprimidos', cor: 'Azul', foto: 'https://example.test/photo.png' });
+    const boundary = { ...padded, boxUnit: ` ${'u'.repeat(50)} `, color: ` ${'c'.repeat(50)} `, photo: ` https://example.test/${'p'.repeat(234)} ` };
+    expect(validateDraft(boundary).valid).toBe(true);
+    const payload = buildTreatmentPayload(boundary).remedio;
+    expect(payload.unidadeMedida).toBe('u'.repeat(50)); expect(payload.cor).toBe('c'.repeat(50)); expect(payload.foto).toBe(`https://example.test/${'p'.repeat(234)}`); expect(payload.foto).toHaveLength(255);
+  });
   it('WUX_FORM_07', () => {
     for (const amount of ['0', '-1', '1e3', '1,5.0', '1.5,0', 'abc', '1 mg', '1,000,000', 'Infinity', '']) {
       expect(parseDoseAmount(amount), amount).toBeNull();

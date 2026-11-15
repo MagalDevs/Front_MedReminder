@@ -86,7 +86,7 @@ export function buildTreatmentPayload(draft: TreatmentDraft) {
     quantidadeCaixa: Number(draft.stock), dataValidade: draft.expiry,
     quantidadeDiaria: schedule.dailyUpperBound, quantidadeDias: schedule.durationDays,
     horaInicio: schedule.firstDoseAt, quantidadeDose: `${result.amount!.canonical} ${draft.unit.trim()}`,
-    unidadeMedida: draft.boxUnit, cor: draft.color, motivo: draft.reason.trim() || 'Não especificado',
-    observacao: draft.notes.trim(), foto: draft.photo,
+    unidadeMedida: draft.boxUnit.trim(), cor: draft.color.trim(), motivo: draft.reason.trim() || 'Não especificado',
+    observacao: draft.notes.trim(), foto: draft.photo.trim(),
   }, doses: schedule.doses };
 }
