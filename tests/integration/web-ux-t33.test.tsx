@@ -50,6 +50,58 @@ it('T33 confirmed alarm registration synchronizes screen and legacy snapshots wh
   await waitFor(() => expect(screen.getByLabelText('Legado')).toHaveTextContent('false')); fireEvent.click(screen.getByRole('button', { name: /Registrar dose de/ }));
   await screen.findByText('Dose registrada. A atualização dos lembretes não foi concluída.'); expect(screen.getByLabelText('Espelho')).toHaveTextContent('1:true,2:false'); expect(screen.getByLabelText('Legado')).toHaveTextContent('true'); expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(1);
 });
+it('T33 real alarm queue retains its own confirmed dialog for failed refresh and GET-only retry, then advances and honors an external confirmation', async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-14T12:00:00-03:00'));
+  const rows = [
+    { ...stored, data_dose: '2026-11-14T12:01:00-03:00' },
+    { ...stored, id: 2, data_dose: '2026-11-14T12:02:00-03:00' },
+  ];
+  let failedRefresh = true;
+  vi.mocked(fetch).mockImplementation(async (input, init) => {
+    const path = new URL(String(input)).pathname;
+    if (path === '/usuario/me') return json({ data: { id: 7, nome: 'Ana' } });
+    if (init?.method === 'PUT') {
+      const item = rows.find(row => path === `/dose/${row.id}`)!;
+      expect(JSON.parse(String(init.body))).toEqual({ tomado: true });
+      item.tomado = true;
+      return json({ data: item });
+    }
+    expect(path).toBe('/dose/me');
+    return rows[0].tomado && failedRefresh ? json({}, 503) : json({ data: rows });
+  });
+  const queuedViews: DoseView[] = rows.map(row => ({ kind: 'complete', id: row.id, medicationId: 17, medicationName: props.medicamentoNome, expectedAt: row.data_dose, amountLabel: props.quantidadeDose, registered: false }));
+  function ExternalConfirmation() {
+    const auth = useAuth();
+    const mutation = useDoseMutation({ identity: auth.identityKey, doses: queuedViews });
+    const legacy = useContext(LembreteContext)!;
+    return <><button onClick={() => void mutation.mutate(2, true)}>Confirmar segunda pela tela</button><output aria-label="Fila confirmada">{legacy.lembretes.map(row => `${row.id}:${row.tomado}`).join(',')}</output></>;
+  }
+  render(<AuthProvider><LembreteProvider><ExternalConfirmation /><AlertaLembretes /></LembreteProvider></AuthProvider>);
+  await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+  expect(screen.getByLabelText('Fila confirmada')).toHaveTextContent('1:false,2:false');
+  await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+  fireEvent.click(screen.getByRole('button', { name: 'Registrar dose de Vitamina A às 12:01' }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+  const dialog = screen.getByRole('dialog', { name: 'Lembrete de dose' });
+  expect(dialog).toHaveTextContent('Dose registrada. A atualização dos lembretes não foi concluída.');
+  expect(dialog).toHaveTextContent('Ao carregar lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
+  expect(screen.getByLabelText('Fila confirmada')).toHaveTextContent('1:true,2:false');
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(1);
+  const reads = vi.mocked(fetch).mock.calls.filter(([input]) => new URL(String(input)).pathname === '/dose/me').length;
+  failedRefresh = false;
+  fireEvent.click(screen.getByRole('button', { name: 'Atualizar lembretes' }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([input]) => new URL(String(input)).pathname === '/dose/me')).toHaveLength(reads + 1);
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(1);
+  await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+  expect(screen.getByRole('button', { name: 'Registrar dose de Vitamina A às 12:02' })).toBeEnabled();
+  fireEvent.click(screen.getByText('Confirmar segunda pela tela'));
+  await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByLabelText('Fila confirmada')).toHaveTextContent('1:true,2:true');
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(2);
+});
 it('T33 screen confirmations preserve another pending ID, sync legacy and cannot be undone by an older GET', async () => {
   let readLegacy!: (response: Response) => void; let readCollection!: (response: Response) => void; let writeOther!: (response: Response) => void; let reads = 0;
   vi.mocked(fetch).mockImplementation(async (input, init) => {

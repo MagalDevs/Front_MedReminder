@@ -11,8 +11,8 @@ import Dialog from '../ui/Dialog';
 import Button from '../ui/Button';
 import { medicationColors } from '../ui/ColorSelector';
 
-interface alarmeDoseProps { dataHora: string; medicamentoNome: string; quantidadeDose: string; cor: string; id: number; onClose: () => void }
-export default function Lembrete({ dataHora, medicamentoNome, quantidadeDose, cor, id, onClose }: alarmeDoseProps) {
+interface alarmeDoseProps { dataHora: string; medicamentoNome: string; quantidadeDose: string; cor: string; id: number; onClose: () => void; onConfirmed?: () => void }
+export default function Lembrete({ dataHora, medicamentoNome, quantidadeDose, cor, id, onClose, onConfirmed }: alarmeDoseProps) {
   const context = useContext(LembreteContext);
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const key = `${token}:${id}`;
@@ -43,6 +43,7 @@ export default function Lembrete({ dataHora, medicamentoNome, quantidadeDose, co
         if (!current()) return;
         if (response?.data?.id !== id || response.data.tomado !== true || !isDoseInstant(response.data.data_dose) || Date.parse(response.data.data_dose) !== Date.parse(dataHora)) throw new RequestContractError();
         setConfirmedKey(key);
+        onConfirmed?.();
         if (context?.identityKey) publishDoseConfirmation({ identityKey: context.identityKey, id, expectedAt: dataHora, registered: true });
       }
       const refreshed = await context?.getLembretes();

@@ -221,7 +221,7 @@ function usarAgenda(api: FakeApi, agenda: Agenda): void {
     const id = Number(call.path.split("/")[2]);
     const alvo = agenda.doses.find((d) => d.id === id);
     if (alvo) alvo.tomado = true;
-    return { json: { message: "Dose atualizada", data: { id, tomado: true } } };
+    return { json: { message: "Dose atualizada", data: { ...alvo, id, tomado: true } } };
   });
   api.on("DELETE", /^\/remedio\/\d+$/, (call) => {
     const id = Number(call.path.split("/")[2]);
@@ -570,14 +570,12 @@ test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ pag
 
 /** Selo de status de uma linha (exclui as <option> dos filtros). */
 function selo(page: Page, estado: "Tomado" | "Pendente") {
-  return page.locator("span.rounded-full", { hasText: new RegExp(`^${estado}$`) });
+  return page.getByRole("article").locator("p").filter({ hasText: new RegExp(`^${estado === "Tomado" ? "Registrada" : "Atrasada"}$`) });
 }
 
 function linhaDeLembrete(page: Page, nome: string, estado: "Tomado" | "Pendente") {
-  return page.locator("div.p-4", {
-    has: page.getByRole("heading", { name: nome }),
-    hasText: estado,
-  });
+  return page.getByRole("article").filter({ has: page.getByRole("heading", { name: nome, exact: true }) })
+    .filter({ has: page.locator("p").filter({ hasText: new RegExp(`^${estado === "Tomado" ? "Registrada" : "Atrasada"}$`) }) });
 }
 
 test("FN-04 TEST-03 lembretes: filtros de período, status e medicamento mostram só os registros esperados", async ({
@@ -586,39 +584,34 @@ test("FN-04 TEST-03 lembretes: filtros de período, status e medicamento mostram
 }) => {
   usarAgenda(api, criarAgenda());
   await seedSession(page);
-  await page.goto("/meus-lembretes");
-
+  // Às 21h as quatro doses de hoje já pertencem ao Histórico, inclusive a das 20h.
+  await page.clock.setFixedTime(new Date("2026-11-04T21:00:00-03:00"));
+  await page.goto("/historico");
   const titulos = page.locator("h3").filter({ hasText: "Teste" });
-  const medicamento = page.locator("select").nth(0);
-  const status = page.locator("select").nth(1);
-  const periodo = page.locator("select").nth(2);
-  await expect(titulos).toHaveCount(4); // "Hoje": 101, 102, 103, 104
-
-  // Status.
-  await status.selectOption({ label: "Pendente" });
+  const medicamento = page.getByLabel("Medicamento", { exact: true });
+  const status = page.getByLabel("Estado", { exact: true });
+  const periodo = page.getByLabel("Período", { exact: true });
+  await periodo.selectOption("today");
+  await expect(titulos).toHaveCount(4);
+  expect(await page.locator("[data-dose-id]").evaluateAll(rows => rows.map(row => row.getAttribute("data-dose-id")))).toEqual(["104", "103", "102", "101"]);
+  await status.selectOption("unregistered");
   await expect(titulos).toHaveCount(3);
   await expect(selo(page, "Tomado")).toHaveCount(0);
-  await status.selectOption({ label: "Tomado" });
+  await status.selectOption("registered");
   await expect(titulos).toHaveCount(1);
   await expect(titulos).toHaveText("Dipirona Teste");
-  await status.selectOption({ label: "Todos os status" });
-
-  // Medicamento.
-  await medicamento.selectOption({ label: "Amoxicilina Teste" });
+  await status.selectOption("all");
+  await medicamento.selectOption("2");
   await expect(titulos).toHaveCount(2);
   await expect(titulos.filter({ hasText: "Amoxicilina Teste" })).toHaveCount(2);
-
-  // Período: a dose de ontem (Losartana) só entra com "Últimos 7 dias".
-  await medicamento.selectOption({ label: "Losartana Teste" });
+  await medicamento.selectOption("3");
   await expect(titulos).toHaveCount(0);
-  await expect(page.getByText("Tente ajustar os filtros para ver mais resultados.")).toBeVisible();
-  await periodo.selectOption({ label: "Últimos 7 dias" });
+  await expect(page.getByText("Nenhuma dose corresponde aos filtros", { exact: true })).toBeVisible();
+  await periodo.selectOption("7days");
   await expect(titulos).toHaveCount(1);
   await expect(titulos).toHaveText("Losartana Teste");
-  await expect(page.getByText("03/11/2026")).toBeVisible();
-
-  // Filtros são locais: nenhuma consulta nova além das de carregamento (somente GET).
-  expect(api.requests.every((call) => call.method === "GET")).toBe(true);
+  await expect(page.locator("article time")).toHaveText("03/11/2026 às 09:00");
+  expect(api.requests.every(call => call.method === "GET")).toBe(true);
 });
 
 test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o estado após a nova consulta", async ({
@@ -627,16 +620,16 @@ test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o 
 }) => {
   usarAgenda(api, criarAgenda());
   await seedSession(page);
-  await page.goto("/meus-lembretes");
+  await page.goto("/hoje");
 
   // Só doses pendentes cujo horário já passou têm botão (102 e 103; 104 é às 20h).
-  const botoes = page.getByRole("button", { name: /Marcar como tomado/ });
+  const botoes = page.getByRole("button", { name: /Registrar dose/ });
   await expect(botoes).toHaveCount(2);
   await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2); // provider + página
   const carregamentos = api.calls("GET", "/dose/me").length;
 
   await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
-    .getByRole("button", { name: /Marcar como tomado/ })
+    .getByRole("button", { name: /Registrar dose/ })
     .click();
 
   // O item muda de estado e o botão dele some.
@@ -650,13 +643,15 @@ test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o 
   expect(puts[0].body).toEqual({ tomado: true });
   expect(puts[0].headers["authorization"]).toBe(AUTH_HEADER);
   expect(puts[0].headers["content-type"]).toContain("application/json");
-  // A confirmação é seguida de uma nova consulta de lembretes.
+  // A confirmação atualiza a tela imediatamente; uma recarga confirma a consulta posterior.
+  expect(api.calls("GET", "/dose/me")).toHaveLength(carregamentos);
+  await page.reload();
+  await expect(selo(page, "Tomado")).toHaveCount(2);
   const sequencia = api.sequence();
   expect(sequencia.slice(sequencia.indexOf("PUT /dose/102"))).toEqual([
-    "PUT /dose/102",
-    "GET /dose/me",
+    "PUT /dose/102", "GET /usuario/me", "GET /dose/me", "GET /dose/me",
   ]);
-  expect(api.calls("GET", "/dose/me")).toHaveLength(carregamentos + 1);
+  expect(api.calls("GET", "/dose/me")).toHaveLength(carregamentos + 2);
 });
 
 // ---------------------------------------------------------------------------
@@ -815,20 +810,20 @@ for (const status of STATUS_DE_ERRO) {
     usarAgenda(api, agenda);
     api.on("PUT", "/dose/102", { status });
     await seedSession(page);
-    await page.goto("/meus-lembretes");
-    await expect(page.getByRole("button", { name: /Marcar como tomado/ })).toHaveCount(2);
+    await page.goto("/hoje");
+    await expect(page.getByRole("button", { name: /Registrar dose/ })).toHaveCount(2);
     await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2); // provider + página
     const carregamentos = api.calls("GET", "/dose/me").length;
     await expect(selo(page, "Tomado")).toHaveCount(1);
     const tomadosAntes = await selo(page, "Tomado").count();
 
     await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
-      .getByRole("button", { name: /Marcar como tomado/ })
+      .getByRole("button", { name: /Registrar dose/ })
       .click();
 
     await expect(
       page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
-    ).toHaveText(`Ao confirmar dose: ${MENSAGEM_POR_STATUS[status]}`);
+    ).toHaveText(`Dose de Dipirona Teste: ${MENSAGEM_POR_STATUS[status]}`);
     await expect(page.locator(".animate-spin")).toHaveCount(0);
     await expect(selo(page, "Tomado")).toHaveCount(tomadosAntes); // nenhuma nova confirmação
     await expect(linhaDeLembrete(page, "Dipirona Teste", "Pendente")).toBeVisible();
@@ -846,19 +841,19 @@ test("FN-07 FN-04 TEST-03 marcar dose tomada com rede interrompida mostra a mens
   usarAgenda(api, agenda);
   api.on("PUT", "/dose/102", { abort: true });
   await seedSession(page);
-  await page.goto("/meus-lembretes");
+  await page.goto("/hoje");
   await expect.poll(() => api.calls("GET", "/dose/me").length).toBe(2);
   const carregamentos = api.calls("GET", "/dose/me").length;
   await expect(selo(page, "Tomado")).toHaveCount(1);
   const tomadosAntes = await selo(page, "Tomado").count();
 
   await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
-    .getByRole("button", { name: /Marcar como tomado/ })
+    .getByRole("button", { name: /Registrar dose/ })
     .click();
 
   await expect(
     page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)")),
-  ).toHaveText("Ao confirmar dose: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
+  ).toHaveText("Dose de Dipirona Teste: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(selo(page, "Tomado")).toHaveCount(tomadosAntes);
   await expect(linhaDeLembrete(page, "Dipirona Teste", "Pendente")).toBeVisible();
   expect(agenda.doses.find((dose) => dose.id === 102)?.tomado).toBe(false);
@@ -873,10 +868,10 @@ test("FN-07 FN-04 TEST-03 marcar dose tomada com 401 remove a sessão e leva ao 
   usarAgenda(api, criarAgenda());
   api.on("PUT", "/dose/102", { status: 401, json: { message: "Token expirado" } });
   await seedSession(page);
-  await page.goto("/meus-lembretes");
+  await page.goto("/hoje");
 
   await linhaDeLembrete(page, "Dipirona Teste", "Pendente")
-    .getByRole("button", { name: /Marcar como tomado/ })
+    .getByRole("button", { name: /Registrar dose/ })
     .click();
 
   await expect(page).toHaveURL(/\/login$/);
@@ -1138,13 +1133,13 @@ alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET'
   api.on('GET', '/dose/me', () => confirmed && failedRefresh
     ? { status: 503, json: {} }
     : { json: { data: [{ ...row, tomado: confirmed }] } });
-  api.on('PUT', '/dose/901', () => { confirmed = true; return { json: { data: { id: 901, tomado: true } } }; });
-  await page.goto('/historico');
-  await expect(page.getByRole('heading', { name: 'Alarme Sintético' })).toBeVisible();
+  api.on('PUT', '/dose/901', () => { confirmed = true; return { json: { data: { id: 901, tomado: true, data_dose: row.data_dose } } }; });
+  await page.goto('/hoje');
+  await expect(page.getByRole('article').getByRole('heading', { name: 'Alarme Sintético' })).toBeVisible();
   await page.clock.runFor(2000);
-  await expect(page.getByText('Hora do Medicamento!')).toBeVisible();
-  await page.getByRole('button', { name: 'Medicamento Tomado' }).click();
-  const surface = page.locator('.fixed.inset-0').filter({ hasText: 'Hora do Medicamento!' });
+  await expect(page.getByRole('dialog', { name: 'Lembrete de dose' })).toBeVisible();
+  await page.getByRole('button', { name: 'Registrar dose de Alarme Sintético às 12:00' }).click();
+  const surface = page.getByRole('dialog', { name: 'Lembrete de dose' });
   const alert = surface.getByRole('alert');
   await expect(alert).toBeVisible();
   await expect(alert).toHaveText('Ao carregar lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
@@ -1155,13 +1150,13 @@ alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET'
     return element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
   })).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('f4-alarm-running.png') });
-  await expect(surface.getByRole('status')).toHaveText('Dose confirmada. A atualização dos lembretes não foi concluída.');
+  await expect(surface.getByRole('status')).toHaveText('Dose registrada. A atualização dos lembretes não foi concluída.');
   expect(api.calls('PUT', '/dose/901')).toHaveLength(1);
   expect(api.calls('PUT', '/dose/901')[0].body).toEqual({ tomado: true });
   const reads = api.calls('GET', '/dose/me').length;
   failedRefresh = false;
   await surface.getByRole('button', { name: 'Atualizar lembretes' }).click();
-  await expect(page.getByText('Hora do Medicamento!')).toHaveCount(0);
+  await expect(page.getByRole('dialog', { name: 'Lembrete de dose' })).toHaveCount(0);
   await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveCount(0);
   expect(api.calls('GET', '/dose/me')).toHaveLength(reads + 1);
   expect(api.calls('PUT', '/dose/901')).toHaveLength(1);

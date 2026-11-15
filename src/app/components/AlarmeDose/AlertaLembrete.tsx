@@ -8,6 +8,7 @@ import { isDoseInstant } from '@/app/features/web-ux/domain/agenda';
 type ReminderContext = NonNullable<ContextType<typeof LembreteContext>>;
 function AlarmQueue({ context }: { context: ReminderContext }) {
   const [queue, setQueue] = useState<number[]>([]);
+  const [confirmedHere, setConfirmedHere] = useState<{ id: number; instant: number } | null>(null);
   const displayed = useRef(new Set<number>());
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
   const latest = useRef(context.lembretes);
@@ -28,8 +29,9 @@ function AlarmQueue({ context }: { context: ReminderContext }) {
     }
   }, [context.lembretes]);
   useEffect(() => { const activeTimers = timers.current; return () => { for (const timer of activeTimers.values()) clearTimeout(timer); activeTimers.clear(); }; }, []);
-  const visible = queue.map(id => context.lembretes.find(dose => dose.id === id && !dose.tomado)).find(Boolean);
-  return visible ? <Lembrete key={visible.id} id={visible.id} dataHora={new Date(visible.data_dose).toISOString()} medicamentoNome={visible.remedio.nome} quantidadeDose={visible.remedio.quantidadeDose} cor={visible.remedio.cor} onClose={() => setQueue(previous => previous.filter(id => id !== visible.id))} /> : null;
+  // A confirmação própria mantém o resultado e a recuperação da leitura no diálogo.
+  const visible = queue.map(id => context.lembretes.find(dose => dose.id === id && (!dose.tomado || (id === confirmedHere?.id && new Date(dose.data_dose).getTime() === confirmedHere.instant)))).find(Boolean);
+  return visible ? <Lembrete key={visible.id} id={visible.id} dataHora={new Date(visible.data_dose).toISOString()} medicamentoNome={visible.remedio.nome} quantidadeDose={visible.remedio.quantidadeDose} cor={visible.remedio.cor} onConfirmed={() => setConfirmedHere({ id: visible.id, instant: new Date(visible.data_dose).getTime() })} onClose={() => { setConfirmedHere(null); setQueue(previous => previous.filter(id => id !== visible.id)); }} /> : null;
 }
 export default function AlertaLembretes() {
   const context = useContext(LembreteContext);
