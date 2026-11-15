@@ -118,7 +118,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 ### Phase 7: Final route and quality
 
-- [ ] T44: Disponibilizar edição pelo ID
+- [x] T44: Disponibilizar edição pelo ID
 - [ ] T45: Fechar responsividade e acessibilidade entre rotas
 - [ ] T46: Uniformizar movimento por intenção
 - [ ] T47: Publicar contrato visual do web
@@ -1060,10 +1060,14 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/meus-medicamentos/[id]/editar/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
-- [ ] As provas MED-05, MED-06, MED-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T44 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/meus-medicamentos/[id]/editar/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 3 casos planejados sem correção formal do plano.
+- [x] As provas MED-05, MED-06, MED-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T44 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Execution**: 2026-11-15. Assumption: Next 16 params are awaited; only positive safe decimal IDs reach the existing numeric editor. Files: route adapter, tests/functional/web-ux-t44.spec.ts and status documents. Success: selected item opens, cancel sends no mutation, seven changed metadata fields only, read-only schedule, invalid ID/guest/error recovery.
+
+**Verified**: Chrome browser gate with playwright.web-ux.config.ts, fresh Webpack build, port 3102, workers=1/retries=0: 5 passed, 0 failed. WUX_MED_05/06/07 assert gestures and visible outcomes; invalid IDs, guest login return and failed load are covered. Selector corrections retained expectations (label gesture plus checked state; exact application alert excludes Next announcer; guest has no auth init script). No tests removed, skipped or weakened. No product deviation.
 
 ### T45: Fechar responsividade e acessibilidade entre rotas
 
@@ -1190,13 +1194,13 @@ Proof: run coverage | WUX_MED_03
 Proof: run functional | WUX_MED_04
 
 **C22** - WHEN a pessoa usa Editar medicamento THEN the web client SHALL abrir um formulário preenchido do item selecionado, sem navegar para a lista de doses. (MED-05, AC 5; T44).
-Proof: run functional | ✓ WUX_MED_05
+Proof: run functional | WUX_MED_05 edit opens the selected item and cancel preserves its original values
 
 **C23** - WHEN a pessoa salva a edição THEN the web client SHALL enviar somente nome, classificação, quantidadeCaixa, dataValidade, cor, motivo e observacao alterados pelo usuário, por PUT do ID existente. (MED-06, AC 6; T44).
-Proof: run functional | ✓ WUX_MED_06
+Proof: run functional | WUX_MED_06 save sends only seven changed metadata fields to the existing ID and recovers after failure
 
 **C24** - WHILE a pessoa edita um medicamento existente the web client SHALL apresentar primeira dose, intervalo, duração, unidade e quantidade por dose como somente leitura com a explicação “Esta edição não altera os horários das doses”. (MED-07, AC 7; T44).
-Proof: run functional | ✓ WUX_MED_07
+Proof: run functional | WUX_MED_07 treatment remains read only with the explicit schedule limit
 
 **C25** - WHEN a pessoa solicita excluir THEN the web client SHALL pedir confirmação com o nome do medicamento e informar que a operação também remove suas doses, conforme o serviço existente. (MED-08, AC 8; T17).
 Proof: run coverage | WUX_MED_08
@@ -1704,7 +1708,7 @@ Este plano contém 47 tarefas em sete fases de 6, 7, 7, 7, 7, 9 e 4 tarefas. As 
 ## Handoff
 
 **Settled mid-build:** user: "Sim, corrigir teste e validação" autorizou corrigir o payload exato novo T24 e bloquear cor/unidade ausentes e URL da foto acima de 255 caracteres (2026-11-14; context.md). Spec e adendo aprovados em 2026-11-13; design e Tasks aprovados em 2026-11-14. user: "execução em lotes sequenciais com subagentes". Correção do pré-requisito autorizada com "sim": package.json usa next build --webpack. Gate inicial --execute passou em 2026-11-14, com build, tipos e lint verdes; diagnóstico e limites em baseline.md. B1 concluiu T1–T6, B2 concluiu T7–T13 e B3 concluiu T14–T20 com gates por tarefa e Build/tipos/lint verdes em 2026-11-14. B4 concluiu T21–T27, com 39 testes próprios e regressões afetadas verdes; B5 concluiu T28–T34 com gates por tarefa; B6 concluiu T35–T43 com 42 testes funcionais próprios e quatro integrações novas; T44–T47 permanecem pendentes. Suporte adicional autorizado após T34 concluído: provider legado reutiliza collector T11 para paginação completa, com provas de página 2 e falha parcial; gate final 89/89, tipos/lint verdes. user: "Sim, alinhar o teste à paginação" e "continue" autorizou a expectativa exata de IT07, sem mudar as demais verificações. B4 foi interrompido por limite de uso da sessão e o usuário autorizou a retomada: "continue com o processo". Root aprovou useDoseCollection.ts como suporte coeso de T26/T27, sem alterar os critérios. Na retomada .agents/ e skills-lock.json estão staged (estado preexistente na retomada); preservar índice e conteúdo, usando commits restritos aos caminhos de cada tarefa. LembreteProvider mantém interface legada e usa loadDoseCollection({includeRaw:true}) para todas as páginas; telas novas usam o coletor sem raw e identityKey. Passar array estável de coleção ao useDoseMutation; substituir o snapshot cancela mutações anteriores.
-**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1, 19 testes novos + 4 regressões. B2 /root/batch_02 returned, T7–T13 em f704393, 38 testes novos + 21 regressões. B3 /root/batch_03 returned, T14–T20 em 31da0c9, 31 testes próprios. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc, 39 testes novos + 27 regressões. B5 /root/batch_05 returned, T28–T34 e paginação adicional em 981ae3a, 38 testes novos, gate final 89/89 e Build/tipos/lint verdes. B6 /root/batch_06 concluiu T35–T43 em 2026-11-14; nove commits atômicos, 42 testes funcionais próprios e quatro integrações novas verdes. Suporte adicional de canonicalização validado; retorno final ao root em preparação. Nenhum outro worker ou Verifier despachado.
+**Dispatched:** B1 /root/batch_01 returned, T1–T6 em 7edc5d1. B2 /root/batch_02 returned, T7–T13 em f704393. B3 /root/batch_03 returned, T14–T20 em 31da0c9. B4 /root/batch_04 returned, T21–T27 em 1b7e1bc. B5 /root/batch_05 returned, T28–T34 e paginação em 981ae3a. B6 /root/batch_06 returned, T35–T43 e normalização em e986dab, 42 funcionais novos + 4 integrações + 1 unitário, regressões afetadas e Build/tipos/lint verdes. B7 /root/batch_07, T44–T47, HEAD e986dab, envio autorizado em 2026-11-14; aguardando retorno. Migração de regressões aprovada para depois de B7; nenhum outro worker ou Verifier despachado.
 **Walked:** Não executado. Inspeções da crítica anterior não aprovam as telas ainda não implementadas.
 
 

@@ -404,9 +404,9 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | MED-02 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
 | MED-03 | Manage medications | T25 | Implemented | T25: 6 integration tests passed |
 | MED-04 | Manage medications | T43 | Implemented | T43 browser gate 3 passed |
-| MED-05 | Manage medications | T44 | Tasks | In Tasks |
-| MED-06 | Manage medications | T44 | Tasks | In Tasks |
-| MED-07 | Manage medications | T44 | Tasks | In Tasks |
+| MED-05 | Manage medications | T44 | Implemented | T44 browser gate: 5 passed; MED_05 |
+| MED-06 | Manage medications | T44 | Implemented | T44 browser gate: 5 passed; MED_06 |
+| MED-07 | Manage medications | T44 | Implemented | T44 browser gate: 5 passed; MED_07 |
 | MED-08 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | MED-09 | Manage medications | T17 | Implemented | T17: 4 tests passed |
 | MED-10 | Manage medications | T17 | Implemented | T17: 4 tests passed |
