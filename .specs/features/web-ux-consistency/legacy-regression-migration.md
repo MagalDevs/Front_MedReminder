@@ -40,3 +40,105 @@ Execute only after B7 returns. These are corrective test-migration batches under
 3. R3, browser regression and visual baselines: existing functional/nonfunctional journeys affected by the new routes, beginning with `fluxo.spec.ts`. Perform the new UI gestures, inspect captures at original sizes and update only changed references after review. Keep the API guard and coverage floors. Review E2E selectors for compatibility; real E2E remains blocked without the already-required isolated API configuration and is never counted as a passing controlled-API run.
 
 Only one worker runs at a time. Do not run competing builds/servers. Preserve the 44 preexisting staged skill/lock files with path-restricted commits. Record each dispatch before sending it and each return in tasks.md. The root performs the final walk, proofs, independent verification, fixes and completion gate after these batches.
+
+## R1 Baseline Inventory
+
+Observed 2026-11-15 at HEAD 24b8cc0: 75 selected/executed, 25 passed, 50 failed, no skipped. Expanded parameter cases below were collected before edits. Original names/IDs and all parameter rows are preserved.
+
+### tests/unit/CardBusca.test.tsx
+
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 inicial encontra nome do catálogo aparado e ignora caixa
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 inicial inexistente não emite seleção
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 inicial duplicado escolhe o primeiro objeto na ordem do CSV
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 clique fecha dropdown e emite objeto original somente após timer zero
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 limpeza após seleção emite objeto vazio imediatamente
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 dropdown vazio abre e fecha sem sugestões nem callback
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 busca mantém ordem e duplicados no limite de dez
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 acento e espaços continuam significativos na busca
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > UT-14 CODE-02 TEST-01 descrição vazia é preservada no callback assíncrono
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > CODE-02 reabrir após escolher duplicado com consulta exata mantém só a linha escolhida
+- tests/unit/CardBusca.test.tsx > CardBusca — UT-14 CODE-02 TEST-01 DEP-03 > CODE-02 mudança de inicial atualiza seleção encontrada e preserva a última quando não encontra
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "DIP" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "dip" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo " dip" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "dip " mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "ácido" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "ÁCIDO" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "acido" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "ACIDO" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termo "xyz" mantém nomes, ordem e equivale ao filtro anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 termos alternados e limpeza não reutilizam resultado anterior
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 seleção emite o objeto original somente após timer zero
+- tests/unit/CardBusca.test.tsx > CardBusca — IT-09 CODE-02 equivalência da otimização > IT-09 CODE-02 TEST-01 medicamentoInicial ignora caixa, mas não acentos nem espaço inicial
+
+### tests/integration/cadastro-feedback-catalog.test.tsx
+
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 ERR-09 HTTP429 respeita Retry-After 0
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 ERR-09 HTTP429 respeita Retry-After 7
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 ERR-09 HTTP429 respeita Retry-After invalid
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 falha 503 produz alerta e não falso vazio/seleção
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 falha network produz alerta e não falso vazio/seleção
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 falha header produz alerta e não falso vazio/seleção
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 falha parser produz alerta e não falso vazio/seleção
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-01 NET-19 falha body produz alerta e não falso vazio/seleção
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-14 loading distinto de vazio; descrição vazia permite seleção real
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-19 desmontagem aborta sem erro tardio nem seleção inicial
+- tests/integration/cadastro-feedback-catalog.test.tsx > NET-19 CardBusca catálogo > ERR-18 nova carga bem sucedida limpa erro e seleciona valor inicial
+
+### tests/integration/auth.test.tsx
+
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido Usuário
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido Ana
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > UT-08 TEST-01 nome exibido ana
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-01 TEST-02 login envia credenciais, busca perfil com Bearer e disponibiliza sessão
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-02 TEST-02 falha no perfil apresenta erro e executa logout limpando sessão prévia
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 sem token mostra loading, bloqueia conteúdo e navega ao login
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 restaura sessão preparada após loading e renderiza conteúdo protegido
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-03 TEST-02 logout remove token/perfil e revoga conteúdo já renderizado
+- tests/integration/auth.test.tsx > sessão real — TEST-01 TEST-02 > IT-10 TEST-02 BEAPI-03 token inválido não deve habilitar dados protegidos
+
+### tests/integration/cadastro-feedback-login.test.tsx
+
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-19 NET-02 NET-03 ignora resposta de login após abandonar a página
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-19 NET-02 NET-03 ignora resposta de profile após abandonar a página
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > REG-09 login direto não anuncia cadastro
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > REG-08 aviso registered aparece uma vez inclusive StrictMode
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-04 aviso de sessão expirada é erro e desaparece ao tentar novamente
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-04 login já montado recebe novo aviso uma única vez
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-03 HTTP401 mostra credenciais inválidas por status
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-03 texto401 em HTTP400 não vira credenciais inválidas
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-12 resposta sem token é erro de contrato sem refletir message
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-12 perfil inválido {} preserva logout e feedback
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-12 perfil inválido {"data":null} preserva logout e feedback
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-01 ERR-17 falha de perfil não expõe diagnóstico técnico
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-01 NET-03 aplica matriz à falha de perfil server
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-01 NET-03 aplica matriz à falha de perfil network
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-01 NET-03 aplica matriz à falha de perfil contract
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-01 ERR-11 rede usa mensagem pública e recupera controle
+- tests/integration/cadastro-feedback-login.test.tsx > NET-02 NET-03 login feedback > ERR-14 nova tentativa remove sucesso e autentica com perfil válido
+
+### tests/integration/cadastro-feedback-session.test.tsx
+
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-20 mudanças de referência do roteador não repetem restauração nem revertem sessão
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-01 sem token não faz request nem alerta
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-01 ERR-11 rede mostra erro contextual sem destruir credencial
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-10 servidor mostra indisponibilidade segura
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-12 perfil inválido {} mostra contrato sem confirmar autenticação
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-12 perfil inválido null mostra contrato sem confirmar autenticação
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-04 ERR-20 401 com login já montado mostra uma única expiração
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-04 invalidação do transporte entrega aviso no login sem duplicar host
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-01 ERR-04 restauração401 em página pública navega ao login com aviso
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-19 cleanup cancela e ignora falha tardia sem aviso
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-19 histórico desmontado recebe401 tardio sem invalidar sessão montada
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-19 401 tardio de A não altera login B nem publica aviso
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-14 login novo remove erro de restauração anterior
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-04 logout intencional não publica expiração
+- tests/integration/cadastro-feedback-session.test.tsx > NET-04 restauração e feedback por identidade > ERR-20 StrictMode mantém um só aviso de restauração
+
+## R1 Execution
+
+| File | Baseline executed (pass/fail) | Migrated executed | Result | Commit |
+| --- | --- | --- | --- | --- |
+| tests/unit/CardBusca.test.tsx | 23 (0/23) | 25 | PASS; 23 preserved + ACCESS-02 and FORM-02 | current atomic commit; root resolves hash |
+
+CardBusca gate: `npx vitest run tests/unit/CardBusca.test.tsx --reporter=verbose`, 25/25 on 2026-11-15. Only accessible selectors changed; all payload/timer/filter/duplicate assertions remain. No product change.

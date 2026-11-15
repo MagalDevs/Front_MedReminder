@@ -32,7 +32,7 @@ async function mount(medicamentoInicial?: string, csv: string = CSV) {
     render(<BuscaMedicamento onSelect={onSelect} medicamentoInicial={medicamentoInicial} />);
   });
   expect(fetchMock).toHaveBeenCalledTimes(1);
-  return { input: screen.getByRole('textbox'), onSelect };
+  return { input: screen.getByRole('combobox', { name: 'Buscar no catálogo' }), onSelect };
 }
 
 function search(input: HTMLElement, value: string) {
@@ -40,13 +40,48 @@ function search(input: HTMLElement, value: string) {
 }
 
 function names() {
-  return Array.from(document.querySelectorAll('span.font-semibold'), (el) => el.textContent);
+  return Array.from(screen.queryAllByRole('option').map(option => option.querySelector('span.font-semibold')!), (el) => el.textContent);
 }
 
 describe('CardBusca — UT-14 CODE-02 TEST-01 DEP-03', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-04T12:00:00-03:00'));
+  });
+
+  it('ACCESS-02 teclado abre lista, percorre opções, seleciona por Enter e fecha por Escape', async () => {
+    const { input, onSelect } = await mount();
+    search(input, 'dip');
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('listbox', { name: 'Medicamentos do catálogo' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'DIP Zeta primeiro DIP' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(screen.getByRole('option', { name: 'dip Alfa segundo DIP' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(input).toHaveValue('DIP Zeta');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(onSelect).not.toHaveBeenCalled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith({ NOME_PRODUTO: 'DIP Zeta', DESCRIÇÃO: 'primeiro DIP' });
+  });
+
+  it('FORM-02 sem correspondência permite cadastro manual com o nome informado', async () => {
+    const onManual = vi.fn();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(CSV)));
+    const onSelect = vi.fn();
+    await act(async () => { render(<BuscaMedicamento onSelect={onSelect} onManual={onManual} />); });
+    search(screen.getByRole('combobox', { name: 'Buscar no catálogo' }), '  Nome manual  ');
+    expect(screen.getByText('Nenhum resultado encontrado')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar manualmente' }));
+    expect(onManual).toHaveBeenCalledExactlyOnceWith('Nome manual');
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('Cadastro manual selecionado. Preencha os dados do medicamento.');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
   it('UT-14 CODE-02 TEST-01 inicial encontra nome do catálogo aparado e ignora caixa', async () => {
@@ -187,7 +222,7 @@ describe('CardBusca — UT-14 CODE-02 TEST-01 DEP-03', () => {
     view.rerender(<BuscaMedicamento onSelect={onSelect} medicamentoInicial="Inexistente" />);
     expect(screen.getByText('Selecionado: DIP Zeta')).toBeVisible();
     expect(onSelect).toHaveBeenCalledTimes(2);
-    expect(screen.getByRole('textbox')).toHaveValue('Sol Sintético');
+    expect(screen.getByRole('combobox', { name: 'Buscar no catálogo' })).toHaveValue('Sol Sintético');
   });
 });
 
