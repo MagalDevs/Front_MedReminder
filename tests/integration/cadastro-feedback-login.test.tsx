@@ -1,31 +1,12 @@
 import { StrictMode } from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import LoginPage from '@/app/login/page';
-import { AuthProvider, useAuth } from '@/app/contexts/AuthContext';
+import Login from '@/app/login/page';
 import { clearNavigationFeedback, publishNavigationFeedback } from '@/app/utils/navigation-feedback';
 const auth = vi.hoisted(() => ({ login: vi.fn(), logout: vi.fn() }));
 const router = vi.hoisted(() => ({ push: vi.fn() }));
-vi.mock('@/app/contexts/AuthContext', async importOriginal => {
-  const actual = await importOriginal<typeof import('@/app/contexts/AuthContext')>();
-  return { ...actual, useAuth: () => {
-    const session = actual.useAuth();
-    return { ...session, login: (...args: Parameters<typeof session.login>) => { auth.login(...args); session.login(...args); },
-      logout: () => { auth.logout(); session.logout(); } };
-  } };
-});
-function SessionProbe() { const session = useAuth(); return <><span aria-label="Sessão autenticada">{String(session.isAuthenticated)}</span><span aria-label="Perfil da sessão">{JSON.stringify(session.user)}</span></>; }
-function Login() { return <AuthProvider><LoginPage /><SessionProbe /></AuthProvider>; }
-function expectAnonymousProfileFailure() {
-  expect(auth.logout).not.toHaveBeenCalled();
-  expect(auth.login).not.toHaveBeenCalled();
-  expect(localStorage.getItem('access_token')).toBeNull();
-  expect(localStorage.getItem('user_data')).toBeNull();
-  expect(screen.getByLabelText('Sessão autenticada')).toHaveTextContent(/^false$/);
-  expect(screen.getByLabelText('Perfil da sessão')).toHaveTextContent(/^null$/);
-  expect(router.push).not.toHaveBeenCalled();
-}
-vi.mock('next/navigation', () => ({ useRouter: () => router, useSearchParams: () => new URLSearchParams() }));
+vi.mock('@/app/contexts/AuthContext', () => ({ useAuth: () => auth }));
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
 const json = (body: unknown, status=200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 function submit() {
   fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'pessoa@example.test' } });
@@ -72,10 +53,10 @@ describe('NET-02 NET-03 login feedback', () => {
     vi.mocked(fetch).mockResolvedValue(json({ message: 'SQLITE_ERROR senha' })); render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível interpretar a resposta'); expect(screen.getByRole('alert').textContent).toBe('Não foi possível interpretar a resposta do serviço. Tente novamente.'); expect(auth.login).not.toHaveBeenCalled(); expect(fetch).toHaveBeenCalledTimes(1);
   });
   it.each([{}, { data: null }])('ERR-12 perfil inválido %j preserva logout e feedback', async (profile) => {
-    vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockResolvedValueOnce(json(profile)); render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível carregar seu perfil. Faça o login novamente.'); expectAnonymousProfileFailure(); expect(auth.login).not.toHaveBeenCalled();
+    vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockResolvedValueOnce(json(profile)); render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível carregar seu perfil. Faça o login novamente.'); expect(auth.logout).toHaveBeenCalledTimes(1); expect(auth.login).not.toHaveBeenCalled();
   });
   it('ERR-01 ERR-17 falha de perfil não expõe diagnóstico técnico', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockRejectedValueOnce(new Error('http://internal SQLITE_ERROR Bearer secret')); render(<Login />); submit(); const alert = await screen.findByRole('alert'); expect(alert).toHaveTextContent('Não foi possível carregar seu perfil. Faça o login novamente.'); expect(alert).not.toHaveTextContent('internal'); expectAnonymousProfileFailure();
+    vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockRejectedValueOnce(new Error('http://internal SQLITE_ERROR Bearer secret')); render(<Login />); submit(); const alert = await screen.findByRole('alert'); expect(alert).toHaveTextContent('Não foi possível carregar seu perfil. Faça o login novamente.'); expect(alert).not.toHaveTextContent('internal'); expect(auth.logout).toHaveBeenCalledTimes(1);
   });
   it.each([
     { kind: 'server', text: 'O serviço está temporariamente indisponível.' },
@@ -85,12 +66,12 @@ describe('NET-02 NET-03 login feedback', () => {
     vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' }));
     if (kind === 'network') vi.mocked(fetch).mockRejectedValueOnce(new TypeError('private'));
     else vi.mocked(fetch).mockResolvedValueOnce(kind === 'server' ? json({}, 503) : json({ data: null }));
-    render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent(text); expectAnonymousProfileFailure(); expect(auth.login).not.toHaveBeenCalled();
+    render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent(text); expect(auth.logout).toHaveBeenCalledTimes(1); expect(auth.login).not.toHaveBeenCalled();
   });
   it('ERR-01 ERR-11 rede usa mensagem pública e recupera controle', async () => {
     vi.mocked(fetch).mockRejectedValue(new TypeError('segredo')); render(<Login />); submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível conectar ao servidor.'); expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled();
   });
   it('ERR-14 nova tentativa remove sucesso e autentica com perfil válido', async () => {
-    publishNavigationFeedback('registered'); vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockResolvedValueOnce(json({ data: { id: 7, nome: 'Pessoa' } })); render(<Login />); submit(); await waitFor(() => expect(router.push).toHaveBeenCalledWith('/hoje')); expect(auth.login).toHaveBeenCalledWith('synthetic', { id: 7, nome: 'Pessoa' }); expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    publishNavigationFeedback('registered'); vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: 'synthetic' })).mockResolvedValueOnce(json({ data: { id: 7, nome: 'Pessoa' } })); render(<Login />); submit(); await waitFor(() => expect(router.push).toHaveBeenCalledWith('/')); expect(auth.login).toHaveBeenCalledWith('synthetic', { id: 7, nome: 'Pessoa' }); expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

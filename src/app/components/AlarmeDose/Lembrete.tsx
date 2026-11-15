@@ -1,67 +1,176 @@
-'use client';
-
-import { useContext, useEffect, useRef, useState } from 'react';
 import { LembreteContext } from '@/app/contexts/lembreteContext';
-import { ApiError, apiRequest } from '@/app/utils/api';
-import { RequestContractError, requestErrorMessage } from '@/app/utils/request-errors';
-import { isDoseInstant } from '@/app/features/web-ux/domain/agenda';
-import { publishDoseConfirmation } from '@/app/features/web-ux/data/dose-confirmations';
-import RequestFeedback, { useRetryDelay } from '../RequestFeedback/RequestFeedback';
-import Dialog from '../ui/Dialog';
-import Button from '../ui/Button';
-import { medicationColors } from '../ui/ColorSelector';
+import { apiRequest } from '@/app/utils/api';
+import { Bell, Pill, X } from 'lucide-react';
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import RequestFeedback from '../RequestFeedback/RequestFeedback';
+import { requestErrorMessage } from '@/app/utils/request-errors';
 
-interface alarmeDoseProps { dataHora: string; medicamentoNome: string; quantidadeDose: string; cor: string; id: number; onClose: () => void; onConfirmed?: () => void }
-export default function Lembrete({ dataHora, medicamentoNome, quantidadeDose, cor, id, onClose, onConfirmed }: alarmeDoseProps) {
+interface alarmeDoseProps {
+  dataHora: string;
+  medicamentoNome: string;
+  quantidadeDose: string;
+  cor: string;
+  id: number;
+  onClose: () => void;
+}
+
+const Lembrete = (props: alarmeDoseProps) => {
+  const { dataHora, medicamentoNome, quantidadeDose, cor, id, onClose } = props;
   const context = useContext(LembreteContext);
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const key = `${token}:${id}`;
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [failure, setFailure] = useState<{ key: string; message: string | null; notBefore?: number } | null>(null);
-  const [confirmedKey, setConfirmedKey] = useState<string | null>(null); const [refreshFailedKey, setRefreshFailedKey] = useState<string | null>(null);
-  const saving = savingKey === key; const error = failure?.key === key ? failure.message : null; const confirmed = confirmedKey === key; const refreshFailed = refreshFailedKey === key;
-  const remaining = useRetryDelay(failure?.key === key ? failure.notBefore : undefined);
+  const [failure, setFailure] = useState<{ key: string; message: string | null } | null>(null);
+  const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
+  const [refreshFailedKey, setRefreshFailedKey] = useState<string | null>(null);
+  const saving = savingKey === key;
+  const error = failure?.key === key ? failure.message : null;
+  const confirmed = confirmedKey === key;
+  const refreshFailed = refreshFailedKey === key;
   const attempt = useRef<AbortController | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!isDoseInstant(dataHora) || Date.parse(dataHora) <= now) return;
-    const timer = window.setTimeout(() => setNow(Date.now()), Math.min(2_147_483_647, Math.max(0, Date.parse(dataHora) - Date.now())));
-    return () => window.clearTimeout(timer);
-  }, [dataHora, now]);
   useEffect(() => () => { attempt.current?.abort(); attempt.current = null; }, [id, token]);
-  const valid = isDoseInstant(dataHora); const date = valid ? new Date(dataHora) : null;
-  const time = date ? date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : 'Horário não informado';
-  const scheduled = !!date && date.getTime() > now;
-  async function register() {
-    if (attempt.current || remaining || !valid || Date.parse(dataHora) > Date.now()) return;
-    const controller = new AbortController(); attempt.current = controller;
-    const current = () => !controller.signal.aborted && attempt.current === controller && localStorage.getItem('access_token') === token;
-    setSavingKey(key); setFailure(null);
+
+  const dataDose = new Date(dataHora);
+
+  const dia = String(dataDose.getDate()).padStart(2, '0');
+  const mes = String(dataDose.getMonth() + 1).padStart(2, '0');
+  const ano = dataDose.getFullYear().toString();
+
+  const hora = String(dataDose.getHours()).padStart(2, '0');
+  const minuto = String(dataDose.getMinutes()).padStart(2, '0');
+  const horario = `${hora}:${minuto}`;
+
+
+  const hashCor: Record<string, string> = {
+    'Vermelho': '#FF0000',
+    'Azul': '#4B00FF',
+    'Amarelo': '#FFFF00',
+    'Laranja': '#FFA500',
+    'Azul claro': '#00CFFF',
+    'Branco': '#FFFFFF',
+    'Verde claro': '#00FF7F',
+    'Verde escuro': '#006400',
+    'Preto': '#000000',
+    'Orquídea': '#DA70D6'
+  };
+
+  const corFundo = hashCor[cor] || '#FF0000';
+
+  const medicamentoTomado = async () => {
+    if (attempt.current) return;
+    const controller = new AbortController();
+    attempt.current = controller;
+    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    setSavingKey(key);
+    setFailure(null);
     try {
       if (!confirmed) {
-        const response = await apiRequest<{ data: { id: number; tomado: boolean; data_dose: string } }>(`dose/${id}`, { method: 'PUT', signal: controller.signal, body: JSON.stringify({ tomado: true }) });
+        await apiRequest(`dose/${id}`, {
+      method: 'PUT',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      },
+      body: JSON.stringify({
+        tomado: true,
+      }),
+        });
         if (!current()) return;
-        if (response?.data?.id !== id || response.data.tomado !== true || !isDoseInstant(response.data.data_dose) || Date.parse(response.data.data_dose) !== Date.parse(dataHora)) throw new RequestContractError();
         setConfirmedKey(key);
-        onConfirmed?.();
-        if (context?.identityKey) publishDoseConfirmation({ identityKey: context.identityKey, id, expectedAt: dataHora, registered: true });
       }
       const refreshed = await context?.getLembretes();
       if (!current()) return;
       if (refreshed === false) { setRefreshFailedKey(key); return; }
       onClose();
-    } catch (cause) { if (current()) setFailure({ key, message: requestErrorMessage(cause), notBefore: cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : undefined }); }
-    finally { if (current()) { attempt.current = null; setSavingKey(null); } }
+    } catch (failure) {
+      if (current()) setFailure({ key, message: requestErrorMessage(failure) });
+    } finally {
+      if (attempt.current === controller) attempt.current = null;
+      if (current()) setSavingKey(null);
+    }
   }
-  return <Dialog open onClose={onClose} title="Lembrete de dose" description="Fechar este lembrete não registra nem adia a dose.">
-    <div className="space-y-6">
-      <div className="space-y-2"><h3 className="break-words text-2xl font-semibold">{medicamentoNome}</h3><p className="text-xl font-semibold">{quantidadeDose}</p><dl className="flex flex-wrap gap-6"><div><dt>Data</dt><dd>{date?.toLocaleDateString('pt-BR') || 'Não informada'}</dd></div><div><dt>Horário</dt><dd><time dateTime={valid ? dataHora : undefined}>{time}</time></dd></div></dl><p className="flex items-center gap-2 text-[var(--text-muted)]"><span aria-hidden style={{ backgroundColor: medicationColors.find(color => color.value === cor)?.swatch ?? 'transparent' }} className="h-5 w-5 rounded border border-[var(--border-control)]" />Cor identificadora: {cor || 'Não informada'}</p></div>
-      <div ref={context?.setLembretesFeedbackHost} />
-      {error && <RequestFeedback context="Ao registrar dose" message={error} />}
-      {refreshFailed && <RequestFeedback kind="success" message="Dose registrada. A atualização dos lembretes não foi concluída." />}
-      {remaining > 0 && <p role="status">Aguarde {remaining} segundos para tentar novamente.</p>}
-      {scheduled && <p>Programada. O registro fica disponível no horário previsto.</p>}
-      <Button className="w-full" onClick={() => void register()} loading={saving} loadingLabel="Registrando…" disabled={!valid || scheduled || remaining > 0} aria-label={confirmed ? 'Atualizar lembretes' : `Registrar dose de ${medicamentoNome} às ${time}`}>{confirmed ? 'Atualizar lembretes' : 'Registrar dose'}</Button>
+
+  return (
+    <div
+      className={`fixed inset-0 flex flex-col items-center justify-center z-50 min-h-screen w-full ${
+        cor === 'Branco' ? 'text-gray-800' : 'text-white'
+      }`}
+      style={{
+        backgroundColor: corFundo,
+        ...(cor === 'Branco' && {
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 0 12px rgba(0,0,0,0.08)',
+        }),
+      }}
+    >
+      <div className="w-full max-w-md px-6">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className={`p-3 rounded-full ${
+              cor === 'Branco' ? 'bg-gray-200' : 'bg-white/20'
+            }`}>
+              <Bell className="w-8 h-8 animate-bounce" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
+            </div>
+            <h2 className="text-2xl font-bold">Hora do Medicamento!</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className={`p-2 h-auto rounded-full transition ${
+              cor === 'Branco' ? 'bg-gray-100 hover:bg-gray-300' : 'bg-white/20 hover:bg-white/30'
+            }`}
+          >
+            <X className="w-6 h-6" color={cor === 'Branco' ? '#4B5563' : '#FFFFFF'} />
+          </button>
+        </div>
+
+        <div className="space-y-6 mb-8">
+          <div className="flex items-center gap-4">
+            <Pill className="w-6 h-6" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
+            <div>
+              <p className="text-lg opacity-90">Medicamento</p>
+              <p className="text-3xl font-bold">{medicamentoNome}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-lg opacity-90">Data</p>
+              <p className="text-2xl font-semibold">{dia}/{mes}/{ano}</p>
+            </div>
+            <div>
+              <p className="text-lg opacity-90">Horário</p>
+              <p className="text-2xl font-semibold">{horario}</p>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-lg p-6 text-center ${
+              cor === 'Branco' ? 'bg-gray-100 shadow-inner' : 'bg-white/20'
+            }`}
+          >
+            <p className="text-lg opacity-90">Dosagem</p>
+            <p className="text-4xl font-bold">{quantidadeDose}</p>
+          </div>
+        </div>
+
+        <div ref={context?.setLembretesFeedbackHost} />
+        {error && <RequestFeedback context="Ao confirmar dose" message={error} />}
+        {refreshFailed && <RequestFeedback kind="success" message="Dose confirmada. A atualização dos lembretes não foi concluída." />}
+        <button
+          onClick={medicamentoTomado}
+          disabled={saving}
+          className={`w-full transition ${
+            cor === 'Branco'
+              ? 'bg-gray-100 hover:bg-gray-300 text-gray-900'
+              : 'bg-white hover:bg-gray-100 text-black'
+          } font-bold py-4 text-lg rounded-md`}
+        >
+          {saving ? 'Carregando...' : confirmed ? 'Atualizar lembretes' : 'Medicamento Tomado'}
+        </button>
+      </div>
     </div>
-  </Dialog>;
+  )
 }
+
+export default Lembrete;

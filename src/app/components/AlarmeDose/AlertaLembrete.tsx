@@ -1,39 +1,57 @@
-'use client';
+'use client'
 
-import { useContext, useEffect, useLayoutEffect, useRef, useState, type ContextType } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Lembrete from './Lembrete';
 import { LembreteContext } from '@/app/contexts/lembreteContext';
-import { isDoseInstant } from '@/app/features/web-ux/domain/agenda';
 
-type ReminderContext = NonNullable<ContextType<typeof LembreteContext>>;
-function AlarmQueue({ context }: { context: ReminderContext }) {
-  const [queue, setQueue] = useState<number[]>([]);
-  const [confirmedHere, setConfirmedHere] = useState<{ id: number; instant: number } | null>(null);
-  const displayed = useRef(new Set<number>());
-  const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
-  const latest = useRef(context.lembretes);
-  useLayoutEffect(() => { latest.current = context.lembretes; }, [context.lembretes]);
-  useEffect(() => {
-    const now = new Date();
-    const eligible = context.lembretes.filter(dose => !dose.tomado && isDoseInstant(dose.data_dose) && new Date(dose.data_dose).toDateString() === now.toDateString());
-    const ids = new Set(eligible.map(dose => dose.id));
-    for (const [id, timer] of timers.current) if (!ids.has(id)) { clearTimeout(timer); timers.current.delete(id); }
-    for (const dose of eligible) {
-      const delay = new Date(dose.data_dose).getTime() - now.getTime();
-      if (delay < 0 || displayed.current.has(dose.id) || timers.current.has(dose.id)) continue;
-      timers.current.set(dose.id, setTimeout(() => {
-        timers.current.delete(dose.id);
-        if (displayed.current.has(dose.id) || !latest.current.some(item => item.id === dose.id && !item.tomado)) return;
-        displayed.current.add(dose.id); setQueue(previous => [...previous, dose.id]);
-      }, delay));
-    }
-  }, [context.lembretes]);
-  useEffect(() => { const activeTimers = timers.current; return () => { for (const timer of activeTimers.values()) clearTimeout(timer); activeTimers.clear(); }; }, []);
-  // A confirmação própria mantém o resultado e a recuperação da leitura no diálogo.
-  const visible = queue.map(id => context.lembretes.find(dose => dose.id === id && (!dose.tomado || (id === confirmedHere?.id && new Date(dose.data_dose).getTime() === confirmedHere.instant)))).find(Boolean);
-  return visible ? <Lembrete key={visible.id} id={visible.id} dataHora={new Date(visible.data_dose).toISOString()} medicamentoNome={visible.remedio.nome} quantidadeDose={visible.remedio.quantidadeDose} cor={visible.remedio.cor} onConfirmed={() => setConfirmedHere({ id: visible.id, instant: new Date(visible.data_dose).getTime() })} onClose={() => { setConfirmedHere(null); setQueue(previous => previous.filter(id => id !== visible.id)); }} /> : null;
+interface LembreteVisivel {
+  id: number;
+  dataHora: string;
+  medicamentoNome: string;
+  quantidadeDose: string;
+  cor: string;
 }
+
 export default function AlertaLembretes() {
-  const context = useContext(LembreteContext);
-  return context?.identityKey ? <AlarmQueue key={context.identityKey} context={context} /> : null;
+  const contexto = useContext(LembreteContext);
+  const [lembreteVisivel, setLembreteVisivel] = useState<LembreteVisivel | null>(null);
+  const [lembretesExibidos, setLembretesExibidos] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!contexto) return;
+
+    contexto.lembretesHoje.forEach((lembrete) => {
+      const id = lembrete.id;
+
+      if (lembretesExibidos.has(id)) return; // já foi exibido
+
+      const dataAlvo = new Date(lembrete.data_dose); // já vem com hora certa
+      const agora = new Date();
+      const delay = dataAlvo.getTime() - agora.getTime();
+
+      if (delay > 0) {
+        setTimeout(() => {
+          setLembreteVisivel({
+            id,
+            dataHora: dataAlvo.toISOString(),
+            medicamentoNome: lembrete.remedio.nome,
+            quantidadeDose: lembrete.remedio.quantidadeDose,
+            cor: lembrete.remedio.cor,
+          });
+          setLembretesExibidos(prev => new Set(prev).add(id));
+        }, delay);
+      }
+    });
+  }, [contexto, lembretesExibidos]);
+
+  return lembreteVisivel ? (
+    <Lembrete
+      dataHora={lembreteVisivel.dataHora}
+      medicamentoNome={lembreteVisivel.medicamentoNome}
+      quantidadeDose={lembreteVisivel.quantidadeDose}
+      cor={lembreteVisivel.cor}
+      id={lembreteVisivel.id}
+      onClose={() => setLembreteVisivel(null)}
+    />
+  ) : null;
 }

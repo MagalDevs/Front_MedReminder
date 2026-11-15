@@ -1,91 +1,17 @@
 @import 'tailwindcss';
 
 :root {
-  --action-primary: #0b6e71;
-  --action-primary-hover: #085659;
-  --action-primary-text: #ffffff;
-  --brand-signature: #be185d;
-  --surface-page: #f6f6f6;
-  --surface-raised: #ffffff;
-  --text-primary: #171717;
-  --text-muted: #525252;
-  --border-default: #d1d5db;
-  --border-control: #737373;
-  --focus: #075985;
-  --error: #b42318;
-  --error-surface: #fef3f2;
-  --warning: #854d0e;
-  --warning-surface: #fefce8;
-  --success: #166534;
-  --success-surface: #f0fdf4;
-  --disabled-text: #525252;
-  --disabled-surface: #e5e7eb;
-  --radius-control: 8px;
-  --radius-surface: 12px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --font-interface: 'Kantumruy', sans-serif;
-  --duration-quick: 150ms;
-  --duration-fast: 250ms;
-  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --distance-base: 8px;
-  --scale-large: 0.96;
-  --background: var(--surface-page);
-  --foreground: var(--text-primary);
-  --primary: var(--brand-signature);
-  --primary-teal: var(--action-primary);
+  --background: #f6f6f6;
+  --foreground: #171717;
+  --primary: #be185d;
+  --primary-teal: #0d9488;
 }
 
 @theme inline {
-  --spacing: var(--space-1);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-interface);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@font-face {
-  font-family: 'Kantumruy';
-  src: url('/fonts/KantumruyPro-Light.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Kantumruy';
-  src: url('/fonts/KantumruyPro-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Kantumruy';
-  src: url('/fonts/KantumruyPro-Medium.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Kantumruy';
-  src: url('/fonts/KantumruyPro-SemiBold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Kantumruy';
-  src: url('/fonts/KantumruyPro-Bold.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
 }
 
 @font-face {
@@ -119,138 +45,26 @@
 }
 
 .KantumruyBold {
-  font-family: var(--font-interface);
-  font-weight: 700;
+  font-family: 'KantumruyProBold', sans-serif;
 }
 
 .KantumruySemiBold {
-  font-family: var(--font-interface);
-  font-weight: 600;
+  font-family: 'KantumruyProSemiBold', sans-serif;
 }
 
 .KantumruyLight {
-  font-family: var(--font-interface);
-  font-weight: 300;
+  font-family: 'KantumruyProLight', sans-serif;
 }
 
 .KantumruyMedium {
-  font-family: var(--font-interface);
-  font-weight: 500;
+  font-family: 'KantumruyProMedium', sans-serif;
 }
 
 .KantumruyRegular {
-  font-family: var(--font-interface);
-  font-weight: 400;
+  font-family: 'KantumruyProRegular', sans-serif;
 }
 
 body {
-  font-family: var(--font-interface);
-  font-size: 1rem;
-  line-height: 1.5;
   background: var(--background);
   color: var(--foreground);
-  overflow-wrap: anywhere;
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
-
-::selection {
-  background: var(--action-primary);
-  color: var(--action-primary-text);
-}
-
-input, textarea {
-  caret-color: var(--action-primary);
-}
-
-input::placeholder, textarea::placeholder {
-  color: var(--text-muted);
-  opacity: 1;
-}
-
-/* Keep native date and time segments visible when enlarged text needs two rows. */
-#draft-firstDoseAt::-webkit-datetime-edit {
-  white-space: normal;
-}
-
-#draft-firstDoseAt::-webkit-datetime-edit-fields-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  white-space: normal;
-}
-
-#draft-firstDoseAt::-webkit-datetime-edit-text {
-  white-space: pre;
-}
-
-button, a, label:has(input[type='radio']) {
-  max-inline-size: 100%;
-  white-space: normal;
-}
-
-label:has(input[type='radio']) {
-  flex-wrap: wrap;
-}
-
-label:has(input[type='radio']:focus-visible) {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
-
-dialog > div:first-child {
-  flex-wrap: wrap;
-}
-
-/* State changes answer the gesture; focus and requests never wait for motion. */
-button, a, input, select, textarea, label:has(input[type='radio']) {
-  transition-property: background-color, border-color, color;
-  transition-duration: var(--duration-quick);
-  transition-timing-function: var(--ease-smooth-out);
-}
-
-/* Text/background pairs switch together so loading never crosses low contrast. */
-button {
-  transition-property: border-color;
-}
-
-.wux-dialog[open] {
-  animation: wux-dialog-enter var(--duration-fast) var(--ease-smooth-out);
-}
-
-.wux-stage {
-  animation: wux-stage-enter var(--duration-fast) var(--ease-smooth-out);
-}
-
-.wux-feedback {
-  animation: wux-feedback-enter var(--duration-quick) var(--ease-smooth-out);
-}
-
-@keyframes wux-dialog-enter {
-  from { transform: scale(var(--scale-large)); opacity: 0.85; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes wux-stage-enter {
-  from { transform: translateX(var(--distance-base)); opacity: 0.9; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes wux-feedback-enter {
-  from { opacity: 0.85; }
-  to { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
 }

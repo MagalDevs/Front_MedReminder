@@ -2,7 +2,6 @@ import { expect, test, PRODUCTION_API_ORIGIN } from '../support/api-guard';
 
 // Browser real + respostas controladas; não comprova persistência na API real.
 test('BEAPI-09 histórico usa doses autenticadas, filtros e recarga', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-04T12:00:00-03:00'));
   const user = { id: 7, nome: 'Ana Sintética', email: 'ana@example.test' };
   await page.addInitScript((profile) => {
     localStorage.setItem('access_token', 'token-sintetico');
@@ -22,21 +21,21 @@ test('BEAPI-09 histórico usa doses autenticadas, filtros e recarga', async ({ p
     if (path === '/usuario/me') {
       await route.fulfill({ json: { data: user } });
     } else if (path === '/dose/me') {
-      await route.fulfill({ json: { data: [{ id: 12, data_dose: '2020-01-02T12:00:00Z', tomado: confirmed, remedio: { id: 4, nome: 'Medicamento Sintético', quantidadeDose: '1 comp' } }] } });
+      await route.fulfill({ json: { data: [{ id: 12, data_dose: '2020-01-02T12:00:00Z', tomado: confirmed, remedio: { id: 4, nome: 'Medicamento Sintético' } }] } });
     } else {
       await route.fallback();
     }
   });
   await page.goto('/historico');
   await expect(page.getByRole('heading', { name: 'Medicamento Sintético' })).toBeVisible();
-  await expect(page.getByRole('article').getByText('Atrasada', { exact: true })).toBeVisible();
+  await expect(page.locator('span').filter({ hasText: /^Não tomado$/ })).toBeVisible();
   await expect(page.getByRole('option', { name: 'Adiado', exact: true })).toHaveCount(0);
   await page.getByLabel('Medicamento', { exact: true }).selectOption('4');
-  await page.getByLabel('Estado', { exact: true }).selectOption('registered');
-  await expect(page.getByText('Nenhuma dose corresponde aos filtros', { exact: true })).toBeVisible();
+  await page.getByLabel('Status', { exact: true }).selectOption('tomado');
+  await expect(page.getByText('Nenhum histórico encontrado')).toBeVisible();
   confirmed = true; // Representa resposta já confirmada pelo servidor; não simula sua persistência.
   await page.reload();
-  await expect(page.getByRole('article').getByText('Registrada', { exact: true })).toBeVisible();
+  await expect(page.locator('span').filter({ hasText: /^Tomado$/ })).toBeVisible();
   expect(requests).toContain('/dose/me');
   expect(requests).not.toContain('/remedio');
 });

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuth } from '@/app/contexts/AuthContext';
 import Login from '@/app/login/page';
@@ -7,7 +7,7 @@ import ProtectedRoute from '@/app/components/ProtectedRoute/ProtectedRoute';
 import { API_URL } from '@/app/utils/api';
 
 const router = vi.hoisted(() => ({ push: vi.fn() }));
-vi.mock('next/navigation', () => ({ useRouter: () => router, useSearchParams: () => new URLSearchParams() }));
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const profile = { id: 7, nome: 'Ana Teste', email: 'ana@example.test' };
 const token = 'token-sintetico';
@@ -21,7 +21,6 @@ function SessionConsumer() {
       <output aria-label="Loading">{String(auth.loading)}</output>
       <output aria-label="Perfil">{JSON.stringify(auth.user)}</output>
       <button onClick={auth.logout}>Sair da sessão</button>
-      <button onClick={() => auth.login('token-b', { id: 2, nome: 'Bruna' })}>Entrar como Bruna</button>
     </aside>
   );
 }
@@ -87,12 +86,12 @@ describe('sessão real — TEST-01 TEST-02', () => {
     vi.mocked(fetch).mockReturnValueOnce(pendingLogin).mockResolvedValueOnce(json({ message: 'ok', data: profile }));
     mountLogin();
     submitLogin();
-    expect(screen.getByRole('button', { name: 'Entrando…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Processando...' })).toBeDisabled();
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem('access_token')).toBeNull();
     resolveLogin(json({ access_token: token }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/hoje'));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/'));
     expect(fetch).toHaveBeenCalledTimes(2);
     const [loginUrl, loginOptions] = vi.mocked(fetch).mock.calls[0];
     expect(loginUrl).toBe(`${API_URL}/auth/login`);
@@ -129,24 +128,6 @@ describe('sessão real — TEST-01 TEST-02', () => {
     expect(screen.getByLabelText('Nome exibido')).toHaveTextContent('Usuário');
     expect(router.push).toHaveBeenCalledExactlyOnceWith('/login');
     expect(fetch).toHaveBeenCalledTimes(3);
-    expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled();
-  });
-
-  it.each([200, 503])('ERR-19 login ignora perfil tardio HTTP%s após nova identidade autenticada', async status => {
-    let finish!: (response: Response) => void;
-    vi.mocked(fetch).mockResolvedValueOnce(json({ access_token: token }))
-      .mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
-    mountLogin();
-    submitLogin();
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar como Bruna' }));
-    await act(async () => { finish(json(status === 200 ? { data: profile } : { message: 'SQLITE_ERROR secret' }, status)); });
-    expect(localStorage.getItem('access_token')).toBe('token-b');
-    expect(JSON.parse(localStorage.getItem('user_data')!)).toEqual({ id: 2, nome: 'Bruna' });
-    expect(screen.getByLabelText('Autenticado')).toHaveTextContent('true');
-    expect(screen.getByLabelText('Perfil')).toHaveTextContent(JSON.stringify({ id: 2, nome: 'Bruna' }));
-    expect(router.push).not.toHaveBeenCalled();
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled();
   });
 

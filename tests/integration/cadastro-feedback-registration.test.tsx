@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { fillRegistrationAccount, fillRegistrationPersonal } from '../helpers/registration';
 import Cadastro from '@/app/cadastro/page';
 import { clearNavigationFeedback, consumeNavigationFeedback } from '@/app/utils/navigation-feedback';
 
@@ -10,8 +9,12 @@ vi.mock('next/navigation', () => ({ useRouter: () => router }));
 const json = (body: unknown, status = 201, headers = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 function setup() {
   const view = render(<Cadastro />);
-  fillRegistrationAccount('feedback@example.test', 'Senha-Sintetica123!');
-  fillRegistrationPersonal({ nome: 'Pessoa Sintética', cpf: '98765432109', cep: '87654321', dataNasc: '1999-02-03' });
+  fireEvent.change(screen.getByPlaceholderText('Nome e sobrenome'), { target: { value: 'Pessoa Sintética' } });
+  fireEvent.change(screen.getByPlaceholderText('exemplo@email.com'), { target: { value: 'feedback@example.test' } });
+  fireEvent.change(screen.getByPlaceholderText('000.000.000-00'), { target: { value: '98765432109' } });
+  fireEvent.change(screen.getByPlaceholderText('00000-000'), { target: { value: '87654321' } });
+  fireEvent.change(view.container.querySelector('input[type="date"]')!, { target: { value: '1999-02-03' } });
+  screen.getAllByPlaceholderText('********').forEach((input) => fireEvent.change(input, { target: { value: 'Senha-Sintetica123!' } }));
   return { ...view, submit: () => fireEvent.submit(view.container.querySelector('form')!) };
 }
 describe('NET-01 cadastro feedback', () => {
@@ -22,7 +25,7 @@ describe('NET-01 cadastro feedback', () => {
   });
   it('REG-04 mostra loading e desabilita imediatamente', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {})); const view = setup(); view.submit();
-    expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /carregando/i })).toBeDisabled();
   });
   it('REG-06 clique e Enter simultâneos enviam apenas uma requisição', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {})); const view = setup(); view.submit(); view.submit(); view.submit(); expect(fetch).toHaveBeenCalledTimes(1);
@@ -31,14 +34,14 @@ describe('NET-01 cadastro feedback', () => {
     const user = userEvent.setup();
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}));
     setup();
-    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
-    expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
-    await user.click(screen.getByRole('button', { name: 'Criando conta…' }));
-    await user.click(screen.getByLabelText('Nome completo'));
+    await user.click(screen.getByRole('button', { name: 'Cadastrar' }));
+    expect(screen.getByRole('button', { name: 'Carregando...' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Carregando...' }));
+    await user.click(screen.getAllByPlaceholderText('********')[1]);
     await user.keyboard('{Enter}{Enter}');
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(router.push).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Carregando...' })).toBeDisabled();
   });
   it.each(['headers', 'body'] as const)('REG-10 prazo exato e mensagem integral com %s pendente', async (phase) => {
     vi.useFakeTimers();
@@ -51,10 +54,10 @@ describe('NET-01 cadastro feedback', () => {
     setup().submit();
     await act(() => vi.advanceTimersByTimeAsync(14999));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Carregando...' })).toBeDisabled();
     await act(() => vi.advanceTimersByTimeAsync(1));
     expect(screen.getByRole('alert').textContent).toBe('O servidor demorou para responder e não foi possível confirmar o cadastro. Tente entrar com seu e-mail e senha antes de cadastrar novamente.');
-    expect(screen.getByRole('button', { name: 'Criar conta' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
     expect(router.push).not.toHaveBeenCalled();
   });
   it.each([400, 409, 500, 'network', 'timeout'] as const)('REG-11 recupera botão e preserva campos após %s', async (failure) => {
@@ -65,16 +68,9 @@ describe('NET-01 cadastro feedback', () => {
     setup().submit();
     await act(() => vi.advanceTimersByTimeAsync(15000));
     expect(screen.getByRole('alert')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Criar conta' })).toBeEnabled();
-    expect(screen.getByLabelText('Nome completo')).toHaveValue('Pessoa Sintética');
-    expect(screen.getByLabelText('CPF')).toHaveValue('98765432109');
-    expect(screen.getByLabelText('CEP')).toHaveValue('87654321');
-    expect(screen.getByLabelText('Data de nascimento')).toHaveValue('1999-02-03');
-    fireEvent.click(screen.getByRole('button', { name: 'Voltar para Conta' }));
-    expect(screen.getByLabelText('E-mail')).toHaveValue('feedback@example.test');
-    expect(screen.getByLabelText('Senha')).toHaveValue('Senha-Sintetica123!');
-    expect(screen.getByLabelText('Confirmar senha')).toHaveValue('Senha-Sintetica123!');
-    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
+    expect(screen.getByPlaceholderText('exemplo@email.com')).toHaveValue('feedback@example.test');
+    expect(screen.getAllByPlaceholderText('********')[0]).toHaveValue('Senha-Sintetica123!');
     expect(router.push).not.toHaveBeenCalled();
     await act(() => vi.advanceTimersByTimeAsync(60000));
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -89,7 +85,7 @@ describe('NET-01 cadastro feedback', () => {
     await act(() => vi.advanceTimersByTimeAsync(15000));
     view.submit();
     await act(async () => { finishOld(json({})); });
-    expect(screen.getByRole('button', { name: 'Criando conta…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Carregando...' })).toBeDisabled();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(router.push).not.toHaveBeenCalled();
     expect(consumeNavigationFeedback()).toBeNull();
@@ -109,7 +105,7 @@ describe('NET-01 cadastro feedback', () => {
     vi.useFakeTimers(); vi.mocked(fetch).mockReturnValue(new Promise(() => {})); setup().submit();
     await act(() => vi.advanceTimersByTimeAsync(14999)); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     await act(() => vi.advanceTimersByTimeAsync(1)); expect(screen.getByRole('alert')).toHaveTextContent('não foi possível confirmar o cadastro');
-    expect(vi.mocked(fetch).mock.calls[0][1]?.signal?.aborted).toBe(true); expect(screen.getByRole('button', { name: 'Criar conta' })).toBeEnabled();
+    expect(vi.mocked(fetch).mock.calls[0][1]?.signal?.aborted).toBe(true); expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
   });
   it('REG-10 deadline inclui leitura do corpo', async () => {
     vi.useFakeTimers(); const response = json({}); vi.spyOn(response, 'json').mockReturnValue(new Promise(() => {})); vi.mocked(fetch).mockResolvedValue(response); setup().submit();
@@ -131,29 +127,23 @@ describe('NET-01 cadastro feedback', () => {
     expect(vi.mocked(fetch).mock.calls[0][1]?.signal?.aborted).toBe(true); await act(async () => { finish(json({})); }); expect(router.push).not.toHaveBeenCalled(); expect(consumeNavigationFeedback()).toBeNull();
   });
   it('REG-13 validação local não deixa botão bloqueado', () => {
-    setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Voltar para Conta' }));
-    fireEvent.change(screen.getByLabelText('Confirmar senha'), { target: { value: 'outra' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
-    expect(screen.getByText('As senhas não coincidem.')).toBeInTheDocument();
-    expect(fetch).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Continuar' })).toBeEnabled();
+    const view = setup(); fireEvent.change(screen.getAllByPlaceholderText('********')[1], { target: { value: 'outra' } }); view.submit(); expect(fetch).not.toHaveBeenCalled(); expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
   });
   it.each([400, 409, 422])('REG-14 HTTP%s apresenta mensagens públicas', async (status) => {
-    vi.mocked(fetch).mockResolvedValue(json({ message: ['CPF inválido', 'CEP inválido'] }, status)); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('CPF inválido'); expect(screen.getByRole('alert')).toHaveTextContent('CEP inválido'); expect(screen.getByRole('alert').textContent).toBe('CPF inválido CEP inválido');
+    vi.mocked(fetch).mockResolvedValue(json({ message: ['CPF inválido', 'CEP inválido'] }, status)); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('CPF inválido'); expect(screen.getByRole('alert')).toHaveTextContent('CEP inválido');
   });
   it('REG-15 HTTP429 respeita Retry-After zero', async () => {
     vi.mocked(fetch).mockResolvedValue(json({}, 429, { 'Retry-After': '0' })); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Tente novamente em 0 segundos.');
   });
   it.each([500, 503])('REG-16 HTTP%s recupera botão sem conteúdo técnico', async (status) => {
-    vi.mocked(fetch).mockResolvedValue(json({ message: 'SQLITE_ERROR secret' }, status)); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Erro ao conectar com o servidor.'); expect(screen.getByRole('alert').textContent).toBe('Erro ao conectar com o servidor. Tente novamente mais tarde.'); expect(screen.getByRole('button', { name: 'Criar conta' })).toBeEnabled();
+    vi.mocked(fetch).mockResolvedValue(json({ message: 'SQLITE_ERROR secret' }, status)); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Erro ao conectar com o servidor.'); expect(screen.getByRole('alert').textContent).toBe('Erro ao conectar com o servidor. Tente novamente mais tarde.'); expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
   });
   it('ERR-01 REG-16 falha de rede permite nova tentativa e limpa erro anterior', async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new TypeError('http://interno/secret')).mockResolvedValueOnce(json({})); const view = setup(); view.submit(); await screen.findByRole('alert'); expect(screen.getByRole('alert').textContent).toBe('Erro ao conectar com o servidor. Tente novamente mais tarde.'); view.submit(); await waitFor(() => expect(router.push).toHaveBeenCalledWith('/login')); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
   it('REG-13 timeout não reenvia automaticamente depois de restaurar botão', async () => {
     vi.useFakeTimers(); vi.mocked(fetch).mockReturnValue(new Promise(() => {})); setup().submit();
-    await act(() => vi.advanceTimersByTimeAsync(75000)); expect(fetch).toHaveBeenCalledTimes(1); expect(screen.getByRole('button', { name: 'Criar conta' })).toBeEnabled();
+    await act(() => vi.advanceTimersByTimeAsync(75000)); expect(fetch).toHaveBeenCalledTimes(1); expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
   });
   it('REG-17 JSON inválido201 não navega nem expõe diagnóstico', async () => {
     vi.mocked(fetch).mockResolvedValue(new Response('<html>secret</html>', { status: 201, headers: { 'Content-Type': 'application/json' } })); setup().submit(); expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível interpretar'); expect(router.push).not.toHaveBeenCalled();

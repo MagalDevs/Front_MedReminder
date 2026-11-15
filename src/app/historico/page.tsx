@@ -1,6 +1,19 @@
-import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
-import HistoryScreen from '../features/web-ux/screens/HistoryScreen';
+'use client';
 
-export default function HistoryPage() {
-  return <ProtectedRoute><HistoryScreen /></ProtectedRoute>;
+import { Suspense } from 'react';
+import Sidebar from '../components/Sidebar/sidebar';
+import HistoricoContent from './HistoricoContent';
+
+export default function Historico() {
+
+  return (
+    <div className="flex min-h-screen bg-[#E8E6E6]">
+      <Sidebar />
+      <div className="flex-1">
+        <Suspense fallback={<div className="p-6">Carregando...</div>}>
+          <HistoricoContent />
+        </Suspense>
+      </div>
+    </div>
+  );
 }

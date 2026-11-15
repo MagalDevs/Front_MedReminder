@@ -15,8 +15,6 @@ async function advance(ms: number) {
 
 describe('IT-08 SEC-03 — alerta real sem logs de tratamento', () => {
   beforeEach(() => {
-  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
-  Object.defineProperty(HTMLDialogElement.prototype, 'close', { configurable: true, value: function (this: HTMLDialogElement) { this.open = false; } });
     vi.useFakeTimers();
     vi.setSystemTime(now);
     for (const method of methods) vi.spyOn(console, method).mockImplementation(() => {});
@@ -47,7 +45,7 @@ describe('IT-08 SEC-03 — alerta real sem logs de tratamento', () => {
       if (method === 'PUT' && path === `/dose/${id}`) {
         await gate;
         dose.tomado = true;
-        return new Response(JSON.stringify({ success: true, data: dose }), {
+        return new Response(JSON.stringify({ success: true }), {
           status: 200, headers: { 'Content-Type': 'application/json' },
         });
       }
@@ -71,18 +69,18 @@ describe('IT-08 SEC-03 — alerta real sem logs de tratamento', () => {
       expect(vi.getTimerCount()).toBe(1);
       expectPrivateConsole();
       await advance(delay - 1);
-      expect(screen.queryByRole('dialog', { name: 'Lembrete de dose' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Hora do Medicamento!')).not.toBeInTheDocument();
       expect(fetch).toHaveBeenCalledTimes(1);
       await advance(1);
       expect(Date.now()).toBe(new Date(data_dose).getTime());
-      expect(screen.getByRole('dialog', { name: 'Lembrete de dose' })).toBeInTheDocument();
+      expect(screen.getByText('Hora do Medicamento!')).toBeInTheDocument();
       expect(screen.getByText(dose.remedio.nome)).toBeInTheDocument();
       expect(screen.getByText(dose.remedio.quantidadeDose)).toBeInTheDocument();
       expect(screen.getByText(horario.slice(0, 5))).toBeInTheDocument();
       expect(screen.getByText('04/11/2026')).toBeInTheDocument();
       expectPrivateConsole();
 
-      fireEvent.click(screen.getByRole('button', { name: /Registrar dose de/ }));
+      fireEvent.click(screen.getByRole('button', { name: 'Medicamento Tomado' }));
       await advance(0);
       expect(fetch).toHaveBeenNthCalledWith(2, `${API_URL}/dose/${id}`, expect.objectContaining({
         method: 'PUT', body: '{"tomado":true}',
@@ -91,11 +89,11 @@ describe('IT-08 SEC-03 — alerta real sem logs de tratamento', () => {
       expect(headers.get('Authorization')).toBe('Bearer token-sintetico');
       expect(headers.get('Content-Type')).toBe('application/json');
       expect(events).toEqual(['GET /dose/me', `PUT /dose/${id}`]);
-      expect(screen.getByRole('dialog', { name: 'Lembrete de dose' })).toBeInTheDocument();
+      expect(screen.getByText('Hora do Medicamento!')).toBeInTheDocument();
       await act(async () => { release(); });
       await advance(0);
       expect(events).toEqual(['GET /dose/me', `PUT /dose/${id}`, 'GET /dose/me']);
-      expect(screen.queryByRole('dialog', { name: 'Lembrete de dose' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Hora do Medicamento!')).not.toBeInTheDocument();
       expectPrivateConsole();
       // The existing token storage contract remains; this task only minimizes logs.
       expect(localStorage.getItem('access_token')).toBe('token-sintetico');

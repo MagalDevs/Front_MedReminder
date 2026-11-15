@@ -120,7 +120,7 @@ describe('NET-15 NET-16 lembretes', () => {
 
   it('ERR-01 NET-15 ERR-20 falha de doses fica só no provider e não mostra vazio', async () => {
     vi.mocked(fetch).mockImplementation(async (url) =>
-      new URL(String(url)).pathname === '/dose/me' ? json({}, 503) : json({ data: [] }),
+      String(url).endsWith('/dose/me') ? json({}, 503) : json({ data: [] }),
     );
     mount();
     await screen.findByRole('alert');

@@ -1,34 +1,25 @@
 'use client';
 
-import { useState, useEffect, useMemo, useId, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { ApiError, parseRetryAfter } from '../../utils/api';
 import { RequestContractError, requestErrorMessage } from '../../utils/request-errors';
 import RequestFeedback from '../RequestFeedback/RequestFeedback';
-import Button from '../ui/Button';
 
-export type Medicamento = {
+type Medicamento = {
   NOME_PRODUTO: string;
   DESCRIÇÃO: string;
 };
 
 type Props = {
   onSelect: (medicamento: Medicamento) => void;
-  onManual?: (name: string) => void;
   medicamentoInicial?: string; // Nome do medicamento inicial
 };
 
 export default function BuscaMedicamento({
   onSelect,
-  onManual,
   medicamentoInicial,
 }: Props) {
-  const listId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const selectionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [manual, setManual] = useState(false);
-  useEffect(() => () => { if (selectionTimer.current) clearTimeout(selectionTimer.current); }, []);
   const [searchTerm, setSearchTerm] = useState(medicamentoInicial || '');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -45,11 +36,11 @@ export default function BuscaMedicamento({
     catalog: Medicamento[];
   } | null>(null);
 
-  const initialMatch = useMemo(() => medicamentoInicial && !manual
+  const initialMatch = useMemo(() => medicamentoInicial
     ? medicamentos.find((med) =>
       med.NOME_PRODUTO.trim().toLowerCase() === medicamentoInicial.toLowerCase(),
     ) ?? null
-    : null, [medicamentos, medicamentoInicial, manual]);
+    : null, [medicamentos, medicamentoInicial]);
   // Reconcile a new matching input during render so no stale selection is
   // committed. An unmatched initial value retains the last selection, as before.
   if (initialMatch && (selection?.catalog !== medicamentos ||
@@ -105,7 +96,6 @@ export default function BuscaMedicamento({
 
   const handleSearch = (term: string): void => {
     setSearchTerm(term);
-    setActiveIndex(-1); setManual(false);
     setSelectedResult(null);
     setIsDropdownOpen(true);
 
@@ -133,60 +123,100 @@ export default function BuscaMedicamento({
 
     // Garante que sempre chamamos o onSelect com o novo medicamento
     // Usando setTimeout para garantir que a execução ocorra após o ciclo de renderização atual
-    if (selectionTimer.current) clearTimeout(selectionTimer.current);
-    selectionTimer.current = setTimeout(() => {
+    setTimeout(() => {
       onSelect(med);
     }, 0);
   };
 
-  const options = filtered.slice(0, 10);
-  const open = isDropdownOpen && !loading && !error;
-  useEffect(() => {
-    if (open && activeIndex >= 0) document.getElementById(`${listId}-${activeIndex}`)?.scrollIntoView?.({ block: 'nearest' });
-  }, [open, activeIndex, listId]);
-  function chooseManual() {
-    setManual(true); setIsDropdownOpen(false); setSelection(null);
-    if (selectionTimer.current) clearTimeout(selectionTimer.current);
-    if (onManual) onManual(searchTerm.trim());
-    else onSelect({ NOME_PRODUTO: searchTerm.trim(), DESCRIÇÃO: '' });
-  }
   return (
-    <div className="relative min-w-0 text-[var(--text-primary)]" onBlur={event => {
-      if (!event.currentTarget.contains(event.relatedTarget)) setIsDropdownOpen(false);
-    }}>
-      <label htmlFor={`${listId}-input`} className="mb-2 block font-semibold">Buscar no catálogo</label>
-      <div className="flex min-w-0 gap-2">
-        <input id={`${listId}-input`} ref={inputRef} type="text" role="combobox" aria-autocomplete="list"
-          aria-expanded={!!open} aria-controls={listId} aria-activedescendant={open && activeIndex >= 0 && options[activeIndex] ? `${listId}-${activeIndex}` : undefined}
-          className="min-h-11 min-w-0 flex-1 rounded-[var(--radius-control)] border border-[var(--border-control)] bg-[var(--surface-raised)] px-3 text-base focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus)]"
-          placeholder="Buscar medicamento..." value={searchTerm} onChange={event => handleSearch(event.target.value)}
-          onClick={() => setIsDropdownOpen(true)} onKeyDown={event => {
-            if (event.key === 'Escape') { event.preventDefault(); setIsDropdownOpen(false); setActiveIndex(-1); }
-            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-              event.preventDefault(); setIsDropdownOpen(true);
-              if (options.length) setActiveIndex(index => !isDropdownOpen || index < 0 ? event.key === 'ArrowDown' ? 0 : options.length - 1 : (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length);
-            }
-            if (event.key === 'Enter' && open && activeIndex >= 0 && options[activeIndex]) { event.preventDefault(); handleResultClick(options[activeIndex]); setActiveIndex(-1); }
-          }} />
-        <Button variant="secondary" aria-label={isDropdownOpen ? 'Fechar sugestões' : 'Abrir sugestões'} aria-expanded={!!open} aria-controls={listId}
-          onClick={() => { toggleDropdown(); inputRef.current?.focus(); }}>Sugestões</Button>
+    <div className="m-6">
+      <div className="relative">
+        <div className="bg-white rounded-lg p-4 flex items-center border border-[#037F8C]">
+          <span className="text-gray-500 mr-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </span>{' '}
+          <input
+            type="text"
+            className="flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
+            placeholder="Buscar medicamento..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            onClick={() => setIsDropdownOpen(true)}
+          />
+          <button className="text-[#037F8C] ml-2" onClick={toggleDropdown}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d={
+                  isDropdownOpen
+                    ? 'M4.5 15.75l7.5-7.5 7.5 7.5'
+                    : 'M19.5 8.25l-7.5 7.5-7.5-7.5'
+                }
+              />
+            </svg>
+          </button>
+        </div>
       </div>
-      {selectedMedicamento && !isDropdownOpen && <p className="mt-2 text-[var(--action-primary)]">Selecionado: {selectedMedicamento.NOME_PRODUTO.trim()}</p>}
+
+      {selectedMedicamento && !isDropdownOpen && (
+        <div className="mt-2 px-4 py-2 bg-[#F2F2F2] rounded-md">
+          <span className="text-sm text-[#037F8C] font-semibold">
+            Selecionado: {selectedMedicamento.NOME_PRODUTO}
+          </span>
+        </div>
+      )}
+
       {loading && <p role="status">Carregando catálogo...</p>}
       {error && <RequestFeedback context="Ao carregar catálogo de medicamentos" message={error} />}
-      {open && <div className="absolute z-10 mt-2 max-h-72 w-full overflow-y-auto rounded-[var(--radius-control)] border border-[var(--border-default)] bg-[var(--surface-raised)]">
-        <ul id={listId} role="listbox" aria-label="Medicamentos do catálogo">
-          {searchTerm && options.map((med, index) => <li key={`${med.NOME_PRODUTO}-${index}`} id={`${listId}-${index}`} role="option"
-            aria-selected={activeIndex === index} onMouseDown={event => event.preventDefault()} onClick={() => handleResultClick(med)}
-            className={`min-h-11 cursor-pointer px-4 py-3 hover:bg-[var(--surface-page)] ${activeIndex === index ? 'bg-[var(--surface-page)] outline-2 outline-[var(--focus)] -outline-offset-2' : ''}`}>
-            <span className="font-semibold">{med.NOME_PRODUTO.trim()}</span>{' '}<span className="ml-2 text-[var(--text-muted)]">{med.DESCRIÇÃO}</span>
-          </li>)}
-        </ul>
-        {(!searchTerm || options.length === 0) && <p className="p-4 text-[var(--text-muted)]">{searchTerm ? 'Nenhum resultado encontrado' : 'Digite para buscar um medicamento'}</p>}
-        {searchTerm && options.length === 0 && <Button variant="secondary" className="m-3" onClick={chooseManual}>Cadastrar manualmente</Button>}
-      </div>}
-      {error && <Button variant="secondary" className="mt-3" onClick={chooseManual}>Cadastrar manualmente</Button>}
-      {manual && <p role="status" className="mt-2">Cadastro manual selecionado. Preencha os dados do medicamento.</p>}
+      {isDropdownOpen && !loading && !error && (
+        <div className="absolute mt-1 min-w-7/10 max-w-9/10 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
+          <div className="py-2 flex flex-col gap-1">
+            {searchTerm && filtered.length > 0 ? (
+              filtered.slice(0, 10).map((med, idx) => (
+                <div
+                  key={`${med.NOME_PRODUTO}-${idx}`}
+                  className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#F2F2F2] cursor-pointer KantumruyRegular"
+                  onClick={() => handleResultClick(med)}
+                >
+                  <div>
+                    <span className="font-semibold text-[#037F8C]">
+                      {med.NOME_PRODUTO.trim()}
+                    </span>
+                    <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">
+                {searchTerm
+                  ? 'Nenhum resultado encontrado'
+                  : 'Digite para buscar um medicamento'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

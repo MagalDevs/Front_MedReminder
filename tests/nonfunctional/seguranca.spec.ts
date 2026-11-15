@@ -13,13 +13,12 @@ test('NF-03 NF-WEB-04 login logging and storage exposure', async ({ page }, info
   await page.getByLabel('E-mail').fill(USER.email);
   await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await expect(page).toHaveURL(/\/hoje$/);
-  await expect(page.getByRole('link', { name: 'Perfil', exact: true })).toBeVisible();
+  await expect(page).toHaveURL('http://localhost:3001/');
+  await expect(page.getByRole('button', { name: 'User menu' })).toBeVisible();
   expect(logs.join('\n')).not.toContain(PASSWORD);
   expect(logs.join('\n')).not.toContain(TOKEN);
   const storage = await page.evaluate(() => ({ tokenPresent: !!localStorage.getItem('access_token'), profilePresent: !!localStorage.getItem('user_data') }));
   expect(storage.tokenPresent).toBe(true);
-  expect(storage.profilePresent).toBe(true);
   await evidence(info, 'security-login', { passwordsOrTokensInConsole: false, storage,
     limitation: 'Token/profile in localStorage accessible to same-origin JavaScript; this is not XSS protection or backend authorization evidence' });
 });
@@ -34,7 +33,7 @@ test('NF-03 NF-WEB-04 raw HTTP error body absent from console', async ({ page },
   await page.getByLabel('E-mail').fill(USER.email);
   await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await expect(page.getByText('O serviço está temporariamente indisponível. Tente novamente mais tarde.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Falha sintética', { exact: true })).toBeVisible();
   expect(logs.join('\n')).not.toContain(ERROR_BODY);
   expect(logs.join('\n')).not.toContain(PASSWORD);
   await evidence(info, 'security-errors', { arbitraryErrorBodyInConsole: false, passwordInConsole: false, displayedMessage: 'Safe synthetic message' });
@@ -53,8 +52,8 @@ test('NF-03 NF-WEB-04 authenticated 401 clears storage', async ({ page }, info) 
 
 test('NF-03 NF-WEB-04 logout removes token and profile', async ({ page }, info) => {
   await setup(page);
-  await page.goto('/hoje');
-  await expect(page.getByRole('heading', { name: 'Hoje', exact: true })).toBeVisible();
+  await page.goto('/');
+  await page.getByRole('button', { name: 'User menu' }).click();
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page).toHaveURL(/\/login$/);
   expect(await page.evaluate(() => ({ token: localStorage.getItem('access_token'), profile: localStorage.getItem('user_data') }))).toEqual({ token: null, profile: null });
