@@ -68,6 +68,9 @@ test('WUX_ACCESS_09 effective 200 percent text reflows all routes and reduced mo
     if (await menu.count()) {
       await menu.click(); const dialog = page.getByRole('dialog'); await reachable(dialog.getByRole('link', { name: 'Perfil', exact: true }));
       if (name === 'today') { await dialog.evaluate(el => { el.scrollTop = 0; }); await page.screenshot({ path: '.specs/features/web-ux-consistency/captures/b7-text200-menu-320.png' }); }
+      const signOut = dialog.getByRole('button', { name: 'Sair', exact: true });
+      for (let tab = 0; tab < 12 && !await signOut.evaluate(el => el === document.activeElement); tab++) await page.keyboard.press('Tab');
+      await expect(signOut).toBeFocused(); await expect(signOut).toBeInViewport(); await reachable(signOut);
       await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0); await expect(menu).toBeFocused();
     }
   }

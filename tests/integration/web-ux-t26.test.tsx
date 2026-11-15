@@ -22,14 +22,14 @@ it('WUX_DAY_02', async () => {
   mount(); const list = await screen.findByRole('list', { name: 'Doses de hoje' }); const items = within(list).getAllByRole('listitem'); expect(items.map(item => item.getAttribute('data-dose-id'))).toEqual(['1', '3', '2', '4']);
   for (const item of items) { expect(item).toHaveTextContent('Vitamina A'); expect(item).toHaveTextContent('1,5 mg'); expect(item).toHaveTextContent('Horário previsto: 13/11/2026'); }
   for (const [index, time, state] of [[0, '11:00', 'Atrasada'], [1, '11:50', 'Registrada'], [2, '12:00', 'Pendente'], [3, '13:00', 'Programada']] as const) { expect(items[index]).toHaveTextContent(time); expect(items[index]).toHaveTextContent(state); }
-  const next = screen.getByRole('region', { name: 'Próxima dose' }); expect(next).toHaveTextContent('13:00'); expect(next).toHaveTextContent('Vitamina A'); expect(screen.getByText('4 doses hoje; 1 registrada(s); 3 não registrada(s).')).toBeVisible();
+  const next = screen.getByRole('region', { name: 'Próxima dose' }); expect(next).toHaveTextContent('13:00'); expect(next).toHaveTextContent('Vitamina A'); expect(screen.getByText('Hoje: 4 doses, 1 registrada e 3 não registradas.')).toBeVisible();
   expect(within(items[3]).queryByRole('button', { name: /Registrar dose/ })).not.toBeInTheDocument();
 });
 it('WUX_DAY_08', async () => {
   vi.mocked(fetch).mockImplementation(async input => json({ data: String(input).endsWith('usuario/me') ? user : [{ id: 1, data_dose: '2026-11-13' }, { id: 2, data_dose: 'inválida' }, { id: 3, data_dose: '2026-11-13T15:00:00Z', tomado: false }] }));
   mount(); const incomplete = await screen.findByRole('region', { name: 'Dados incompletos' });
   expect(incomplete).toHaveTextContent('Horário não informado'); expect(incomplete).toHaveTextContent('Data inválida'); expect(incomplete).toHaveTextContent('Medicamento não informado');
-  expect(within(incomplete).queryByRole('button')).not.toBeInTheDocument(); expect(incomplete.querySelector('time')).toBeNull(); expect(screen.getByText('0 doses hoje; 0 registrada(s); 0 não registrada(s).')).toBeVisible();
+  expect(within(incomplete).queryByRole('button')).not.toBeInTheDocument(); expect(incomplete.querySelector('time')).toBeNull(); expect(screen.getByText('Hoje: 0 doses, 0 registradas e 0 não registradas.')).toBeVisible();
 });
 it('T26 successful empty day offers History and Add without calling future doses today', async () => {
   vi.mocked(fetch).mockImplementation(async input => json({ data: String(input).endsWith('usuario/me') ? user : [row(5, '2026-11-14T16:00:00Z')] }));
@@ -44,13 +44,13 @@ it('T26 clock updates do not cancel pending mutations and confirmed counts use t
   fireEvent.click(screen.getByRole('button', { name: 'Registrar dose de Vitamina A, prevista para 13/11/2026 às 11:00' })); const call = vi.mocked(fetch).mock.calls.at(-1)!; expect(JSON.parse(String(call[1]!.body))).toEqual({ tomado: true });
   await act(async () => { vi.setSystemTime(new Date('2026-11-13T15:00:01Z')); document.dispatchEvent(new Event('visibilitychange')); }); expect(call[1]!.signal!.aborted).toBe(false);
   await act(async () => write.resolve(json({ data: { id: 1, tomado: true, data_dose: '2026-11-13T14:00:00Z' } })));
-  expect(screen.getByText('4 doses hoje; 2 registrada(s); 2 não registrada(s).')).toBeVisible(); const item = within(screen.getByRole('list', { name: 'Doses de hoje' })).getAllByRole('listitem')[0]; expect(item).toHaveTextContent('Registrada'); expect(within(item).getByRole('button', { name: /Corrigir registro/ })).toBeVisible();
+  expect(screen.getByText('Hoje: 4 doses, 2 registradas e 2 não registradas.')).toBeVisible(); const item = within(screen.getByRole('list', { name: 'Doses de hoje' })).getAllByRole('listitem')[0]; expect(item).toHaveTextContent('Registrada'); expect(within(item).getByRole('button', { name: /Corrigir registro/ })).toBeVisible();
 });
 it('T26 paginated loading labels partial next/counts and completes with every page', async () => {
   const second = pending(); vi.mocked(fetch).mockResolvedValueOnce(json({ data: user })).mockResolvedValueOnce(json({ data: [row(2, '2026-11-13T17:00:00Z')], pagination: { page: 1, limit: 1, total: 2, totalPages: 2 } })).mockReturnValueOnce(second.promise);
-  mount(); await screen.findByText('1 doses hoje; 0 registrada(s); 1 não registrada(s). (parcial)'); expect(screen.getByRole('region', { name: 'Próxima dose (parcial)' })).toHaveTextContent('14:00');
+  mount(); await screen.findByText('Hoje: 1 dose, 0 registradas e 1 não registrada. (parcial)'); expect(screen.getByRole('region', { name: 'Próxima dose (parcial)' })).toHaveTextContent('14:00');
   await act(async () => second.resolve(json({ data: [row(1, '2026-11-13T16:00:00Z')], pagination: { page: 2, limit: 1, total: 2, totalPages: 2 } })));
-  expect(screen.getByText('2 doses hoje; 0 registrada(s); 2 não registrada(s).')).toBeVisible(); expect(screen.getByRole('region', { name: 'Próxima dose' })).toHaveTextContent('13:00'); expect(screen.queryByText(/\(parcial\)/)).not.toBeInTheDocument();
+  expect(screen.getByText('Hoje: 2 doses, 0 registradas e 2 não registradas.')).toBeVisible(); expect(screen.getByRole('region', { name: 'Próxima dose' })).toHaveTextContent('13:00'); expect(screen.queryByText(/\(parcial\)/)).not.toBeInTheDocument();
 });
 it('T26 read failure is recoverable and Retry-After prevents automatic or early retries', async () => {
   vi.mocked(fetch).mockResolvedValueOnce(json({ data: user })).mockResolvedValueOnce(json({ message: 'Aguarde' }, 429, { 'Retry-After': '60' })).mockResolvedValueOnce(json({ data: rows }));

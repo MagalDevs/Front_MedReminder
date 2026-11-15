@@ -24,7 +24,7 @@ test('T36 failed dose read stays partial and retries instead of claiming empty s
   await prepareSession(page); await routeReadApi(page); let failed = true;
   await page.route(`${PRODUCTION_API_ORIGIN}/dose/me?**`, route => failed ? route.fulfill({ status: 503, json: { message: 'Indisponível' } }) : route.fulfill({ json: { data: [dose(2, '2026-11-14T16:00:00Z')] } }));
   await page.goto('/hoje'); await expect(page.getByRole('alert').filter({ hasText: 'Ao carregar doses' })).toBeVisible();
-  await expect(page.getByText('Nenhuma dose prevista para hoje', { exact: true })).toHaveCount(0); await expect(page.getByRole('status').filter({ hasText: '0 doses hoje' })).toContainText('(parcial)');
+  await expect(page.getByText('Nenhuma dose prevista para hoje', { exact: true })).toHaveCount(0); await expect(page.getByRole('status').filter({ hasText: 'Hoje: 0 doses, 0 registradas e 0 não registradas.' })).toContainText('(parcial)');
   failed = false; await page.getByRole('button', { name: 'Tentar novamente' }).click(); await expect(page.getByRole('list', { name: 'Doses de hoje' }).locator('li')).toHaveCount(1);
 });
 test('T36 restoring and unavailable session withholds private content until manual recovery', async ({ page }) => {

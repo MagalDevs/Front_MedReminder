@@ -98,3 +98,13 @@ test('WUX_ACCESS_08 forms remain reachable at all four viewport sizes with long 
     await openVisualRoute(page,'/meus-medicamentos');const opener=page.getByRole('button',{name:'Excluir medicamento',exact:true});await opener.click();const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await reachable(dialog.getByRole('button',{name:'Confirmar exclusão'}));const bounds=await dialog.boundingBox();expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width);expect(bounds!.height).toBeLessThanOrEqual(height);await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);await expect(opener).toBeFocused();await noHorizontalOverflow(page);
   }
 });
+
+test('T45 review follow-up gives natural exact counts and places history after the complete daily agenda', async ({ page }) => {
+  await page.setViewportSize({width:320,height:568});await openVisualRoute(page,'/hoje');
+  await expect(page.getByRole('status').filter({hasText:'Hoje: 2 doses, 0 registradas e 2 não registradas.'})).toHaveText('Hoje: 2 doses, 0 registradas e 2 não registradas.');
+  const list=page.getByRole('list',{name:'Doses de hoje'});await expect(list).toContainText(visualMedication.quantidadeDose);
+  expect(await list.evaluate(el=>!!(el.compareDocumentPosition(document.querySelector('a[href="/historico"]:not(nav a)')!)&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+  await page.route(`${PRODUCTION_API_ORIGIN}/dose/31`,route=>route.fulfill({json:{data:{id:31,data_dose:'2026-11-14T08:00:00-03:00',tomado:true,remedio:visualMedication}}}));
+  await page.getByRole('button',{name:/Registrar dose de/}).click();await expect(page.getByRole('status').filter({hasText:'Hoje: 2 doses, 1 registrada e 1 não registrada.'})).toHaveText('Hoje: 2 doses, 1 registrada e 1 não registrada.');
+  await page.getByRole('link',{name:'Ver Histórico',exact:true}).click();await expect(page).toHaveURL(/\/historico$/);
+});

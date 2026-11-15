@@ -107,6 +107,10 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - Capturas devem ser inspecionadas nos tamanhos originais antes de atualizar referências. Não há autorização para reduzir tolerância de qualidade, aumentar máscaras, eliminar casos ou declarar E2E real com API interceptada.
 - O trabalho permanece sequencial: concluir B6 e B7, migrar as regressões autorizadas em lotes suplementares conforme necessário e executar as provas e a verificação independente finais.
 
+### B7 Resume Authorization
+
+- Em 2026-11-15, após interrupção por limite de uso, o usuário respondeu: "continue". Retomar o follow-up de acabamento pendente, concluir T47 e prosseguir com a migração de regressões já aprovada e a verificação final.
+
 ## Deferred Ideas
 
 - Implementação e correções do app mobile.

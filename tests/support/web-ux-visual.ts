@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, PRODUCTION_API_ORIGIN } from './api-guard';
 import { prepareSession, routeReadApi, dose } from './web-ux-routes';
-export const visualMedication = { id: 17, nome: 'Vitamina Sintética', classificacao: 'Suplemento', quantidadeCaixa: 10, dataValidade: '2027-01-01', cor: 'Azul', motivo: 'Rotina', observacao: '', quantidadeDose: '1,5 mg', unidadeMedida: 'comprimidos' };
+export const visualMedication = { id: 17, nome: 'Vitamina Sintética', classificacao: 'Suplemento', quantidadeCaixa: 10, dataValidade: '2027-01-01', cor: 'Azul', motivo: 'Rotina', observacao: '', quantidadeDose: '1,5 comprimidos', unidadeMedida: 'comprimidos' };
 export const visualRoutes = [['/', 'home'], ['/login', 'login'], ['/cadastro', 'signup'], ['/hoje', 'today'], ['/meus-medicamentos', 'medications'], ['/historico', 'history'], ['/Configuracoes', 'profile'], ['/novo-medicamento', 'wizard'], ['/meus-medicamentos/17/editar', 'edit'], ['/meus-lembretes', 'agenda']] as const;
 export async function visualSetup(page: Page) {
   await prepareSession(page);
