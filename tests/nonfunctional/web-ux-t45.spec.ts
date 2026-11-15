@@ -1,6 +1,7 @@
 import { test, expect, PRODUCTION_API_ORIGIN } from '../support/api-guard';
 import { contrastRatio, noHorizontalOverflow, openVisualRoute, pair, reachable, visualMedication, visualRoutes, visualSetup } from '../support/web-ux-visual';
 import { syntheticProfile } from '../support/web-ux-routes';
+import { laterStageGeometry, walkLaterForms } from '../support/web-ux-visual';
 test.use({ timezoneId: 'America/Sao_Paulo' });
 test.beforeEach(async ({ page }) => { await visualSetup(page); });
 test('B7 observe incumbent screens at actual viewport sizes', async ({ page }) => {
@@ -134,6 +135,17 @@ test('WUX_ACCESS_08 forms remain reachable at all four viewport sizes with long 
   for(const [width,height] of [[320,568],[390,844],[768,1024],[1440,900]]){
     await page.setViewportSize({width,height});await openVisualRoute(page,'/meus-medicamentos/17/editar');await page.getByLabel('Nome',{exact:true}).fill('Medicamento'.repeat(12));await page.getByRole('radio',{name:'Verde escuro',exact:true}).locator('..').click();await noHorizontalOverflow(page);await reachable(page.getByRole('button',{name:'Salvar alterações'}));
     await openVisualRoute(page,'/meus-medicamentos');const opener=page.getByRole('button',{name:'Excluir medicamento',exact:true});await opener.click();const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await reachable(dialog.getByRole('button',{name:'Confirmar exclusão'}));const bounds=await dialog.boundingBox();expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width);expect(bounds!.height).toBeLessThanOrEqual(height);await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);await expect(opener).toBeFocused();await noHorizontalOverflow(page);
+  }
+});
+
+test('WUX_ACCESS_08 later treatment expanded review and personal forms reflow and remain keyboard reachable at all four sizes', async ({ page }) => {
+  test.setTimeout(120_000);
+  for (const [width, height] of [[320,568],[390,844],[768,1024],[1440,900]]) {
+    await page.setViewportSize({ width, height });
+    await walkLaterForms(page, async name => {
+      await laterStageGeometry(page);
+      await page.screenshot({ path: `.specs/features/web-ux-consistency/captures/f2-${name}-${width}.png`, fullPage: true });
+    });
   }
 });
 

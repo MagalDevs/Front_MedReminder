@@ -175,6 +175,21 @@ input::placeholder, textarea::placeholder {
   opacity: 1;
 }
 
+/* Keep native date and time segments visible when enlarged text needs two rows. */
+#draft-firstDoseAt::-webkit-datetime-edit {
+  white-space: normal;
+}
+
+#draft-firstDoseAt::-webkit-datetime-edit-fields-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+#draft-firstDoseAt::-webkit-datetime-edit-text {
+  white-space: pre;
+}
+
 button, a, label:has(input[type='radio']) {
   max-inline-size: 100%;
   white-space: normal;

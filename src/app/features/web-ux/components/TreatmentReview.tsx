@@ -16,7 +16,7 @@ export default function TreatmentReview() {
   return <section aria-labelledby="review-title" className="min-w-0 space-y-6">
     <h2 id="review-title" className="text-xl font-semibold">Revisão</h2>
     <p>Confira os dados e os horários antes de salvar o tratamento.</p>
-    <dl className="grid min-w-0 gap-x-8 gap-y-4 sm:grid-cols-2 [&_dt]:text-[var(--text-muted)] [&_dd]:break-words [&_dd]:font-semibold">
+    <dl className="grid min-w-0 gap-x-8 gap-y-4 sm:grid-cols-2 [&>div]:min-w-0 [&_dt]:text-[var(--text-muted)] [&_dd]:[overflow-wrap:anywhere] [&_dd]:font-semibold">
       <div><dt>Medicamento</dt><dd>{draft.medicationName.trim()}</dd></div>
       <div><dt>Classificação</dt><dd>{draft.classification.trim() || 'Não classificado'}</dd></div>
       <div><dt>Quantidade por dose</dt><dd>{amount.display} {draft.unit.trim()}</dd></div>

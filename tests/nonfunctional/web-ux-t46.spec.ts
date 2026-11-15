@@ -1,6 +1,7 @@
 import { test, expect, PRODUCTION_API_ORIGIN } from '../support/api-guard';
 import { noHorizontalOverflow, openVisualRoute, reachable, visualMedication, visualRoutes, visualSetup } from '../support/web-ux-visual';
 import { syntheticProfile } from '../support/web-ux-routes';
+import { laterStageGeometry, walkLaterForms } from '../support/web-ux-visual';
 
 test.use({ timezoneId: 'America/Sao_Paulo' });
 test.beforeEach(async ({ page }) => { await visualSetup(page); });
@@ -108,5 +109,22 @@ test('T46 wizard and registration stage changes keep entered values focus and im
     await expect(page.locator('fieldset.wux-stage')).toHaveCSS('animation-duration', reducedMotion === 'reduce' ? '0s' : '0.25s');
     await page.getByRole('button', { name: 'Voltar para Conta' }).click();
     await expect(page.getByLabel('E-mail', { exact: true })).toHaveValue('ana@example.test');
+  }
+});
+
+test('WUX_ACCESS_09 later forms preserve effective 200 percent geometry keyboard access and reduced motion at all four sizes', async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => { document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '200%'; }); });
+  for (const [width, height] of [[320,568],[390,844],[768,1024],[1440,900]]) {
+    await page.setViewportSize({ width, height });
+    await walkLaterForms(page, async name => {
+      await expect(page.locator('body')).toHaveCSS('font-size', '32px');
+      await expect(page.locator('html')).toHaveCSS('font-size', '32px');
+      await laterStageGeometry(page, true);
+      const styles = await page.locator('main,main button,main input,main select,.wux-stage').evaluateAll(elements => elements.map(el => ({ animation: getComputedStyle(el).animationDuration, transition: getComputedStyle(el).transitionDuration, opacity: getComputedStyle(el).opacity })));
+      for (const style of styles) { expect(style.animation).toBe('0s'); expect(style.transition).toBe('0s'); expect(style.opacity).toBe('1'); }
+      await page.screenshot({ path: `.specs/features/web-ux-consistency/captures/f2-text200-reduced-${name}-${width}.png`, fullPage: true });
+    });
   }
 });
