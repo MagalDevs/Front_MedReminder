@@ -108,7 +108,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 - [x] T35: Conectar página inicial à nova entrada
 - [x] T36: Disponibilizar rota Hoje
-- [ ] T37: Conectar rota Medicamentos
+- [x] T37: Conectar rota Medicamentos
 - [ ] T38: Conectar cadastro de medicamento
 - [ ] T39: Conectar rota Histórico
 - [ ] T40: Preservar Configuracoes como Perfil
@@ -911,10 +911,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/meus-medicamentos/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas MED-01 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T37 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/meus-medicamentos/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas MED-01 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T37 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 2 passed, 0 failed. Three-filter intersection excludes each mismatched record; today expiry and missing date asserted, clearing restores five/count, links carry selected ID and editor URL, single navigation/current destination asserted. Read failure retries into successful empty state. No legacy test changed or product deviation.
 
 ### T38: Conectar cadastro de medicamento
 
@@ -1164,7 +1166,7 @@ Proof: run coverage | WUX_DAY_08
 Proof: run coverage | WUX_DAY_09
 
 **C18** - WHEN a pessoa combina nome, classificação e validade THEN the web client SHALL listar somente medicamentos que satisfazem os três filtros. (MED-01, AC 1; T37).
-Proof: run functional | ✓ WUX_MED_01
+Proof: run functional | WUX_MED_01
 
 **C19** - WHEN a pessoa usa Limpar filtros THEN the web client SHALL restabelecer a lista sem filtros e sua contagem. (MED-02, AC 2; T25).
 Proof: run coverage | WUX_MED_02
