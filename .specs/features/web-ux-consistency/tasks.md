@@ -1791,3 +1791,5 @@ R3 treatment journey complete: original 10/10 scenarios, exact payload/schedule/
 R3 dose/alarms complete: 9/9 browser, 26/26 integration (25 original +1 full-queue regression), fresh Build/types/lint0. Real alarm unmount regression fixed; confirmed ID/instant remains until read recovery/close, external confirmation still suppresses the next queued item. Remaining R3: medication/deletion, history, visual and nonfunctional/E2E compatibility.
 
 R3 medication/deletion complete: 9/9 original browser scenarios, nominal dialog/cancel and exact API/status/order/privacy assertions preserved. Fresh Build passed. Visual/NF/history/E2E compatibility remain.
+
+R3 BEAPI-09 history complete: original scenario 1/1, current status/filter selectors and complete synthetic fixture, fresh Build. Snapshot review now in progress.
