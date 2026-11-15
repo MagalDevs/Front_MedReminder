@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, PRODUCTION_API_ORIGIN } from './api-guard';
-import { prepareSession, routeReadApi, dose } from './web-ux-routes';
+import { prepareSession, routeReadApi, dose, syntheticProfile } from './web-ux-routes';
 export const visualMedication = { id: 17, nome: 'Vitamina Sintética', classificacao: 'Suplemento', quantidadeCaixa: 10, dataValidade: '2027-01-01', cor: 'Azul', motivo: 'Rotina', observacao: '', quantidadeDose: '1,5 comprimidos', unidadeMedida: 'comprimidos' };
 export const visualRoutes = [['/', 'home'], ['/login', 'login'], ['/cadastro', 'signup'], ['/hoje', 'today'], ['/meus-medicamentos', 'medications'], ['/historico', 'history'], ['/Configuracoes', 'profile'], ['/novo-medicamento', 'wizard'], ['/meus-medicamentos/17/editar', 'edit'], ['/meus-lembretes', 'agenda']] as const;
 export async function visualSetup(page: Page) {
@@ -10,10 +10,19 @@ export async function visualSetup(page: Page) {
   await page.route(`${PRODUCTION_API_ORIGIN}/remedio/17`, route => route.request().method() === 'GET' ? route.fulfill({ json: { data: visualMedication } }) : route.fallback());
 }
 export async function openVisualRoute(page: Page, path: string) {
-  await page.goto(path); await expect(page.locator('h1').first()).toBeVisible(); await page.evaluate(() => document.fonts.ready);
+  await page.goto(path);
+  await expect(page.locator('h1').first()).toBeVisible();
+  await expect(page.getByText('Verificando sessão…', { exact: true })).toHaveCount(0);
+  if (path === '/Configuracoes') await expect(page.getByLabel('Nome', { exact: true })).toHaveValue(syntheticProfile.nome);
+  if (path === '/' || path === '/novo-medicamento') {
+    await expect(page.getByRole('combobox')).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'Carregando catálogo...' })).toHaveCount(0);
+  }
+  if (path === '/novo-medicamento') await expect(page.getByLabel('Nome do medicamento', { exact: true })).toBeVisible();
   if (path.includes('/17/')) await expect(page.getByLabel('Nome', { exact: true })).toHaveValue(visualMedication.nome);
   if (path === '/meus-medicamentos') await expect(page.getByRole('article')).toHaveCount(1);
   if (path === '/hoje' || path === '/meus-lembretes' || path === '/historico') await expect(page.getByRole('article').first()).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
 }
 export async function noHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, page: document.documentElement.scrollWidth, body: document.body.scrollWidth }));

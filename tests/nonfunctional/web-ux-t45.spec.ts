@@ -1,5 +1,6 @@
 import { test, expect, PRODUCTION_API_ORIGIN } from '../support/api-guard';
 import { contrastRatio, noHorizontalOverflow, openVisualRoute, pair, reachable, visualMedication, visualRoutes, visualSetup } from '../support/web-ux-visual';
+import { syntheticProfile } from '../support/web-ux-routes';
 test.use({ timezoneId: 'America/Sao_Paulo' });
 test.beforeEach(async ({ page }) => { await visualSetup(page); });
 test('B7 observe incumbent screens at actual viewport sizes', async ({ page }) => {
@@ -29,7 +30,43 @@ test('WUX_NAV_08 narrow menu opens by Enter contains focus and closes with Escap
 });
 
 test('WUX_SYSTEM_01 interface font is Kantumruy on every route including headings and native controls', async ({ page }) => {
-  for(const [path] of visualRoutes){ await openVisualRoute(page,path); const elements=page.locator('body,h1,h2,p,button,input,select,textarea'); expect(await elements.count()).toBeGreaterThan(3); for(const element of await elements.all()) await expect(element).toHaveCSS('font-family','Kantumruy, sans-serif'); }
+  for (const [path] of visualRoutes) {
+    await openVisualRoute(page, path);
+    const fonts = await page.locator('body,h1,h2,p,button,input,select,textarea').evaluateAll(elements => elements.map(el => ({
+      element: el.tagName,
+      text: el.textContent?.slice(0, 80),
+      family: getComputedStyle(el).fontFamily,
+    })));
+    expect(fonts.length).toBeGreaterThan(3);
+    for (const font of fonts) expect(font.family, `${path}: ${font.element} ${font.text ?? ''}`).toBe('Kantumruy, sans-serif');
+  }
+});
+
+test('T45 visual readiness waits for delayed session restoration before inspecting public or profile content', async ({ page }) => {
+  for (const path of ['/', '/Configuracoes']) {
+    let release: () => void = () => {};
+    const restored = new Promise<void>(resolve => { release = resolve; });
+    await page.route(`${PRODUCTION_API_ORIGIN}/usuario/me`, async route => {
+      await restored;
+      await route.fulfill({ json: { data: syntheticProfile } });
+    });
+    let ready = false;
+    const opening = openVisualRoute(page, path).then(() => { ready = true; });
+    await expect(page.getByRole('status').filter({ hasText: 'Verificando sessão…' })).toBeVisible();
+    if (path === '/') await expect(page.locator('h1').first()).toBeVisible();
+    // The rendered document and its fonts can settle while authentication is held.
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    expect(ready).toBe(false);
+    release(); await opening;
+    await expect(page.getByText('Verificando sessão…', { exact: true })).toHaveCount(0);
+    if (path === '/Configuracoes') await expect(page.getByLabel('Nome', { exact: true })).toHaveValue(syntheticProfile.nome);
+    const fonts = await page.locator('body,h1,h2,p,button,input,select,textarea').evaluateAll(elements => elements.map(el => getComputedStyle(el).fontFamily));
+    expect(fonts.length).toBeGreaterThan(3);
+    for (const font of fonts) expect(font).toBe('Kantumruy, sans-serif');
+  }
 });
 
 test('WUX_SYSTEM_02 actual primary fields focus and feedback use the single semantic token palette', async ({ page }) => {
@@ -80,6 +117,7 @@ test('WUX_ACCESS_06 rendered text placeholders primary hover disabled warning er
   let release:()=>void=()=>{}; const pending=new Promise<void>(resolve=>{release=resolve;}); await page.route(`${PRODUCTION_API_ORIGIN}/auth/login`,async route=>{await pending;await route.fulfill({status:429,headers:{'Retry-After':'5','access-control-expose-headers':'Retry-After'},json:{}});}); await page.getByLabel('E-mail').fill('ana@example.test');await page.getByLabel('Senha',{exact:true}).fill('Senha123!');await button.click();const disabled=page.getByRole('button',{name:'Entrando…',exact:true});await expect(disabled).toBeDisabled();const busy=await pair(disabled);expect(contrastRatio(busy.foreground,busy.background)).toBeGreaterThanOrEqual(4.5);release();await expect(page.getByRole('alert').filter({hasText:'Muitas tentativas.'})).toBeVisible();
   await openVisualRoute(page,'/meus-medicamentos/17/editar');await page.getByRole('button',{name:'Salvar alterações'}).click();const confirmed=await pair(page.getByRole('status').filter({hasText:'Nenhuma alteração para salvar.'}));expect(contrastRatio(confirmed.foreground,confirmed.background)).toBeGreaterThanOrEqual(4.5);await page.route(`${PRODUCTION_API_ORIGIN}/remedio/17`,route=>route.request().method()==='PUT'?route.fulfill({status:429,headers:{'Retry-After':'5','access-control-expose-headers':'Retry-After'},json:{}}):route.fallback());await page.getByLabel('Nome',{exact:true}).fill('Outro nome');await page.getByRole('button',{name:'Salvar alterações'}).click();
   for(const text of ['Muitas tentativas.','Aguarde antes de salvar novamente.']){const state=await pair(page.getByRole('alert').filter({hasText:text}));expect(contrastRatio(state.foreground,state.background)).toBeGreaterThanOrEqual(4.5);}
+  await expect(page.getByRole('button',{name:'Salvar alterações',exact:true})).toHaveCSS('border-top-color','rgb(209, 213, 219)');
   await page.screenshot({path:'.specs/features/web-ux-consistency/captures/b7-warning-error-1280.png',fullPage:true});
 });
 
