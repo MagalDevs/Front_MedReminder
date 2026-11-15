@@ -7,7 +7,7 @@ import HistoricoContent from '@/app/historico/HistoricoContent';
 import { apiRequest, SESSION_INVALIDATED_EVENT } from '@/app/utils/api';
 import { clearNavigationFeedback, consumeNavigationFeedback } from '@/app/utils/navigation-feedback';
 const router = vi.hoisted(() => ({ push: vi.fn(), unstable: false }));
-vi.mock('next/navigation', () => ({ useRouter: () => router.unstable ? { push: router.push } : router }));
+vi.mock('next/navigation', () => ({ useRouter: () => router.unstable ? { push: router.push } : router, useSearchParams: () => new URLSearchParams() }));
 const json = (data: unknown, status=200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 function Probe() { const auth = useAuth(); return <><output data-testid="auth">{String(auth.isAuthenticated)}:{String(auth.loading)}:{auth.user?.nome}</output><button onClick={() => auth.login('token-b', { id: 2, nome: 'B' })}>login B</button><button onClick={auth.logout}>logout</button></>; }
 function mount(login=false) { return render(<AuthProvider>{login && <Login />}<Probe /></AuthProvider>); }

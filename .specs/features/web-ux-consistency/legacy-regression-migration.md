@@ -142,7 +142,8 @@ Observed 2026-11-15 at HEAD 24b8cc0: 75 selected/executed, 25 passed, 50 failed,
 | tests/unit/CardBusca.test.tsx | 23 (0/23) | 25 | PASS; 23 preserved + ACCESS-02 and FORM-02 | f413988 |
 | tests/integration/cadastro-feedback-catalog.test.tsx | 11 (5/6) | 11 | PASS; all cases and manual failure gestures | 33ecfa0 |
 | tests/integration/auth.test.tsx | 9 (7/2) | 11 | PASS; 9 preserved + 2 late identity cases | 3dce2ee |
-| tests/integration/cadastro-feedback-login.test.tsx | 17 (0/17) | 17 | PASS; every original parameter/scenario preserved | current atomic commit; root resolves hash |
+| tests/integration/cadastro-feedback-login.test.tsx | 17 (0/17) | 17 | PASS; every original parameter/scenario preserved | 7eaf560 |
+| tests/integration/cadastro-feedback-session.test.tsx | 15 (13/2) | 15 | PASS; only Next search-param mock added | current atomic commit; root resolves hash |
 
 CardBusca gate: `npx vitest run tests/unit/CardBusca.test.tsx --reporter=verbose`, 25/25 on 2026-11-15. Only accessible selectors changed; all payload/timer/filter/duplicate assertions remain. No product change.
 
@@ -161,3 +162,11 @@ Assumption: anonymous profile failure must preserve absence of session; the prev
 The LoginPage wrapper now receives useSearchParams and a real AuthProvider. login/logout spies forward to the real context instead of simulating its outcome. For the two ERR-12 malformed-profile rows, ERR-01 ERR-17 diagnostic failure and three NET-03 server/network/contract rows, the obsolete unconditional logout-spy assertion is replaced by stronger outcomes: no login/logout call, no token or stored profile, rendered authenticated=false and profile=null, and no navigation. This preserves the anonymous invariant from T29 without introducing navigation merely to satisfy a spy. The same contextual errors and technical-secret exclusions remain. Names/IDs remain verbatim for inventory traceability. IT-02 separately proves real prior-session cleanup and /login navigation.
 
 Gate: `npx vitest run tests/integration/cadastro-feedback-login.test.tsx --reporter=verbose`, 17/17, no cases skipped/deleted.
+
+### R1 final selected gate
+
+Session assumption: useSearchParams is required by the real /login wrapper; no session behavior or expected state changes. Files: session test and migration/status docs. Its gate passed 15/15 with every assertion intact.
+
+Final command: `npx vitest run tests/unit/CardBusca.test.tsx tests/integration/cadastro-feedback-catalog.test.tsx tests/integration/auth.test.tsx tests/integration/cadastro-feedback-login.test.tsx tests/integration/cadastro-feedback-session.test.tsx --reporter=verbose`. Result on 2026-11-15: 5 files, 79/79 passed, 0 failed/skipped. Baseline was 75 (25 pass/50 fail); all 75 expanded original names/IDs are still selected, plus 4 cases (2 catalog keyboard/manual, 2 late login identity). Final `npx tsc --noEmit` and `npm run lint -- --max-warnings=0` passed. No additional production changes after the fresh T41 Build and 10/10 browser run.
+
+Preserved index: 44 stage records; SHA-256 of git ls-files --stage joined by LF (no terminal newline) is 87300EDE63817AE45055AD7E3D3305E74B137F5D8C6ADE86ABADA7BEC941B6D8. Commits use exact --only paths. R2/R3, aggregate proofs, independent walk, Verifier and final feature validation remain root-owned; no push/deploy, real API writes, backend/mobile edits or snapshots.
