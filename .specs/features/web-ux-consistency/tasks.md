@@ -1765,3 +1765,5 @@ CardBusca migration complete: 23 original cases preserved, 2 spec-derived keyboa
 R1 catalog feedback complete: 11/11 original cases, with manual-path gestures in existing failure matrix. Auth/login/session migrations remain.
 
 R1 auth complete: 9 existing + 2 late identity regressions, 11/11; real LoginScreen profile-failure regression fixed with token/generation guard. T29 3/3 unchanged, T41 selective browser 10/10 with fresh build, types/lint0 green. Login feedback/session migrations remain.
+
+R1 login feedback complete: 17/17 with real AuthProvider and forwarding spies. Anonymous profile failures assert no stored/rendered session and no navigation; prior-session cleanup remains covered by IT-02. Session feedback remains.
