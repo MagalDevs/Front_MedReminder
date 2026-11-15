@@ -113,7 +113,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T39: Conectar rota Histórico
 - [x] T40: Preservar Configuracoes como Perfil
 - [x] T41: Conectar rota de login
-- [ ] T42: Conectar rota de cadastro
+- [x] T42: Conectar rota de cadastro
 - [ ] T43: Preservar acesso legado aos lembretes
 
 ### Phase 7: Final route and quality
@@ -1016,10 +1016,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/cadastro/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 4 casos planejados sem correção formal do plano.
-- [ ] As provas ACCOUNT-01, ACCOUNT-02, ACCOUNT-03, ACCOUNT-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T42 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/cadastro/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 4 casos planejados sem correção formal do plano.
+- [x] As provas ACCOUNT-01, ACCOUNT-02, ACCOUNT-03, ACCOUNT-04 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T42 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 5 passed, 0 failed. Account/personal stages, mandatory summary, exact complete DTO, duplicate pending gesture, invalid CPF/CEP/future date with focus, password visibility/value and all DTO error messages/retry asserted. Supporting RegistrationScreen preserves the previous real 15-second Promise.race deadline across headers and body, AbortController, late-result suppression and abandonment. 4 new timeout/lifecycle integration tests plus 3 T30 regressions passed (7 total). No legacy test changed; root authorized co-located deadline support.
 
 ### T43: Preservar acesso legado aos lembretes
 
@@ -1282,16 +1284,16 @@ Proof: run coverage | WUX_DOSE_08
 Proof: run coverage | WUX_DOSE_09
 
 **C54** - WHEN a pessoa abre o cadastro THEN the web client SHALL organizar os campos exigidos nas etapas Conta e Dados pessoais com resumo das informações obrigatórias antes de enviar. (ACCOUNT-01, AC 1; T42).
-Proof: run functional | ✓ WUX_ACCOUNT_01
+Proof: run functional | WUX_ACCOUNT_01
 
 **C55** - WHILE o cadastro é preenchido the web client SHALL manter nome, email, CPF, CEP, nascimento, senha e cuidador compatíveis com os DTOs existentes, sem dados fictícios para contornar obrigatoriedade. (ACCOUNT-02, AC 2; T42).
-Proof: run functional | ✓ WUX_ACCOUNT_02
+Proof: run functional | WUX_ACCOUNT_02
 
 **C56** - WHEN o cadastro recebe data futura, CPF com quantidade diferente de 11 dígitos ou CEP com quantidade diferente de 8 dígitos THEN the web client SHALL impedir o envio e indicar o campo. (ACCOUNT-03, AC 3; T42).
-Proof: run functional | ✓ WUX_ACCOUNT_03
+Proof: run functional | WUX_ACCOUNT_03
 
 **C57** - WHEN a pessoa usa Mostrar senha THEN the web client SHALL alternar a visibilidade com nome e estado acessíveis sem alterar o valor digitado. (ACCOUNT-04, AC 4; T42).
-Proof: run functional | ✓ WUX_ACCOUNT_04
+Proof: run functional | WUX_ACCOUNT_04
 
 **C58** - WHEN a pessoa altera apenas dados pessoais no Perfil THEN the web client SHALL chamar PATCH `/usuario/me` somente com os campos permitidos alterados, preservando o comportamento de omissão dos opcionais. (ACCOUNT-05, AC 5; T40).
 Proof: run functional | WUX_ACCOUNT_05

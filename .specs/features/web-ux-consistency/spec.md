@@ -436,10 +436,10 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | DOSE-07 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-08 | Register and correct a dose | T12 | Implemented | T12: 9 integration tests passed |
 | DOSE-09 | Register and correct a dose | T33 | Implemented | WUX_DOSE_09; T33 9 integration tests passed |
-| ACCOUNT-01 | Account and profile | T42 | Tasks | In Tasks |
-| ACCOUNT-02 | Account and profile | T42 | Tasks | In Tasks |
-| ACCOUNT-03 | Account and profile | T42 | Tasks | In Tasks |
-| ACCOUNT-04 | Account and profile | T42 | Tasks | In Tasks |
+| ACCOUNT-01 | Account and profile | T42 | Implemented | T42 browser gate 5 passed and 4 lifecycle integration tests |
+| ACCOUNT-02 | Account and profile | T42 | Implemented | T42 browser gate 5 passed and 4 lifecycle integration tests |
+| ACCOUNT-03 | Account and profile | T42 | Implemented | T42 browser gate 5 passed and 4 lifecycle integration tests |
+| ACCOUNT-04 | Account and profile | T42 | Implemented | T42 browser gate 5 passed and 4 lifecycle integration tests |
 | ACCOUNT-05 | Account and profile | T40 | Implemented | T40 browser gate 3 passed |
 | ACCOUNT-06 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |
 | ACCOUNT-07 | Account and profile | T31 | Implemented | T31: 8 integration tests passed |

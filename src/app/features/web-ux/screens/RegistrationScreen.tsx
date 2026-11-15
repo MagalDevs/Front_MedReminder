@@ -8,7 +8,7 @@ import Button from '../../../components/ui/Button';
 import FormField from '../../../components/ui/FormField';
 import RequestFeedback, { useRetryDelay } from '../../../components/RequestFeedback/RequestFeedback';
 import { ApiError, apiRequest } from '../../../utils/api';
-import { requestErrorMessage } from '../../../utils/request-errors';
+import { requestErrorMessage, RequestTimeoutError } from '../../../utils/request-errors';
 import { clearNavigationFeedback, publishNavigationFeedback } from '../../../utils/navigation-feedback';
 import { isCalendarDate, localDay } from '../domain/agenda';
 
@@ -19,8 +19,8 @@ export default function RegistrationScreen() {
   const [values, setValues] = useState({ email: '', senha: '', confirmation: '', nome: '', cpf: '', cep: '', dataNasc: '', cuidador: false });
   const [errors, setErrors] = useState<Record<string, string>>({}); const [error, setError] = useState<string | null>(null);
   const [visible, setVisible] = useState(false); const [busy, setBusy] = useState(false); const [notBefore, setNotBefore] = useState(0);
-  const remaining = useRetryDelay(notBefore); const pending = useRef<AbortController | null>(null); const form = useRef<HTMLFormElement>(null); const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => () => { pending.current?.abort(); pending.current = null; }, []);
+  const remaining = useRetryDelay(notBefore); const pending = useRef<{ active: boolean; controller: AbortController; timer?: ReturnType<typeof setTimeout> } | null>(null); const form = useRef<HTMLFormElement>(null); const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => () => { if (pending.current) { pending.current.active = false; pending.current.controller.abort(); clearTimeout(pending.current.timer); pending.current = null; } }, []);
   function move(next: number) { setStep(next); setErrors({}); requestAnimationFrame(() => heading.current?.focus()); }
   async function submit(event: React.FormEvent) {
     event.preventDefault(); if (pending.current || remaining) return;
@@ -38,14 +38,18 @@ export default function RegistrationScreen() {
     setErrors(invalid); setError(null);
     if (Object.keys(invalid).length) { requestAnimationFrame(() => form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()); return; }
     if (step === 0) { move(1); return; }
-    const controller = new AbortController(); pending.current = controller; const active = () => pending.current === controller && !controller.signal.aborted;
+    const attempt = { active: true, controller: new AbortController(), timer: undefined as ReturnType<typeof setTimeout> | undefined };
+    pending.current = attempt; const active = () => attempt.active && pending.current === attempt;
+    const deadline = new Promise<never>((_resolve, reject) => {
+      attempt.timer = setTimeout(() => { reject(new RequestTimeoutError()); attempt.controller.abort(); }, 15_000);
+    });
     setBusy(true); clearNavigationFeedback();
     try {
-      await apiRequest('usuario', { method: 'POST', requireAuth: false, expectedStatus: 201, signal: controller.signal, body: JSON.stringify({ nome: values.nome.trim(), email: values.email.trim(), senha: values.senha, cpf: values.cpf.replace(/[.\-\s]/g, ''), cep: values.cep.replace(/[-\s]/g, ''), dataNasc: values.dataNasc, cuidador: values.cuidador }) });
+      await Promise.race([deadline, apiRequest('usuario', { method: 'POST', requireAuth: false, expectedStatus: 201, signal: attempt.controller.signal, body: JSON.stringify({ nome: values.nome.trim(), email: values.email.trim(), senha: values.senha, cpf: values.cpf.replace(/[.\-\s]/g, ''), cep: values.cep.replace(/[-\s]/g, ''), dataNasc: values.dataNasc, cuidador: values.cuidador }) })]);
       if (!active()) return;
       publishNavigationFeedback('registered'); setValues(previous => ({ ...previous, senha: '', confirmation: '' })); router.push('/login');
     } catch (cause) { if (active()) { setError(requestErrorMessage(cause, 'registration')); setNotBefore(cause instanceof ApiError && cause.status === 429 && cause.retryAfter !== undefined ? Date.now() + cause.retryAfter * 1000 : 0); } }
-    finally { if (active()) { pending.current = null; setBusy(false); } }
+    finally { clearTimeout(attempt.timer); if (active()) { attempt.active = false; pending.current = null; setBusy(false); } }
   }
   const field = (key: Exclude<keyof typeof values, 'cuidador'>, label: string, type = 'text', maxLength?: number, autoComplete?: string) => <FormField key={key} label={label} error={errors[key]} description={key === 'senha' ? passwordHelp : undefined}><input className={control} type={type} required maxLength={maxLength} autoComplete={autoComplete} inputMode={key === 'cpf' || key === 'cep' ? 'numeric' : undefined} value={values[key]} onChange={event => setValues({ ...values, [key]: event.target.value })} /></FormField>;
   return <main className="mx-auto w-full max-w-xl space-y-6 px-4 py-8 sm:py-12">
