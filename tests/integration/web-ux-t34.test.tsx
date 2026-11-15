@@ -37,13 +37,13 @@ it.each(['logout', 'identity', 'expiration'])('WUX_STATE_04 %s', async kind => {
 function Collection() { const auth = useAuth(); const { collection, refresh } = useDoseCollection(); return <><SessionActions /><button onClick={() => void refresh()}>Atualizar coleção</button><output aria-label="Doses">{auth.sessionStatus === 'authenticated' ? collection.items.map(dose => dose.kind === 'complete' ? dose.medicationName : dose.reason).join(',') : ''}</output></>; }
 it('WUX_STATE_06 newer read', async () => {
   let old!: (value: Response) => void; let current!: (value: Response) => void; let reads = 0;
-  vi.mocked(fetch).mockImplementation(async input => String(input).endsWith('/usuario/me') ? json({ data: user }) : !String(input).includes('?') ? json({ data: [] }) : new Promise(done => { if (++reads === 1) old = done; else current = done; }));
-  render(providers(<Collection />)); await ready(); await waitFor(() => expect(reads).toBe(1)); const signal = vi.mocked(fetch).mock.calls.find(([input]) => String(input).includes('?'))![1]!.signal!;
+  vi.mocked(fetch).mockImplementation(async input => String(input).endsWith('/usuario/me') ? json({ data: user }) : ++reads === 2 ? json({ data: [] }) : new Promise(done => { if (reads === 1) old = done; else current = done; }));
+  render(providers(<Collection />)); await ready(); await waitFor(() => expect(reads).toBe(2)); const signal = vi.mocked(fetch).mock.calls.find(([input]) => String(input).includes('?'))![1]!.signal!;
   fireEvent.click(screen.getByText('Atualizar coleção')); await act(async () => current(json({ data: [dose('Atual')] }))); expect(screen.getByLabelText('Doses')).toHaveTextContent('Atual'); await act(async () => old(json({ data: [dose('Antigo')] }))); expect(signal.aborted).toBe(true); expect(screen.getByLabelText('Doses')).toHaveTextContent('Atual'); expect(screen.queryByText('Antigo')).not.toBeInTheDocument();
 });
 it('WUX_STATE_06 identity replacement', async () => {
-  let old!: (value: Response) => void; let queried = false;
-  vi.mocked(fetch).mockImplementation(async input => String(input).endsWith('/usuario/me') ? json({ data: user }) : !String(input).includes('?') ? json({ data: [] }) : !queried ? (queried = true, new Promise(done => { old = done; })) : json({ data: [dose('Conta B')] }));
+  let old!: (value: Response) => void; let queried = false; let reads = 0;
+  vi.mocked(fetch).mockImplementation(async input => String(input).endsWith('/usuario/me') ? json({ data: user }) : ++reads === 2 ? json({ data: [] }) : !queried ? (queried = true, new Promise(done => { old = done; })) : json({ data: [dose('Conta B')] }));
   render(providers(<Collection />)); await ready(); await waitFor(() => expect(queried).toBe(true)); const signal = vi.mocked(fetch).mock.calls.find(([input]) => String(input).includes('?'))![1]!.signal!; fireEvent.click(screen.getByText('Conta B')); await waitFor(() => expect(screen.getByLabelText('Doses')).toHaveTextContent('Conta B'));
   await act(async () => old(json({ data: [dose('Privado A')] }))); expect(signal.aborted).toBe(true); expect(screen.getByLabelText('Doses')).toHaveTextContent('Conta B'); expect(screen.queryByText('Privado A')).not.toBeInTheDocument();
 });

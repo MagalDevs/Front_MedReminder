@@ -108,7 +108,7 @@ describe('NET-05 NET-06 feedback de doses', () => {
       .mockResolvedValueOnce(
         json({
           data: [
-            { id: 1, tomado: false, data_dose: '2026-11-12', remedio: { nome: 'Preservado', quantidadeDose: '1', cor: 'Branco' } },
+            { id: 1, tomado: false, data_dose: '2026-11-12T08:00:00-03:00', remedio: { nome: 'Preservado', quantidadeDose: '1', cor: 'Branco' } },
           ],
         }),
       )
@@ -160,7 +160,7 @@ describe('NET-05 NET-06 feedback de doses', () => {
       .mockResolvedValueOnce(
         json({
           data: [
-            { id: 2, tomado: false, data_dose: '2026-11-12', remedio: { nome: 'Conta B', quantidadeDose: '1', cor: 'Branco' } },
+            { id: 2, tomado: false, data_dose: '2026-11-12T08:00:00-03:00', remedio: { nome: 'Conta B', quantidadeDose: '1', cor: 'Branco' } },
           ],
         }),
       );

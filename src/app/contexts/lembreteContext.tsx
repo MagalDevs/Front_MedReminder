@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode, useEffect, useLayoutEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import { apiRequest, ApiError } from "../utils/api";
+import { ApiError } from "../utils/api";
 import RequestFeedback from "../components/RequestFeedback/RequestFeedback";
 import { requestErrorMessage, RequestContractError } from "../utils/request-errors";
 import { publishNavigationFeedback } from "../utils/navigation-feedback";
@@ -10,6 +10,7 @@ import { publishNavigationFeedback } from "../utils/navigation-feedback";
 import { useAuth } from "./AuthContext";
 import { subscribeDoseConfirmations, type DoseConfirmation } from '../features/web-ux/data/dose-confirmations';
 import { isDoseInstant } from '../features/web-ux/domain/agenda';
+import { loadDoseCollection } from '../features/web-ux/data/loadDoseCollection';
 
 interface Lembrete {
     id: number;
@@ -80,13 +81,15 @@ export const LembreteProvider = ({ children }: { children: ReactNode }) => {
         const active = () => attempt === version.current && !request.signal.aborted && localStorage.getItem('access_token') === token;
         setSnapshot(previous => ({ identity, token, doses: previous.identity === identity && previous.token === token ? previous.doses : [], error: null, loading: true }));
         try {
-            const response = await apiRequest<{ data: Lembrete[] }>('dose/me', {
-                method: 'GET', onUnauthorized: 'throw', signal: request.signal,
-            });
+            const loaded = await loadDoseCollection({ signal: request.signal, includeRaw: true });
             if (!active()) return false;
-            if (!response || !Array.isArray(response.data)) throw new RequestContractError();
-            const complete = response.data.filter(dose => dose && Number.isSafeInteger(dose.id) && dose.id > 0 && typeof dose.tomado === 'boolean' && isDoseInstant(dose.data_dose) && dose.remedio && typeof dose.remedio.nome === 'string' && dose.remedio.nome.trim() && typeof dose.remedio.quantidadeDose === 'string' && dose.remedio.quantidadeDose.trim() && typeof dose.remedio.cor === 'string');
-            if (response.data.length && !complete.length) throw new RequestContractError();
+            if (!loaded.complete) throw loaded.failure ?? new RequestContractError();
+            if (!Array.isArray(loaded.rawItems)) throw new RequestContractError();
+            const complete = loaded.rawItems.filter((value): value is Lembrete => {
+                const dose = value as Lembrete | null;
+                return !!(dose && Number.isSafeInteger(dose.id) && dose.id > 0 && typeof dose.tomado === 'boolean' && isDoseInstant(dose.data_dose) && dose.remedio && typeof dose.remedio.nome === 'string' && dose.remedio.nome.trim() && typeof dose.remedio.quantidadeDose === 'string' && dose.remedio.quantidadeDose.trim() && typeof dose.remedio.cor === 'string');
+            });
+            if (loaded.rawItems.length && !complete.length) throw new RequestContractError();
             const doses = complete.map(dose => {
                 const confirmed = confirmations.current.slice(start).findLast(value => value.id === dose.id && Date.parse(value.expectedAt) === new Date(dose.data_dose).getTime());
                 return confirmed ? { ...dose, tomado: confirmed.registered } : dose;

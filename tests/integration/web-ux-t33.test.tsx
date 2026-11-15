@@ -51,12 +51,12 @@ it('T33 confirmed alarm registration synchronizes screen and legacy snapshots wh
   await screen.findByText('Dose registrada. A atualização dos lembretes não foi concluída.'); expect(screen.getByLabelText('Espelho')).toHaveTextContent('1:true,2:false'); expect(screen.getByLabelText('Legado')).toHaveTextContent('true'); expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(1);
 });
 it('T33 screen confirmations preserve another pending ID, sync legacy and cannot be undone by an older GET', async () => {
-  let readLegacy!: (response: Response) => void; let readCollection!: (response: Response) => void; let writeOther!: (response: Response) => void;
+  let readLegacy!: (response: Response) => void; let readCollection!: (response: Response) => void; let writeOther!: (response: Response) => void; let reads = 0;
   vi.mocked(fetch).mockImplementation(async (input, init) => {
     if (String(input).endsWith('/usuario/me')) return json({ data: { id: 7, nome: 'Ana' } });
     if (init?.method === 'PUT' && String(input).endsWith('/2')) return new Promise(done => { writeOther = done; });
     if (init?.method === 'PUT') return json({ data: { id: 1, tomado: true, data_dose: props.dataHora } });
-    return new Promise(done => { if (String(input).includes('?')) readCollection = done; else readLegacy = done; });
+    return new Promise(done => { if (++reads === 1) readCollection = done; else readLegacy = done; });
   });
   render(<AuthProvider><LembreteProvider><Mirror /><CollectionObserver /></LembreteProvider></AuthProvider>);
   await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3)); fireEvent.click(screen.getByText('Registrar outra dose')); const pendingOther = vi.mocked(fetch).mock.calls[3][1]!.signal!; fireEvent.click(screen.getByText('Registrar pela tela'));

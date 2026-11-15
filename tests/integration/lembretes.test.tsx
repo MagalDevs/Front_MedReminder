@@ -434,7 +434,7 @@ describe("IT-07 TEST-01 TEST-02: lista, filtros e marcar como tomado", () => {
 
     const doses = pathsOf(api, "GET", "/dose/me");
     expect(doses.length).toBeGreaterThanOrEqual(1);
-    expect(doses[0].url).toBe(`${API_URL}/dose/me`);
+    expect(doses[0].url).toBe(`${API_URL}/dose/me?limit=100&order=ASC&page=1`);
     expect(doses[0].headers.get("Authorization")).toBe(`Bearer ${TOKEN}`);
     expect(doses[0].body).toBeUndefined();
 

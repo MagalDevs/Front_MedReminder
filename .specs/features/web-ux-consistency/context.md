@@ -94,6 +94,12 @@ Nenhuma área foi recusada. Detalhes de comportamento foram delegados explicitam
 - Preservar as verificações de dose já registrada, fila de doses simultâneas, cancelamento de timers e ausência de duplicação. Os seletores devem continuar identificando a interface real; renomear o título não pode fazer uma asserção negativa passar sem provar a ausência do alarme.
 - A integração mantém os resultados confirmados sincronizados em memória entre telas e alarme, por identidade. Não acrescenta storage, polling, endpoints nem garantia de sincronização entre dispositivos.
 
+### Pagination Assertion Correction Authorization
+
+- Em 2026-11-14, foi enviada pergunta assíncrona para atualizar a expectativa exata de IT07 em `tests/integration/lembretes.test.tsx`: de `/dose/me` para `/dose/me?limit=100&order=ASC&page=1`, mantendo autenticação, quantidade de chamadas e resultado.
+- O usuário respondeu: "Sim, alinhar o teste à paginação". Atualização dessa expectativa autorizada, mantendo as demais verificações e sem reduzir cenários.
+- Após a interrupção de uso, o usuário confirmou a retomada: "continue". O gate final selecionado passou em 89 casos, sem falhas, seguido de TypeScript e lint global verdes. O Build das fontes corrigidas também passou. O commit corretivo inclui a expectativa aprovada e preserva os 44 arquivos de skills já preparados no índice. B6 ainda não foi despachado.
+
 ## Deferred Ideas
 
 - Implementação e correções do app mobile.

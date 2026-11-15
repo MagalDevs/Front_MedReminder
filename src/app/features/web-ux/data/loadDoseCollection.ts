@@ -2,11 +2,13 @@ import { apiRequest } from '../../../utils/api';
 import { RequestContractError, requestErrorMessage } from '../../../utils/request-errors';
 import { DoseView, normalizeDose } from '../domain/agenda';
 
-export type DoseCollection = { items: DoseView[]; complete: boolean; loading: boolean; error: string | null; expectedTotal: number | null; failure?: unknown };
+export type DoseCollection = { items: DoseView[]; complete: boolean; loading: boolean; error: string | null; expectedTotal: number | null; failure?: unknown; rawItems?: unknown[] };
 type Pagination = { page: number; limit: number; total: number; totalPages: number };
 export type DoseCollectionOptions = {
   signal?: AbortSignal; from?: string; to?: string; tomado?: boolean; order?: 'ASC' | 'DESC';
   onProgress?: (result: DoseCollection) => void;
+  /** Only legacy adapters need the original transport rows. Omitted by default. */
+  includeRaw?: boolean;
 };
 
 function envelope(value: unknown): { data: unknown[]; pagination?: Pagination } {
@@ -19,7 +21,7 @@ function envelope(value: unknown): { data: unknown[]; pagination?: Pagination } 
 }
 
 export async function loadDoseCollection(options: DoseCollectionOptions = {}): Promise<DoseCollection> {
-  let result: DoseCollection = { items: [], complete: false, loading: true, error: null, expectedTotal: null };
+  let result: DoseCollection = { items: [], complete: false, loading: true, error: null, expectedTotal: null, ...(options.includeRaw ? { rawItems: [] } : {}) };
   const query = new URLSearchParams({ limit: '100', order: options.order ?? 'ASC' });
   if (options.from) query.set('from', options.from);
   if (options.to) query.set('to', options.to);
@@ -37,7 +39,7 @@ export async function loadDoseCollection(options: DoseCollectionOptions = {}): P
       if (pagination && (pagination.page !== page || (first && (pagination.total !== first.total || pagination.limit !== first.limit || pagination.totalPages !== first.totalPages)))) throw new RequestContractError();
       first ??= pagination;
       const items = response.data.map(normalizeDose);
-      result = { ...result, items: [...result.items, ...items], expectedTotal: pagination?.total ?? items.length };
+      result = { ...result, items: [...result.items, ...items], expectedTotal: pagination?.total ?? items.length, ...(options.includeRaw ? { rawItems: [...(result.rawItems ?? []), ...response.data] } : {}) };
       for (const item of items) {
         if (item.id !== undefined) {
           if (ids.has(item.id)) throw new RequestContractError();

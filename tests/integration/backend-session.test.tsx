@@ -28,7 +28,7 @@ describe('BEAPI-03/BEAPI-04 restauração e consultas por identidade', () => {
     vi.mocked(fetch).mockImplementation(async (input) => {
       const url = String(input);
       if (url.endsWith('/usuario/me')) return json({ data: { id: 1 } });
-      if (url.endsWith('/dose/me')) return json({ data: [] });
+      if (new URL(url).pathname === '/dose/me') return json({ data: [] });
       if (url.endsWith('/fixture-private')) return json({}, 401);
       throw new Error(`Unexpected test request: ${url}`);
     });
