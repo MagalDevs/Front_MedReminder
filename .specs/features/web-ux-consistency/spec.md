@@ -396,8 +396,8 @@ Cada ID identifica um único critério de aceite. Os grupos abaixo preservam ras
 | DAY-03 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
 | DAY-04 | Understand today's doses and history | T10 | Implemented | T10: 2 integration tests passed |
 | DAY-05 | Understand today's doses and history | T36 | Implemented | T36 browser gate 6 passed |
-| DAY-06 | Understand today's doses and history | T39 | Tasks | In Tasks |
-| DAY-07 | Understand today's doses and history | T39 | Tasks | In Tasks |
+| DAY-06 | Understand today's doses and history | T39 | Implemented | T39 browser gate 3 passed |
+| DAY-07 | Understand today's doses and history | T39 | Implemented | T39 browser gate 3 passed |
 | DAY-08 | Understand today's doses and history | T26 | Implemented | T26: 10 integration tests passed |
 | DAY-09 | Understand today's doses and history | T11 | Implemented | T11: 4 integration tests passed |
 | MED-01 | Manage medications | T37 | Implemented | T37 browser gate 2 passed |

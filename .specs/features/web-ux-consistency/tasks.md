@@ -110,7 +110,7 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 - [x] T36: Disponibilizar rota Hoje
 - [x] T37: Conectar rota Medicamentos
 - [x] T38: Conectar cadastro de medicamento
-- [ ] T39: Conectar rota Histórico
+- [x] T39: Conectar rota Histórico
 - [ ] T40: Preservar Configuracoes como Perfil
 - [ ] T41: Conectar rota de login
 - [ ] T42: Conectar rota de cadastro
@@ -953,10 +953,12 @@ As fases e tarefas executam em ordem. Dependências técnicas aparecem nos corpo
 
 **Done when**:
 
-- [ ] Entregável de src/app/historico/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
-- [ ] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
-- [ ] As provas DAY-06, DAY-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
-- [ ] Gate concreto acima passa; marcar T39 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+- [x] Entregável de src/app/historico/page.tsx funciona no escopo desta tarefa sem implementar capacidades fora da spec.
+- [x] Os testes desta tarefa cobrem sucesso, limite e erro pertinentes; contagem selecionada/executada é registrada e nunca cai abaixo de 2 casos planejados sem correção formal do plano.
+- [x] As provas DAY-06, DAY-07 possuem asserções dos resultados da spec, não somente snapshots de estrutura ou logs.
+- [x] Gate concreto acima passa; marcar T39 concluída antes do seu commit atômico, incluindo tasks.md se o repositório o rastrear.
+
+**Verified**: 2026-11-14 — Browser gate isolated config: 3 passed, 0 failed. History excludes future instants, descends with explicit planned time, three filters intersect over all 102 records including same-name IDs, clearing restores complete collection. Page-2 failure keeps 100 records labeled partial and retries to 101 complete. API fixture serves both global alarm and screen. No product deviation or old test changes.
 
 ### T40: Preservar Configuracoes como Perfil
 
@@ -1156,10 +1158,10 @@ Proof: run coverage | WUX_DAY_04
 Proof: run functional | WUX_DAY_05
 
 **C14** - WHEN a pessoa abre Histórico THEN the web client SHALL apresentar doses até o relógio atual em ordem decrescente, com a data explicitamente rotulada como horário previsto. (DAY-06, AC 6; T39).
-Proof: run functional | ✓ WUX_DAY_06
+Proof: run functional | WUX_DAY_06
 
 **C15** - WHEN a pessoa aplica período, medicamento e estado no Histórico THEN the web client SHALL mostrar a interseção dos filtros e a contagem do conjunto filtrado, independentemente da página carregada. (DAY-07, AC 7; T39).
-Proof: run functional | ✓ WUX_DAY_07
+Proof: run functional | WUX_DAY_07
 
 **C16** - IF uma dose tem data inválida, ausência de relação ou data sem hora THEN the web client SHALL mostrá-la em uma seção “Dados incompletos”, sem inventar horário, medicamento ou ação de registro. (DAY-08, AC 8; T26).
 Proof: run coverage | WUX_DAY_08
