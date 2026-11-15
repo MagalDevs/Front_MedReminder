@@ -2,7 +2,7 @@ import { expect, test, PRODUCTION_API_ORIGIN } from '../support/api-guard';
 import { dose, prepareSession, routeReadApi } from '../support/web-ux-routes';
 
 test.use({ timezoneId: 'America/Sao_Paulo' });
-const medication = { id: 17, nome: 'Vitamina Sintética', classificacao: 'Suplemento', quantidadeCaixa: 10, dataValidade: '2027-01-01', cor: 'Azul', motivo: 'Rotina', observacao: '', quantidadeDose: '1,5 mg', unidadeMedida: 'comprimidos', quantidadeDiaria: 6, quantidadeDias: 10 };
+const medication = { id: 17, nome: 'Vitamina Sintética', classificacao: 'Suplemento', quantidadeCaixa: 10, dataValidade: '2027-01-01', cor: 'Azul', motivo: 'Rotina', observacao: 'Nota original preservada', quantidadeDose: '1,5 mg', unidadeMedida: 'comprimidos', quantidadeDiaria: 6, quantidadeDias: 10 };
 async function setup(page: Parameters<typeof prepareSession>[0]) {
   await prepareSession(page);
   await routeReadApi(page, [dose(31, '2026-11-14T08:00:00-03:00', medication.nome, 17)], [medication]);
@@ -41,6 +41,27 @@ test('WUX_MED_06 save sends only seven changed metadata fields to the existing I
   fail = false; await page.getByRole('button', { name: 'Salvar alterações' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Medicamento atualizado.' })).toBeVisible(); expect(bodies).toEqual([changed, changed]);
   await page.getByRole('button', { name: 'Salvar alterações' }).click(); await expect(page.getByText('Nenhuma alteração para salvar.')).toBeVisible(); expect(bodies).toHaveLength(2);
+});
+
+test('WUX_MED_06 one changed name sends a sparse PUT and preserves every untouched populated value', async ({ page }) => {
+  await setup(page);
+  const writes: { method: string; path: string; body: unknown }[] = [];
+  await page.route(`${PRODUCTION_API_ORIGIN}/remedio/17`, async route => {
+    if (route.request().method() !== 'PUT') return route.fallback();
+    writes.push({ method: route.request().method(), path: new URL(route.request().url()).pathname, body: route.request().postDataJSON() });
+    await route.fulfill({ json: { data: { ...medication, nome: 'Vitamina Nome Único' } } });
+  });
+  await page.goto('/meus-medicamentos/17/editar');
+  await expect(page.getByLabel('Nome', { exact: true })).toHaveValue('Vitamina Sintética');
+  await page.getByLabel('Nome', { exact: true }).fill('Vitamina Nome Único');
+  await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Medicamento atualizado. Os horários das doses foram preservados.' })).toBeVisible();
+  expect(writes).toEqual([{ method: 'PUT', path: '/remedio/17', body: { nome: 'Vitamina Nome Único' } }]);
+  for (const [label, value] of [['Nome', 'Vitamina Nome Único'], ['Classificação', 'Suplemento'], ['Quantidade em estoque', '10'], ['Validade', '2027-01-01'], ['Motivo', 'Rotina'], ['Observação', 'Nota original preservada']]) await expect(page.getByLabel(label, { exact: true })).toHaveValue(value);
+  await expect(page.getByRole('radio', { name: 'Azul', exact: true })).toBeChecked();
+  const treatment = page.getByRole('region', { name: 'Tratamento (somente leitura)' });
+  for (const text of ['14/11/2026', '08:00', '1,5 mg', 'comprimidos']) await expect(treatment).toContainText(text);
+  await expect(treatment.locator('input,select,textarea')).toHaveCount(0);
 });
 
 test('WUX_MED_07 treatment remains read only with the explicit schedule limit', async ({ page }) => {
