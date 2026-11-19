@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 
 import ConfigurarLembrete from "@/app/components/CardCadastrar/cardCadastrar";
+import ToastProvider from "@/app/components/Feedback/ToastProvider";
 import { AuthProvider, useAuth } from "@/app/contexts/AuthContext";
 import { LembreteContext, LembreteProvider } from "@/app/contexts/lembreteContext";
 import { SidebarProvider } from "@/app/contexts/SidebarContext";
@@ -183,6 +184,7 @@ function montar(
         formulario
       )}
     </AuthProvider>,
+    { wrapper: ToastProvider },
   );
 }
 
@@ -258,14 +260,11 @@ const formatarLocal = (iso: string) =>
     hourCycle: "h23",
   }).format(new Date(iso));
 
-let alerta: MockInstance<(mensagem?: unknown) => void>;
-
 beforeEach(() => {
-  // Isolamento: relógio, fuso, sessão, alert e logs de erro esperados.
+  // Isolamento: relógio, fuso, sessão e logs de erro esperados.
   instalarRelogio();
   expect(new Date().getTimezoneOffset()).toBe(180);
   sessao();
-  alerta = vi.spyOn(window, "alert").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   parametrosBusca.atual = new URLSearchParams();
@@ -287,7 +286,7 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     expect(screen.getByText("Quantidade é obrigatória")).toBeInTheDocument();
     expect(screen.getByText("Duração é obrigatória")).toBeInTheDocument();
     expect(screen.getByText("Intervalo é obrigatório")).toBeInTheDocument();
-    expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
+    expect(screen.getByText(MSG_CORRIJA)).toBeVisible();
     expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
@@ -302,7 +301,7 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     expect(screen.getByText("Quantidade deve ser maior que zero")).toBeInTheDocument();
     expect(screen.getByText("Duração deve ser maior que zero")).toBeInTheDocument();
     expect(screen.getByText("Intervalo deve ser maior que zero")).toBeInTheDocument();
-    expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
+    expect(screen.getByText(MSG_CORRIJA)).toBeVisible();
     expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
@@ -316,7 +315,7 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     expect(
       await screen.findByText("Horário da primeira dose é obrigatório"),
     ).toBeInTheDocument();
-    expect(alerta).toHaveBeenCalledWith(MSG_CORRIJA);
+    expect(screen.getByText(MSG_CORRIJA)).toBeVisible();
     expect(api.posts("/tratamento")).toHaveLength(0);
   });
 
@@ -340,7 +339,7 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
     preencher(container, VALIDOS);
     await salvar();
 
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
     expect(screen.queryByText("Dosagem é obrigatória")).not.toBeInTheDocument();
     expect(api.posts("/tratamento")).toHaveLength(1);
   });
@@ -355,9 +354,7 @@ describe("UT-12 TEST-01 validação do formulário de tratamento", () => {
 
     await salvar();
 
-    await waitFor(() =>
-      expect(alerta).toHaveBeenCalledWith("Você precisa estar logado para salvar um lembrete"),
-    );
+    expect(await screen.findByText("Você precisa estar logado para salvar um lembrete")).toBeVisible();
     expect(api.posts("/tratamento")).toHaveLength(0);
   });
 });
@@ -484,7 +481,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
 
     await salvar();
 
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
     expect(api.rotulos()).toEqual([
       "GET /dose/me", // carga inicial do provider
       "POST /tratamento",
@@ -594,7 +591,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     preencher(container, { ...VALIDOS, motivo: "Dor de cabeça" });
 
     await salvar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
 
     expect(screen.getByPlaceholderText("Dipirona")).toHaveValue("");
     expect(screen.getByPlaceholderText("500")).toHaveValue(null);
@@ -627,7 +624,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     expect(botao).toBeDisabled();
     expect(screen.getByRole("button", { name: "Limpar formulário" })).toBeDisabled();
     liberar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
     expect(api.posts("/tratamento")).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   });
@@ -644,6 +641,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
           </SidebarProvider>
         </LembreteProvider>
       </AuthProvider>,
+      { wrapper: ToastProvider },
     );
 
     // CSV simulado: o item "DIPIRONA" é selecionado e o formulário recebe nome e tipo.
@@ -653,7 +651,7 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
     preencher(container, { ...VALIDOS, nome: undefined });
     await salvar();
 
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
     expect((api.posts("/tratamento")[0].corpo as TreatmentRequest).remedio).toMatchObject({
       nome: "DIPIRONA",
       classificacao: "Analgésico",
@@ -674,8 +672,8 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
       await salvar();
       expect(await screen.findByRole('alert')).toHaveTextContent('Ao salvar tratamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.');
       expect(screen.getAllByRole('alert')).toHaveLength(1);
-      expect(alerta).not.toHaveBeenCalled();
-      expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
+      expect(screen.queryByRole("button", { name: "Fechar notificação" })).not.toBeInTheDocument();
+      expect(screen.queryByText(MSG_SUCESSO)).not.toBeInTheDocument();
       expect(api.rotulos()).toEqual(["GET /dose/me", "POST /tratamento"]);
       expect(api.remedios).toHaveLength(0);
       expect(api.doses).toHaveLength(0);
@@ -690,7 +688,7 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
     preencher(container, VALIDOS);
     await salvar();
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível interpretar a resposta do serviço. Tente novamente.');
-    expect(alerta).not.toHaveBeenCalledWith(MSG_SUCESSO);
+    expect(screen.queryByText(MSG_SUCESSO)).not.toBeInTheDocument();
     expect(api.posts("/tratamento")).toHaveLength(1);
   });
 
@@ -703,7 +701,7 @@ describe("IT-05 BEAPI-07 BEAPI-08 falha no tratamento", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled());
     expect(api.posts("/tratamento")).toHaveLength(1);
     await salvar();
-    await waitFor(() => expect(alerta).toHaveBeenCalledWith(MSG_SUCESSO));
+    expect(await screen.findByText(MSG_SUCESSO)).toBeVisible();
     const posts = api.posts("/tratamento");
     expect(posts).toHaveLength(2);
     expect(posts[0].cabecalhos.get("Idempotency-Key")).toBe(posts[1].cabecalhos.get("Idempotency-Key"));

@@ -3,9 +3,11 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import MeusMedicamentosContent from '@/app/meus-medicamentos/MeusMedicamentosContent';
+import ToastProvider from '@/app/components/Feedback/ToastProvider';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 const json = (data: unknown, status = 200) =>
@@ -14,17 +16,37 @@ const json = (data: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 const medicine = { id: 7, nome: 'Sintético', classificacao: 'Teste' };
+const renderList = () => render(<MeusMedicamentosContent />, { wrapper: ToastProvider });
+const openDeletion = () => {
+  fireEvent.click(screen.getByRole('button', { name: 'Excluir medicamento' }));
+  return within(screen.getByRole('alertdialog', { name: 'Excluir medicamento?' }));
+};
+
 async function mountList() {
   vi.mocked(fetch).mockResolvedValueOnce(json({ data: [medicine] }));
-  const view = render(<MeusMedicamentosContent />);
+  const view = renderList();
   await screen.findByRole('heading', { name: 'Sintético' });
   return view;
 }
 
 describe('NET-13 NET-14 medicamentos', () => {
+  beforeAll(() => {
+    // JSDOM doesn't implement the HTML dialog methods. Focus and Escape
+    // are tested in Chromium.
+    const prototype = HTMLDialogElement.prototype;
+    if (typeof prototype.showModal === 'function') return;
+    Object.defineProperties(prototype, {
+      showModal: { configurable: true, value(this: HTMLDialogElement) { this.open = true; } },
+      close: { configurable: true, value(this: HTMLDialogElement) { this.open = false; } },
+    });
+    return () => {
+      Reflect.deleteProperty(prototype, 'showModal');
+      Reflect.deleteProperty(prototype, 'close');
+    };
+  });
+
   beforeEach(() => {
     localStorage.setItem('access_token', 'a');
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
 
   it.each([503, 'network'] as const)(
@@ -33,7 +55,7 @@ describe('NET-13 NET-14 medicamentos', () => {
       if (status === 'network')
         vi.mocked(fetch).mockRejectedValueOnce(new TypeError('private'));
       else vi.mocked(fetch).mockResolvedValueOnce(json({}, status));
-      render(<MeusMedicamentosContent />);
+      renderList();
       expect(await screen.findByRole('alert')).toHaveTextContent(
         'Ao carregar medicamentos:',
       );
@@ -45,7 +67,7 @@ describe('NET-13 NET-14 medicamentos', () => {
 
   it('ERR-12 NET-13 envelope inválido produz erro de interpretação', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(json({ data: [null] }));
-    render(<MeusMedicamentosContent />);
+    renderList();
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível interpretar a resposta do serviço. Tente novamente.',
     );
@@ -63,7 +85,7 @@ describe('NET-13 NET-14 medicamentos', () => {
       ['Validade inválida', '2026-11-31'],
     ].map(([nome, dataValidade], id) => ({ id: id + 1, nome, dataValidade }));
     vi.mocked(fetch).mockResolvedValueOnce(json({ data }));
-    render(<MeusMedicamentosContent />);
+    renderList();
     await screen.findByRole('heading', { name: 'Vence hoje' });
     expect(screen.getByText('04/11/2026')).toBeInTheDocument();
 
@@ -91,9 +113,10 @@ describe('NET-13 NET-14 medicamentos', () => {
       vi.mocked(fetch).mockResolvedValueOnce(
         json({ message: 'SQLITE_ERROR private' }, status),
       );
-      fireEvent.click(
-        screen.getByRole('button', { name: 'Excluir medicamento' }),
-      );
+      const dialog = openDeletion();
+      expect(dialog.getByText(/Deseja excluir “Sintético”/)).toBeVisible();
+      expect(fetch).toHaveBeenCalledTimes(1);
+      fireEvent.click(dialog.getByRole('button', { name: 'Excluir' }));
       expect(await screen.findByRole('alert')).toHaveTextContent(
         'Ao excluir medicamento:',
       );
@@ -105,27 +128,22 @@ describe('NET-13 NET-14 medicamentos', () => {
       ).toBeEnabled();
       expect(screen.getByRole('alert')).not.toHaveTextContent('private');
       expect(vi.mocked(fetch).mock.calls[1][1]?.method).toBe('DELETE');
-      expect(window.confirm).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     },
   );
 
   it('ERR-18 exclusão confirmada limpa erro próprio e atualiza lista; cancelamento não envia', async () => {
     await mountList();
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Excluir medicamento' }),
-    );
+    fireEvent.click(openDeletion().getByRole('button', { name: 'Cancelar' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledTimes(1);
     vi.mocked(fetch).mockRejectedValueOnce(new TypeError('offline'));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Excluir medicamento' }),
-    );
+    fireEvent.click(openDeletion().getByRole('button', { name: 'Excluir' }));
     await screen.findByRole('alert');
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 204 }));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Excluir medicamento' }),
-    );
+    fireEvent.click(openDeletion().getByRole('button', { name: 'Excluir' }));
     await screen.findByText('Nenhum medicamento encontrado');
+    expect(screen.getByText('Medicamento excluído com sucesso.')).toBeVisible();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { name: 'Sintético' }),
@@ -139,11 +157,20 @@ describe('NET-13 NET-14 medicamentos', () => {
         reject = j;
       }),
     );
-    const view = render(<MeusMedicamentosContent />);
+    const view = renderList();
     const signal = vi.mocked(fetch).mock.calls[0][1]?.signal;
     view.unmount();
     expect(signal?.aborted).toBe(true);
     await act(async () => reject(new TypeError('private')));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('descarta a confirmação de exclusão se a sessão mudar com o diálogo aberto', async () => {
+    await mountList();
+    const dialog = openDeletion();
+    localStorage.setItem('access_token', 'b');
+    fireEvent.click(dialog.getByRole('button', { name: 'Excluir' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(vi.mocked(fetch).mock.calls.every(([, options]) => options?.method !== 'DELETE')).toBe(true);
   });
 });

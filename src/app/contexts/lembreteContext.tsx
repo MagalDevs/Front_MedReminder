@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { apiRequest, ApiError } from "../utils/api";
+import { getSessionIdentity } from '../utils/session-storage';
 import RequestFeedback from "../components/RequestFeedback/RequestFeedback";
 import { requestErrorMessage, RequestContractError } from "../utils/request-errors";
 import { publishNavigationFeedback } from "../utils/navigation-feedback";
@@ -48,36 +49,36 @@ export const LembreteContext = createContext<LembreteContextType | null>(null)
 export const LembreteProvider = ({ children }: { children: ReactNode }) => {
     const { user, isAuthenticated, loading, logout } = useAuth();
     const identity = !loading && isAuthenticated ? String(user?.id ?? user?.email ?? '') : '';
-    const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; doses: Lembrete[]; error: string | null; loading: boolean }>({ identity: '', token: null, doses: [], error: null, loading: false });
-    const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-    const current = Boolean(identity && snapshot.identity === identity && snapshot.token === token);
+    const [snapshot, setSnapshot] = useState<{ identity: string; session: string | null; doses: Lembrete[]; error: string | null; loading: boolean }>({ identity: '', session: null, doses: [], error: null, loading: false });
+    const session = getSessionIdentity();
+    const current = Boolean(identity && snapshot.identity === identity && snapshot.session === session);
     const lembretes = current ? snapshot.doses : [];
     const lembretesError = current ? snapshot.error : null;
-    const lembretesLoading = Boolean(identity && token && (!current || snapshot.loading));
+    const lembretesLoading = Boolean(identity && session && (!current || snapshot.loading));
     const [feedbackHost, setLembretesFeedbackHost] = useState<HTMLElement | null>(null);
     const version = useRef(0);
     const controller = useRef<AbortController | null>(null);
 
     const getLembretes = useCallback(async () => {
-        if (!identity || !token) return false;
+        if (!identity || !session) return false;
         controller.current?.abort();
         const request = new AbortController();
         controller.current = request;
         const attempt = ++version.current;
-        const active = () => attempt === version.current && !request.signal.aborted && localStorage.getItem('access_token') === token;
-        setSnapshot(previous => ({ identity, token, doses: previous.identity === identity && previous.token === token ? previous.doses : [], error: null, loading: true }));
+        const active = () => attempt === version.current && !request.signal.aborted && getSessionIdentity() === session;
+        setSnapshot(previous => ({ identity, session, doses: previous.identity === identity && previous.session === session ? previous.doses : [], error: null, loading: true }));
         try {
             const response = await apiRequest<{ data: Lembrete[] }>('dose/me', {
-                method: 'GET', onUnauthorized: 'throw', signal: request.signal,
+                method: 'GET', onUnauthorized: 'refresh', signal: request.signal,
             });
             if (!active()) return false;
             if (!response || !Array.isArray(response.data) || !response.data.every(dose => dose && typeof dose.id === 'number' && Number.isFinite(dose.id) && typeof dose.tomado === 'boolean' && typeof dose.data_dose === 'string' && !Number.isNaN(new Date(dose.data_dose).getTime()) && dose.remedio && typeof dose.remedio.nome === 'string' && typeof dose.remedio.quantidadeDose === 'string' && typeof dose.remedio.cor === 'string')) throw new RequestContractError();
-            setSnapshot({ identity, token, doses: response.data, error: null, loading: false });
+            setSnapshot({ identity, session, doses: response.data, error: null, loading: false });
             return true;
         } catch (error) {
             if (!active()) return false;
             if (error instanceof ApiError && error.status === 401) {
-                setSnapshot({ identity: '', token: null, doses: [], error: null, loading: false });
+                setSnapshot({ identity: '', session: null, doses: [], error: null, loading: false });
                 logout();
                 publishNavigationFeedback('session-expired');
             } else {
@@ -85,7 +86,7 @@ export const LembreteProvider = ({ children }: { children: ReactNode }) => {
             }
             return false;
         }
-    }, [identity, token, logout]);
+    }, [identity, session, logout]);
 
     const cancelRequests = useCallback(() => {
         version.current++;

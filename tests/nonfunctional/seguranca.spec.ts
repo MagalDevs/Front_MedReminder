@@ -8,7 +8,7 @@ test('NF-03 NF-WEB-04 login logging and storage exposure', async ({ page }, info
   await setup(page, 0, false);
   const logs: string[] = [];
   page.on('console', message => logs.push(message.text()));
-  await page.route(`${PRODUCTION_API_ORIGIN}/auth/login`, route => route.fulfill({ headers: CORS, json: { access_token: TOKEN } }));
+  await page.route('**/auth/session/login', route => route.fulfill({ headers: CORS, json: { access_token: TOKEN } }));
   await page.goto('/login');
   await page.getByLabel('E-mail').fill(USER.email);
   await page.getByLabel('Senha', { exact: true }).fill(PASSWORD);
@@ -27,7 +27,7 @@ test('NF-03 NF-WEB-04 raw HTTP error body absent from console', async ({ page },
   await setup(page, 0, false);
   const logs: string[] = [];
   page.on('console', message => logs.push(message.text()));
-  await page.route(`${PRODUCTION_API_ORIGIN}/auth/login`, route => route.fulfill({ status: 500, headers: CORS,
+  await page.route('**/auth/session/login', route => route.fulfill({ status: 500, headers: CORS,
     json: { message: 'Falha sintética', privateDetail: ERROR_BODY } }));
   await page.goto('/login');
   await page.getByLabel('E-mail').fill(USER.email);

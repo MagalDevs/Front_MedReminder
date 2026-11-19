@@ -1,6 +1,11 @@
 "use client";
 
 import { RequestContractError } from './request-errors';
+import { buildApiUrl } from './api-url';
+import { clearSession, getAccessToken, getSessionIdentity, getWebSessionId, saveAccessToken } from './session-storage';
+import { sessionIdHeader, webSessionHeader, webSessionPath } from './web-session-protocol';
+
+export * from './api-url';
 
 /**
  * Cliente HTTP único do frontend para o backend MedReminder.
@@ -11,7 +16,7 @@ import { RequestContractError } from './request-errors';
  * - `apiRequest<T>(endpoint, options?)` -> `Promise<T>`: faz a chamada, devolve o corpo
  *   já interpretado (JSON ou texto) em sucesso e lança `ApiError` em qualquer resposta
  *   HTTP de falha. Não desembrulha envelopes (`{ message, data }`): cada chamador
- *   decide. Não faz retry automático.
+ *   decide. Uma sessão web pode ser renovada em resposta a um 401.
  * - `getApiBaseUrl()` / `buildApiUrl(endpoint)`: origem e URL efetivas (use no lugar de
  *   URLs fixas).
  * - `ApiError`: erro estruturado com `status`, `code?`, `messages`, `retryAfter?`, `body?`.
@@ -25,8 +30,9 @@ import { RequestContractError } from './request-errors';
  *   cadastro).
  * - `onUnauthorized` (padrão `'invalidate'`): o que fazer num HTTP 401 de chamada
  *   autenticada.
- *   - `'invalidate'`: remove `access_token`/`user_data` do localStorage, notifica
- *     AuthProvider para navegar a `/login` e depois lança `ApiError`.
+ *   - `'invalidate'`: tenta renovar a sessão e repete a chamada uma vez. Se o 401
+ *     persistir, limpa a sessão e notifica AuthProvider para navegar a `/login`.
+ *   - `'refresh'`: tenta a mesma renovação e deixa o chamador tratar o 401 final.
  *   - `'throw'`: só lança `ApiError`, preservando a sessão. Uso previsto: operações em
  *     que 401 significa falha operacional, p.ex. PATCH `/usuario/senha` com senha atual
  *     incorreta (o design chama isso de `invalidateSessionOn401=false`). O chamador deve
@@ -43,111 +49,10 @@ import { RequestContractError } from './request-errors';
  * ser registrado.
  */
 
-/**
- * Origem de produção legada. Só é usada como fallback explícito (ver `getApiBaseUrl`);
- * nunca em testes nem em ambientes marcados como isolados.
- */
 export const SESSION_INVALIDATED_EVENT = "medreminder:session-invalidated";
 
-export const PRODUCTION_API_URL = "https://medreminder-backend.onrender.com";
-export const DEVELOPMENT_API_URL = "http://localhost:3001";
-
-/**
- * Origem de marcador usada SOMENTE quando `NODE_ENV === 'test'` e `NEXT_PUBLIC_API_URL`
- * não está definida. O TLD `.invalid` (RFC 2606) nunca resolve, então um teste que
- * esqueça de simular o `fetch` falha em vez de alcançar produção.
- */
-export const TEST_PLACEHOLDER_API_URL = "http://api.test.invalid";
-
-/** Falha de configuração da origem da API (variável ausente ou inválida). */
-export class ApiConfigError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ApiConfigError";
-  }
-}
-
-function isValidHttpOrigin(value: string): boolean {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Resolve a origem sem lançar. Cada leitura de `process.env.NEXT_PUBLIC_*` precisa
- * ser literal para o Next substituir o valor no build (lookups dinâmicos não são
- * inlined).
- */
-function resolveApiBaseUrl(): string | ApiConfigError {
-  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
-
-  if (configured) {
-    if (!isValidHttpOrigin(configured)) {
-      return new ApiConfigError(
-        "NEXT_PUBLIC_API_URL deve ser uma URL absoluta http(s), por exemplo http://localhost:3001.",
-      );
-    }
-    return configured.replace(/\/+$/, "");
-  }
-
-  if (process.env.NEXT_PUBLIC_API_ENV === "isolated") {
-    return new ApiConfigError(
-      "NEXT_PUBLIC_API_URL é obrigatória quando NEXT_PUBLIC_API_ENV=isolated: não há fallback para a API de produção.",
-    );
-  }
-  if (process.env.NODE_ENV === "test") {
-    return TEST_PLACEHOLDER_API_URL;
-  }
-  if (process.env.NODE_ENV === "development") {
-    return DEVELOPMENT_API_URL;
-  }
-  return PRODUCTION_API_URL;
-}
-
-/**
- * Origem efetiva da API, sem barra final.
- *
- * Ordem: (1) `NEXT_PUBLIC_API_URL` (valor incorporado no build; barra final removida);
- * (2) se `NEXT_PUBLIC_API_ENV === 'isolated'`, lança `ApiConfigError` (sem fallback);
- * (3) se `NODE_ENV === 'test'`, `TEST_PLACEHOLDER_API_URL`;
- * (4) em desenvolvimento, `DEVELOPMENT_API_URL` (localhost:3001); (5) nos demais casos,
- * `PRODUCTION_API_URL` (compatibilidade de deploy existente). Variável definida mas
- * inválida sempre lança. Lido a cada chamada.
- *
- * @throws ApiConfigError
- */
-export function getApiBaseUrl(): string {
-  const resolved = resolveApiBaseUrl();
-  if (resolved instanceof ApiConfigError) throw resolved;
-  return resolved;
-}
-
-/**
- * Monta a URL absoluta de um endpoint: exatamente uma barra entre origem e caminho,
- * com ou sem barra inicial no endpoint e com ou sem barra final na origem.
- * Query string é preservada. Ex.: `buildApiUrl('dose/me')` e `buildApiUrl('/dose/me')`
- * -> `<origem>/dose/me`.
- *
- * @throws ApiConfigError
- */
-export function buildApiUrl(endpoint: string): string {
-  return `${getApiBaseUrl()}/${endpoint.replace(/^\/+/, "")}`;
-}
-
-const initialOrigin = resolveApiBaseUrl();
-
-/**
- * @deprecated Calculada uma vez na importação; use `getApiBaseUrl()`/`buildApiUrl()`.
- * Vazia quando a origem é inválida/ausente em ambiente isolado.
- */
-export const API_URL: string =
-  typeof initialOrigin === "string" ? initialOrigin : "";
-
 /** Política para HTTP 401 em chamadas autenticadas. Ver o cabeçalho do módulo. */
-export type UnauthorizedPolicy = "invalidate" | "throw";
+export type UnauthorizedPolicy = "invalidate" | "refresh" | "throw";
 
 export interface ApiRequestOptions extends RequestInit {
   /** Anexa o Bearer e exige token armazenado. Padrão `true`. */
@@ -306,14 +211,88 @@ export async function apiRequest<T = unknown>(
   endpoint: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
+  return request<T>(buildApiUrl(endpoint), options);
+}
+
+type SessionResponse = { access_token: string; session_id?: string; message?: string };
+
+let queuedSessionRequest: Promise<unknown> = Promise.resolve();
+let inFlightRefresh: { sessionId: string; token: string; result: Promise<string | null> } | undefined;
+
+async function withSessionLock<T>(operation: () => Promise<T>): Promise<T> {
+  // Serializa login, renovação e logout entre abas, quando Web Locks está disponível.
+  if (navigator.locks) return navigator.locks.request('medreminder-web-session', operation);
+  const result = queuedSessionRequest.then(operation);
+  queuedSessionRequest = result.catch(() => undefined);
+  return result;
+}
+
+function webSessionRequest<T>(action: 'login' | 'refresh' | 'logout', options: RequestInit = {}) {
+  const headers = new Headers(options.headers);
+  headers.set(webSessionHeader, '1');
+  return request<T>(`${webSessionPath}/${action}`, {
+    ...options,
+    signal: options.signal ?? AbortSignal.timeout(15000),
+    headers,
+    method: 'POST',
+    credentials: 'same-origin',
+    requireAuth: false,
+  });
+}
+
+export function startWebSession(body: string, signal: AbortSignal, accept: (session: SessionResponse) => Promise<void>) {
+  return withSessionLock(async () => {
+    signal.throwIfAborted();
+    const session = await webSessionRequest<SessionResponse>('login', {
+      body, signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
+    });
+    await accept(session);
+  });
+}
+
+export function endWebSession(sessionId: string) {
+  return withSessionLock(() => webSessionRequest<void>('logout', {
+    headers: { [sessionIdHeader]: sessionId }, keepalive: true,
+  }));
+}
+
+function refreshAccessToken(sessionId: string, rejectedToken: string): Promise<string | null> {
+  if (inFlightRefresh?.sessionId === sessionId && inFlightRefresh.token === rejectedToken) {
+    return inFlightRefresh.result;
+  }
+
+  const result = withSessionLock(async () => {
+    const currentToken = getAccessToken();
+    if (getWebSessionId(currentToken) !== sessionId) return null;
+    if (currentToken !== rejectedToken) return currentToken;
+
+    let data: SessionResponse;
+    try {
+      data = await webSessionRequest<SessionResponse>('refresh', { headers: { [sessionIdHeader]: sessionId } });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) return null;
+      throw error;
+    }
+    if (getAccessToken() !== rejectedToken) return null;
+    if (data?.session_id !== sessionId || typeof data.access_token !== 'string' || getWebSessionId(data.access_token) !== sessionId) {
+      throw new RequestContractError();
+    }
+    saveAccessToken(data.access_token);
+    return data.access_token;
+  }).finally(() => {
+    if (inFlightRefresh?.result === result) inFlightRefresh = undefined;
+  });
+  inFlightRefresh = { sessionId, token: rejectedToken, result };
+  return result;
+}
+
+async function request<T>(url: string, options: ApiRequestOptions): Promise<T> {
   const {
     requireAuth = true,
     onUnauthorized = "invalidate",
     expectedStatus,
     ...fetchOptions
   } = options;
-
-  const url = buildApiUrl(endpoint);
 
   // Headers do chamador são copiados e preservados.
   const headers = new Headers(fetchOptions.headers);
@@ -330,9 +309,9 @@ export async function apiRequest<T = unknown>(
     headers.set("Content-Type", "application/json");
   }
 
-  const requestToken = requireAuth
-    ? localStorage.getItem("access_token")
-    : null;
+  const requestToken = requireAuth ? getAccessToken() : null;
+  const requestSession = getSessionIdentity(requestToken);
+  const sessionId = getWebSessionId(requestToken);
 
   // Add auth token if required and available
   if (requireAuth) {
@@ -344,7 +323,26 @@ export async function apiRequest<T = unknown>(
     }
   }
 
-  const response = await fetch(url, { ...fetchOptions, headers });
+  let sentToken = requestToken;
+  let response = await fetch(url, { ...fetchOptions, headers });
+
+  fetchOptions.signal?.throwIfAborted();
+  if (response.status === 401 && sessionId && requestToken &&
+      onUnauthorized !== 'throw' && getSessionIdentity() === requestSession &&
+      !(fetchOptions.body instanceof ReadableStream)) {
+    const renewedToken = await refreshAccessToken(sessionId, requestToken).catch((error: unknown) => {
+      void response.body?.cancel().catch(() => undefined);
+      throw error;
+    });
+    fetchOptions.signal?.throwIfAborted();
+    if (renewedToken && getSessionIdentity() === requestSession) {
+      void response.body?.cancel().catch(() => undefined);
+      const retryHeaders = new Headers(headers);
+      retryHeaders.set('Authorization', `Bearer ${renewedToken}`);
+      sentToken = renewedToken;
+      response = await fetch(url, { ...fetchOptions, headers: retryHeaders });
+    }
+  }
 
   fetchOptions.signal?.throwIfAborted();
 
@@ -371,10 +369,10 @@ export async function apiRequest<T = unknown>(
       response.status === 401 &&
       requireAuth &&
       onUnauthorized === "invalidate" &&
-      localStorage.getItem("access_token") === requestToken
+      getSessionIdentity() === requestSession &&
+      getAccessToken() === sentToken
     ) {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user_data");
+      clearSession();
       window.dispatchEvent(new Event(SESSION_INVALIDATED_EVENT));
     }
 

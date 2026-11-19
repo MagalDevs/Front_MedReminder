@@ -3,8 +3,10 @@
 import { useState, useLayoutEffect, useContext, useRef, useId } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiRequest } from "../../utils/api";
+import { getSessionIdentity } from '../../utils/session-storage';
 import { RequestContractError, requestErrorMessage } from "../../utils/request-errors";
 import RequestFeedback from "../RequestFeedback/RequestFeedback";
+import { useToast } from "../Feedback/ToastProvider";
 import { LembreteContext } from "@/app/contexts/lembreteContext";
 import { Check, Loader2 } from "lucide-react";
 
@@ -91,6 +93,7 @@ function calcularDoses(inicio: Date, intervaloHoras: number, duracaoDias: number
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
+  const showToast = useToast();
   const intervaloId = useId();
   const grupoCoresId = useId();
   const scope = JSON.stringify([isAuthenticated, user?.id, user?.email]);
@@ -199,16 +202,17 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const salvarLembrete = async () => {
     if (enviando.current) return;
     if (!validarFormulario()) {
-      alert("Por favor, corrija os erros no formulário");
+      showToast("warning", "Por favor, corrija os erros no formulário");
       return;
     }
-    const token = localStorage.getItem("access_token");
-    if (!isAuthenticated || !token) {
-      alert("Você precisa estar logado para salvar um lembrete");
+    const session = getSessionIdentity();
+    if (!isAuthenticated || !session) {
+      showToast("warning", "Você precisa estar logado para salvar um lembrete");
       return;
     }
     if (!user || !user.id) {
-      alert(
+      showToast(
+        "error",
         "Não foi possível identificar seu usuário. Por favor, faça login novamente.",
       );
       return;
@@ -219,14 +223,14 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     const errosLote = validarLoteTratamento(validade, dosesISO);
     if (Object.keys(errosLote).length > 0) {
       setErros(errosLote);
-      alert("Por favor, corrija os erros no formulário");
+      showToast("warning", "Por favor, corrija os erros no formulário");
       return;
     }
 
     const submittedEpoch = sessionEpoch.current;
     const controller = new AbortController();
     activeRequest.current = controller;
-    const currentSession = () => !controller.signal.aborted && sessionEpoch.current === submittedEpoch && localStorage.getItem("access_token") === token;
+    const currentSession = () => !controller.signal.aborted && sessionEpoch.current === submittedEpoch && getSessionIdentity() === session;
     enviando.current = true;
     setLoadingScope(scope);
     setRequestFailure(null);
@@ -271,7 +275,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         throw new RequestContractError();
       }
       intencao.current = null;
-      alert("Lembrete e doses salvos com sucesso!");
+      showToast("success", "Lembrete e doses salvos com sucesso!");
       limparFormulario();
       try {
         const refreshed = await context?.getLembretes();

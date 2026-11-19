@@ -10,7 +10,8 @@ import {
   useCallback,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiRequest, ApiError, SESSION_INVALIDATED_EVENT } from '../utils/api';
+import { apiRequest, ApiError, endWebSession, SESSION_INVALIDATED_EVENT } from '../utils/api';
+import { clearSession, getAccessToken, getSessionIdentity, getWebSessionId, saveAccessToken } from '../utils/session-storage';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { requestErrorMessage, RequestContractError } from '../utils/request-errors';
 import { clearNavigationFeedback, publishNavigationFeedback } from '../utils/navigation-feedback';
@@ -63,10 +64,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => { routerRef.current = router; }, [router]);
   // Each explicit login/logout revokes outstanding restoration responses.
   const generation = useRef(0);
+  const activeSession = useRef<string | null>(null);
 
   useEffect(() => {
     const invalidate = () => {
       generation.current++;
+      activeSession.current = null;
       setUser(null);
       setIsAuthenticated(false);
       setLoading(false);
@@ -74,24 +77,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       publishNavigationFeedback('session-expired');
       routerRef.current.push('/login');
     };
+    const sessionChanged = (event: StorageEvent) => {
+      if ((event.key === 'access_token' || event.key === null) && activeSession.current &&
+          getSessionIdentity() !== activeSession.current) invalidate();
+    };
     window.addEventListener(SESSION_INVALIDATED_EVENT, invalidate);
-    return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, invalidate);
+    window.addEventListener('storage', sessionChanged);
+    return () => {
+      window.removeEventListener(SESSION_INVALIDATED_EVENT, invalidate);
+      window.removeEventListener('storage', sessionChanged);
+    };
   }, []);
-
-  // Each explicit login/logout revokes outstanding restoration responses.
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
     const version = generation.current;
-    const token = localStorage.getItem('access_token');
+    const session = getSessionIdentity();
+    activeSession.current = session;
     const current = () => active && generation.current === version &&
-      localStorage.getItem('access_token') === token;
+      getSessionIdentity() === session;
     const checkAuth = async () => {
       try {
-        if (!token) return;
+        if (!session) return;
         const response = await apiRequest<{ data: User }>('usuario/me', {
-          method: 'GET', onUnauthorized: 'throw', signal: controller.signal,
+          method: 'GET', onUnauthorized: 'refresh', signal: controller.signal,
         });
         if (!current()) return;
         if (!response?.data || !response.data.id) throw new RequestContractError();
@@ -104,8 +114,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         // Network/server failures leave the credential available for a later attempt.
         if (error instanceof ApiError && error.status === 401) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('user_data');
+          activeSession.current = null;
+          clearSession();
           publishNavigationFeedback('session-expired');
           routerRef.current.push('/login');
         } else {
@@ -123,7 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     generation.current++;
     setRestorationError(null);
     clearNavigationFeedback();
-    localStorage.setItem('access_token', token);
+    activeSession.current = getSessionIdentity(token);
+    saveAccessToken(token);
     if (userData) localStorage.setItem('user_data', JSON.stringify(userData));
     else localStorage.removeItem('user_data');
     setIsAuthenticated(true);
@@ -133,10 +144,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     generation.current++;
+    const token = getAccessToken();
+    if (activeSession.current === getSessionIdentity(token)) {
+      clearSession();
+      const sessionId = getWebSessionId(token);
+      if (sessionId) void endWebSession(sessionId).catch(() => undefined);
+    }
+    activeSession.current = null;
     setRestorationError(null);
     clearNavigationFeedback();
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_data');
     setIsAuthenticated(false);
     setUser(null);
     setLoading(false);

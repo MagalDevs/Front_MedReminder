@@ -87,18 +87,19 @@ describe('sessão real — TEST-01 TEST-02', () => {
     mountLogin();
     submitLogin();
     expect(screen.getByRole('button', { name: 'Processando...' })).toBeDisabled();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     expect(localStorage.getItem('access_token')).toBeNull();
     resolveLogin(json({ access_token: token }));
 
     await waitFor(() => expect(router.push).toHaveBeenCalledWith('/'));
     expect(fetch).toHaveBeenCalledTimes(2);
     const [loginUrl, loginOptions] = vi.mocked(fetch).mock.calls[0];
-    expect(loginUrl).toBe(`${API_URL}/auth/login`);
+    expect(loginUrl).toBe('/auth/session/login');
     expect(loginOptions?.method).toBe('POST');
     expect(JSON.parse(String(loginOptions?.body))).toEqual({ email: profile.email, senha: 'senha-sintetica' });
     expect(new Headers(loginOptions?.headers).get('Authorization')).toBeNull();
     expect(new Headers(loginOptions?.headers).get('Content-Type')).toBe('application/json');
+    expect(new Headers(loginOptions?.headers).get('x-medreminder-session')).toBe('1');
     const [profileUrl, profileOptions] = vi.mocked(fetch).mock.calls[1];
     expect(profileUrl).toBe(`${API_URL}/usuario/me`);
     expect(profileOptions?.method).toBe('GET');

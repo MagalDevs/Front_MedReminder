@@ -16,7 +16,7 @@ export const test = base.extend<{ apiGuard: ApiGuard }>({
       const unexpectedApiRequests: string[] = [];
       // Rotas mais recentes têm prioridade: um teste que prevê uma chamada
       // registra sua própria rota (page.route) por cima deste bloqueio.
-      await context.route(`${PRODUCTION_API_ORIGIN}/**`, (route) => {
+      await context.route(url => url.origin === PRODUCTION_API_ORIGIN || url.pathname.startsWith('/auth/session/'), (route) => {
         const request = route.request();
         unexpectedApiRequests.push(`${request.method()} ${new URL(request.url()).pathname}`);
         return route.abort("blockedbyclient");

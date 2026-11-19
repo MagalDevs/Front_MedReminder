@@ -1,5 +1,6 @@
 import { LembreteContext } from '@/app/contexts/lembreteContext';
 import { apiRequest } from '@/app/utils/api';
+import { getSessionIdentity } from '@/app/utils/session-storage';
 import { Bell, Pill, X } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import RequestFeedback from '../RequestFeedback/RequestFeedback';
@@ -17,8 +18,8 @@ interface alarmeDoseProps {
 const Lembrete = (props: alarmeDoseProps) => {
   const { dataHora, medicamentoNome, quantidadeDose, cor, id, onClose } = props;
   const context = useContext(LembreteContext);
-  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-  const key = `${token}:${id}`;
+  const session = getSessionIdentity();
+  const key = `${session}:${id}`;
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [failure, setFailure] = useState<{ key: string; message: string | null } | null>(null);
   const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
@@ -28,7 +29,7 @@ const Lembrete = (props: alarmeDoseProps) => {
   const confirmed = confirmedKey === key;
   const refreshFailed = refreshFailedKey === key;
   const attempt = useRef<AbortController | null>(null);
-  useEffect(() => () => { attempt.current?.abort(); attempt.current = null; }, [id, token]);
+  useEffect(() => () => { attempt.current?.abort(); attempt.current = null; }, [id, session]);
 
   const dataDose = new Date(dataHora);
 
@@ -60,7 +61,7 @@ const Lembrete = (props: alarmeDoseProps) => {
     if (attempt.current) return;
     const controller = new AbortController();
     attempt.current = controller;
-    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    const current = () => !controller.signal.aborted && getSessionIdentity() === session;
     setSavingKey(key);
     setFailure(null);
     try {
@@ -70,7 +71,6 @@ const Lembrete = (props: alarmeDoseProps) => {
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       },
       body: JSON.stringify({
         tomado: true,

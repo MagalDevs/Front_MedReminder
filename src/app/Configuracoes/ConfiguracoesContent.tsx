@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest, ApiError } from '../utils/api';
+import { getAccessToken, getSessionIdentity } from '../utils/session-storage';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 
@@ -55,13 +56,13 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
   const [photoSaving, setPhotoSaving] = useState(false);
   const photoRequest = useRef<AbortController | null>(null);
   const [readError, setReadError] = useState<{ identity: string; message: string | null } | null>(null);
-  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-  const identity = `${user?.id ?? user?.email ?? ''}:${token}`;
+  const session = getSessionIdentity();
+  const identity = `${user?.id ?? user?.email ?? ''}:${session}`;
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    const current = () => active && !controller.signal.aborted && getSessionIdentity() === session;
     const fetchUserData = async () => {
       setLoading(true);
       setReadError(null);
@@ -77,9 +78,6 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
         }>('usuario/me', {
           method: 'GET',
           signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
         });
 
         if (!current()) return;
@@ -111,7 +109,7 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
 
     void fetchUserData();
     return () => { active = false; controller.abort(); };
-  }, [user, token, identity]);
+  }, [user, session, identity]);
   useEffect(() => () => { mutation.current?.abort(); mutation.current = null; }, [identity]);
   useEffect(() => () => { photoRequest.current?.abort(); photoRequest.current = null; }, [identity]);
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -154,8 +152,8 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
     }
     const controller = new AbortController();
     mutation.current = controller;
-    const originalToken = localStorage.getItem('access_token');
-    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === originalToken;
+    const originalSession = getSessionIdentity();
+    const current = () => !controller.signal.aborted && getSessionIdentity() === originalSession;
     const changesPassword = Boolean(senhaAtual && novaSenha);
     setLoading(true);
     setProfileError(null);
@@ -185,13 +183,16 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
           if (!current()) return;
           let detail = requestErrorMessage(error);
           if (error instanceof ApiError && error.status === 401) {
+            const tokenBeforeVerification = getAccessToken();
             try {
               const profile = await apiRequest<{ data: Usuario }>('usuario/me', { signal: controller.signal });
               if (!current()) return;
               if (!validUser(profile?.data)) throw new RequestContractError();
-              detail = 'Senha atual incorreta. Sua sessão continua válida.';
+              detail = tokenBeforeVerification === getAccessToken()
+                ? 'Senha atual incorreta. Sua sessão continua válida.'
+                : 'Sua sessão foi renovada. Tente alterar a senha novamente.';
             } catch (sessionError) {
-              if (controller.signal.aborted || (localStorage.getItem('access_token') !== originalToken && localStorage.getItem('access_token') !== null)) return;
+              if (controller.signal.aborted || (getSessionIdentity() !== originalSession && getSessionIdentity() !== null)) return;
               detail = sessionError instanceof ApiError && sessionError.status === 401
                 ? 'Sessão expirada. Entre novamente.'
                 : 'Não foi possível verificar a sessão. A alteração da senha não foi confirmada.';
@@ -227,8 +228,8 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
       }
       const controller = new AbortController();
       photoRequest.current = controller;
-      const originalToken = localStorage.getItem('access_token');
-      const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === originalToken;
+      const originalSession = getSessionIdentity();
+      const current = () => !controller.signal.aborted && getSessionIdentity() === originalSession;
       setPhotoSaving(true);
       setPhotoError(null);
       try {

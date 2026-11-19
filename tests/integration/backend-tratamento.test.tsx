@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ConfigurarLembrete, { validarLoteTratamento } from "@/app/components/CardCadastrar/cardCadastrar";
+import ToastProvider from "@/app/components/Feedback/ToastProvider";
 import { LembreteContext } from "@/app/contexts/lembreteContext";
 import {
   treatmentResponseFixture, treatmentRequestFixture, documentedTreatmentIssues,
@@ -25,6 +26,7 @@ function montar() {
     }}>
       <ConfigurarLembrete medicamentoSelecionado={{ nome: "Dipirona", tipo: "Analgésico" }} />
     </LembreteContext.Provider>,
+    { wrapper: ToastProvider },
   );
   const mudar = (elemento: Element, value: string) => fireEvent.change(elemento, { target: { value } });
   mudar(screen.getByPlaceholderText("500"), "500");
@@ -52,7 +54,6 @@ beforeEach(() => {
   recarregar.mockClear();
   comportamento = "ok";
   localStorage.setItem("access_token", "token-sintetico");
-  vi.spyOn(window, "alert").mockImplementation(() => undefined);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
   vi.stubGlobal("fetch", vi.fn(async (url: string, init: RequestInit) => {
@@ -74,14 +75,14 @@ describe("BEAPI-08 fronteiras antes de qualquer envio", () => {
   it.each([null, ""])("BEAPI-08 validade %j bloqueia o envio", async (validade) => {
     // Null is the initial state; empty is a date explicitly cleared by the user.
     if (validade === null) {
-      render(<ConfigurarLembrete medicamentoSelecionado={{ nome: "Dipirona", tipo: "" }} />);
+      render(<ConfigurarLembrete medicamentoSelecionado={{ nome: "Dipirona", tipo: "" }} />, { wrapper: ToastProvider });
     } else {
       const { mudar, datas } = montar();
       mudar(datas[0], validade);
     }
     salvar();
     expect(await screen.findByText("Data de validade é obrigatória")).toBeInTheDocument();
-    expect(window.alert).toHaveBeenCalledWith(CORRIJA);
+    expect(screen.getByText(CORRIJA)).toBeVisible();
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -105,7 +106,7 @@ describe("BEAPI-08 fronteiras antes de qualquer envio", () => {
     const { mudar } = montar();
     mudar(screen.getByPlaceholderText("7"), String(count));
     salvar();
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith(SUCESSO));
+    expect(await screen.findByText(SUCESSO)).toBeVisible();
     expect(posts).toHaveLength(1);
     expect(posts[0].payload.doses).toHaveLength(count);
     expect(posts[0].payload.doses[0]).toBe("2026-11-05T01:00:00.000Z");
@@ -149,7 +150,7 @@ describe("BEAPI-07 BEAPI-08 operação atômica idempotente", () => {
     const uuid = vi.spyOn(crypto, "randomUUID");
     montar();
     salvar();
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith(SUCESSO));
+    expect(await screen.findByText(SUCESSO)).toBeVisible();
     expect(posts).toHaveLength(1);
     expect(posts[0].url).toMatch(/\/tratamento$/);
     expect(Object.keys(posts[0].payload)).toEqual(["remedio", "doses"]);
@@ -170,10 +171,10 @@ describe("BEAPI-07 BEAPI-08 operação atômica idempotente", () => {
     await aguardarFalha();
     expect(posts).toHaveLength(1);
     expect(recarregar).not.toHaveBeenCalled();
-    expect(window.alert).not.toHaveBeenCalledWith(SUCESSO);
+    expect(screen.queryByText(SUCESSO)).not.toBeInTheDocument();
     comportamento = "ok";
     salvar();
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith(SUCESSO));
+    expect(await screen.findByText(SUCESSO)).toBeVisible();
     expect(posts).toHaveLength(2);
     expect(posts[1].payload).toEqual(posts[0].payload);
     expect(posts[1].headers.get("Idempotency-Key")).toBe(posts[0].headers.get("Idempotency-Key"));
@@ -217,7 +218,7 @@ describe("BEAPI-07 BEAPI-08 operação atômica idempotente", () => {
     salvar();
     await aguardarFalha();
     expect(screen.getByRole('alert')).toHaveTextContent(message);
-    expect(window.alert).not.toHaveBeenCalledWith(SUCESSO);
+    expect(screen.queryByText(SUCESSO)).not.toBeInTheDocument();
     expect(posts).toHaveLength(1);
     expect(recarregar).not.toHaveBeenCalled();
     expect(screen.getByPlaceholderText("500")).toHaveValue(500);
@@ -232,11 +233,11 @@ describe("BEAPI-07 BEAPI-08 operação atômica idempotente", () => {
     montar();
     salvar();
     await aguardarFalha();
-    expect(window.alert).not.toHaveBeenCalledWith(SUCESSO);
+    expect(screen.queryByText(SUCESSO)).not.toBeInTheDocument();
     expect(recarregar).not.toHaveBeenCalled();
     comportamento = "ok";
     salvar();
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith(SUCESSO));
+    expect(await screen.findByText(SUCESSO)).toBeVisible();
     expect(posts[1].headers.get("Idempotency-Key")).toBe(posts[0].headers.get("Idempotency-Key"));
   });
 });
@@ -255,7 +256,7 @@ it.each(['logout', 'other-account'])('BEAPI-07 resposta pendente apos %s nao con
   else { auth.user = { id: 202, email: 'bia@example.test' }; localStorage.setItem('access_token', 'token-b'); }
   fireEvent.change(screen.getByPlaceholderText('Tomar após as refeições'), { target: { value: 'New account draft' } });
   await act(async () => { release(); });
-  expect(window.alert).not.toHaveBeenCalledWith(SUCESSO);
+  expect(screen.queryByText(SUCESSO)).not.toBeInTheDocument();
   expect(recarregar).not.toHaveBeenCalled();
   expect(screen.getByPlaceholderText('Dipirona')).toHaveValue('Dipirona');
 });

@@ -3,10 +3,10 @@ import {
   fireEvent,
   render,
   screen,
-  waitFor,
 } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ConfigurarLembrete from '@/app/components/CardCadastrar/cardCadastrar';
+import ToastProvider from "@/app/components/Feedback/ToastProvider";
 import { LembreteContext } from '@/app/contexts/lembreteContext';
 
 vi.mock('@/app/contexts/AuthContext', () => ({
@@ -27,6 +27,7 @@ function mount() {
         medicamentoSelecionado={{ nome: 'Sintético', tipo: 'Teste' }}
       />
     </LembreteContext.Provider>,
+    { wrapper: ToastProvider },
   );
   for (const [placeholder, value] of [
     ['500', '500'],
@@ -64,7 +65,6 @@ describe('NET-12 tratamento', () => {
   beforeEach(() => {
     localStorage.setItem('access_token', 'a');
     refresh.mockReset().mockResolvedValue(true);
-    vi.spyOn(window, 'alert').mockImplementation(() => undefined);
   });
 
   it.each([400, 409, 503, 'network'] as const)(
@@ -89,7 +89,7 @@ describe('NET-12 tratamento', () => {
       ).toBeEnabled();
       expect(screen.getByPlaceholderText('Dipirona')).toHaveValue('Sintético');
       expect(refresh).not.toHaveBeenCalled();
-      expect(window.alert).not.toHaveBeenCalled();
+      expect(screen.queryByRole('button', { name: 'Fechar notificação' })).not.toBeInTheDocument();
     },
   );
 
@@ -103,7 +103,7 @@ describe('NET-12 tratamento', () => {
       'Não foi possível interpretar a resposta do serviço. Tente novamente.',
     );
     expect(refresh).not.toHaveBeenCalled();
-    expect(window.alert).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Fechar notificação' })).not.toBeInTheDocument();
   });
 
   it('ERR-18 reenvio explícito mantém chave, limpa erro e confirma resultado', async () => {
@@ -115,11 +115,7 @@ describe('NET-12 tratamento', () => {
     await screen.findByRole('alert');
     const first = vi.mocked(fetch).mock.calls[0][1];
     submit();
-    await waitFor(() =>
-      expect(window.alert).toHaveBeenCalledWith(
-        'Lembrete e doses salvos com sucesso!',
-      ),
-    );
+    expect(await screen.findByText('Lembrete e doses salvos com sucesso!')).toBeVisible();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(vi.mocked(fetch).mock.calls[1][1]?.body).toBe(first?.body);
     expect(
@@ -155,6 +151,6 @@ describe('NET-12 tratamento', () => {
     expect(signal?.aborted).toBe(true);
     await act(async () => reject(new TypeError('private')));
     expect(refresh).not.toHaveBeenCalled();
-    expect(window.alert).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Fechar notificação' })).not.toBeInTheDocument();
   });
 });

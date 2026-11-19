@@ -37,7 +37,8 @@ describe('NET-02 NET-03 login feedback', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Cadastro concluído! Entre com seu e-mail e senha.'); view.unmount(); render(<Login />); expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
   it('ERR-04 aviso de sessão expirada é erro e desaparece ao tentar novamente', async () => {
-    publishNavigationFeedback('session-expired'); vi.mocked(fetch).mockReturnValue(new Promise(() => {})); render(<Login />); expect(screen.getByRole('alert')).toHaveTextContent('Sessão expirada. Entre novamente.'); submit(); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    publishNavigationFeedback('session-expired'); vi.mocked(fetch).mockResolvedValueOnce(json({ message: 'Falha' }, 401)); render(<Login />); expect(screen.getByRole('alert')).toHaveTextContent('Sessão expirada. Entre novamente.'); submit(); expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await screen.findByRole('alert');
   });
   it('ERR-04 login já montado recebe novo aviso uma única vez', () => {
     render(<Login />); act(() => publishNavigationFeedback('session-expired'));

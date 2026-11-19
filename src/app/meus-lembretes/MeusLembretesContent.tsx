@@ -3,6 +3,7 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
+import { getSessionIdentity } from '../utils/session-storage';
 import { LembreteContext } from '../contexts/lembreteContext';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
@@ -33,10 +34,10 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
   const [confirmationError, setConfirmationError] = useState<string | null>(null);
   const [confirmationStatus, setConfirmationStatus] = useState('');
   const [savingId, setSavingId] = useState<number | null>(null);
-  const [confirmedSnapshot, setConfirmedSnapshot] = useState<{ token: string | null; ids: Set<number> }>({ token: null, ids: new Set() });
+  const [confirmedSnapshot, setConfirmedSnapshot] = useState<{ session: string | null; ids: Set<number> }>({ session: null, ids: new Set() });
   const mutation = useRef<AbortController | null>(null);
-  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-  const confirmedIds = confirmedSnapshot.token === token ? confirmedSnapshot.ids : new Set<number>();
+  const session = getSessionIdentity();
+  const confirmedIds = confirmedSnapshot.session === session ? confirmedSnapshot.ids : new Set<number>();
   const [medicamentoSelecionado, setFiltroMedicamento] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroPeriodo, setFiltroPeriodo] = useState<Periodo>(medicamentoId || nomeMedicamento ? 'todos' : 'hoje');
@@ -48,14 +49,14 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    const current = () => active && !controller.signal.aborted && getSessionIdentity() === session;
     async function fetchData() {
       try {
         setLoading(true);
         setError('');
         setConfirmationError(null);
         setConfirmationStatus('');
-        setConfirmedSnapshot({ token, ids: new Set() });
+        setConfirmedSnapshot({ session, ids: new Set() });
         setSavingId(null);
         const medicamentosResponse = await apiRequest<{
           message: string;
@@ -63,9 +64,6 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
         }>('remedio/me', {
           method: 'GET',
           signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
         });
 
         if (!current()) return;
@@ -84,7 +82,7 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
 
     void fetchData();
     return () => { active = false; controller.abort(); mutation.current?.abort(); mutation.current = null; };
-  }, [getLembretes, token]);
+  }, [getLembretes, session]);
 
   const formatarData = (dataString: Date) => {
     if (!dataString) return 'Sem data';
@@ -96,7 +94,7 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
     if (mutation.current) return;
     const controller = new AbortController();
     mutation.current = controller;
-    const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    const current = () => !controller.signal.aborted && getSessionIdentity() === session;
     setSavingId(lembreteId);
     setConfirmationError(null);
     setConfirmationStatus('');
@@ -107,14 +105,13 @@ export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }:
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
         body: JSON.stringify({
           tomado: true,
         }),
         });
         if (!current()) return;
-        setConfirmedSnapshot(previous => ({ token, ids: new Set(previous.token === token ? previous.ids : []).add(lembreteId) }));
+        setConfirmedSnapshot(previous => ({ session, ids: new Set(previous.session === session ? previous.ids : []).add(lembreteId) }));
       }
 
       if (getLembretes) {

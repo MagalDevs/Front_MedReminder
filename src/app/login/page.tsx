@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo/Logo';
 import { useAuth } from '../contexts/AuthContext';
-import { apiRequest } from '../utils/api';
+import { apiRequest, endWebSession, startWebSession } from '../utils/api';
+import { getWebSessionId } from '../utils/session-storage';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { requestErrorMessage, RequestContractError } from '../utils/request-errors';
 import { clearNavigationFeedback, consumeNavigationFeedback, subscribeNavigationFeedback, type NavigationFeedback } from '../utils/navigation-feedback';
@@ -50,56 +51,48 @@ export default function Login() {
     clearNavigationFeedback();
     setIsLoading(true);
     try {
-      const data = await apiRequest<{
-        access_token: string;
-        message?: string;
-      }>('auth/login', {
-        method: 'POST',
-        requireAuth: false,
-        signal: attempt.signal,
-        body: JSON.stringify({
-          email: username,
-          senha: password,
-        }),
-      });
-      if (!current()) return;
-
-      if (!data || typeof data.access_token !== 'string' || !data.access_token.trim()) throw new RequestContractError();
-
-      if (data.access_token) {
-        try {
-          const userData = await apiRequest<{
-            message: string;
-            data: {
-              id: string | number;
-              nome: string;
-              email: string;
-              cep: string;
-              cpf: string;
-              cuidador: boolean;
-              dataNasc: Date;
-              senha: string;
-            };
-          }>('usuario/me', {
-            method: 'GET',
-            signal: attempt.signal,
-            requireAuth: false,
-            headers: {
-              Authorization: `Bearer ${data.access_token}`,
-            },
-          });
+      await startWebSession(
+        JSON.stringify({ email: username, senha: password }),
+        attempt.signal,
+        async (data) => {
           if (!current()) return;
+          if (!data || typeof data.access_token !== 'string' || !data.access_token.trim() ||
+              (data.session_id !== undefined && data.session_id !== getWebSessionId(data.access_token))) {
+            throw new RequestContractError();
+          }
 
-          if (!userData?.data || !userData.data.id) throw new RequestContractError();
-          login(data.access_token, userData.data);
+          try {
+            const userData = await apiRequest<{
+              message: string;
+              data: {
+                id: string | number;
+                nome: string;
+                email: string;
+                cep: string;
+                cpf: string;
+                cuidador: boolean;
+                dataNasc: Date;
+                senha: string;
+              };
+            }>('usuario/me', {
+              method: 'GET',
+              signal: AbortSignal.any([attempt.signal, AbortSignal.timeout(15000)]),
+              requireAuth: false,
+              headers: { Authorization: `Bearer ${data.access_token}` },
+            });
+            if (!current()) return;
 
-          router.push('/');
-        } catch (profileError) {
-          if (!current()) return;
-          setError(`Não foi possível carregar seu perfil. Faça o login novamente. ${requestErrorMessage(profileError, 'session') || ''}`.trim());
-          logout();
-        }
-      }
+            if (!userData?.data || !userData.data.id) throw new RequestContractError();
+            login(data.access_token, userData.data);
+            router.push('/');
+          } catch (profileError) {
+            if (!current()) return;
+            if (data.session_id) void endWebSession(data.session_id).catch(() => undefined);
+            setError(`Não foi possível carregar seu perfil. Faça o login novamente. ${requestErrorMessage(profileError, 'session') || ''}`.trim());
+            logout();
+          }
+        },
+      );
     } catch (err) {
       if (current()) setError(requestErrorMessage(err, 'login') || '');
     } finally {

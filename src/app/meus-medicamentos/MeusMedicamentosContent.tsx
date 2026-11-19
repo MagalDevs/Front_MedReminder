@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
+import { getSessionIdentity } from '../utils/session-storage';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import ConfirmDialog from '../components/Feedback/ConfirmDialog';
+import { useToast } from '../components/Feedback/ToastProvider';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 import { dataDeValidade, diasAteValidade } from '../utils/date-filters';
 
@@ -43,22 +46,29 @@ export default function MeusMedicamentosContent() {
   const [error, setError] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [pendingDeletion, setPendingDeletion] = useState<{
+    id: number;
+    nome: string;
+    session: string | null;
+  } | null>(null);
   const [medicamentoSelecionado, setFiltroMedicamento] = useState('');
   const [filtroValidade, setFiltroValidade] = useState<FiltroValidade>('');
   const deletion = useRef<AbortController | null>(null);
-  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
+  const session = getSessionIdentity();
   const router = useRouter();
+  const showToast = useToast();
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    const current = () => active && !controller.signal.aborted && localStorage.getItem('access_token') === token;
+    const current = () => active && !controller.signal.aborted && getSessionIdentity() === session;
     async function fetchMedicamentos() {
       try {
         setLoading(true);
         setError('');
         setDeleteError(null);
         setDeleting(null);
+        setPendingDeletion(null);
         setMedicamentos([]);
 
         const response = await apiRequest<{
@@ -67,9 +77,6 @@ export default function MeusMedicamentosContent() {
         }>('remedio/me', {
           method: 'GET',
           signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
         });
 
         if (!current()) return;
@@ -84,7 +91,7 @@ export default function MeusMedicamentosContent() {
 
     void fetchMedicamentos();
     return () => { active = false; controller.abort(); deletion.current?.abort(); deletion.current = null; };
-  }, [token]);
+  }, [session]);
 
   const formatarClassificacao = (texto: string) => {
     if (!texto || texto !== texto.toLocaleUpperCase('pt-BR')) return texto;
@@ -96,34 +103,31 @@ export default function MeusMedicamentosContent() {
   };
 
   const excluirMedicamento = async (id: number) => {
-    if (deletion.current) return;
-    if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
-      const controller = new AbortController();
-      deletion.current = controller;
-      const current = () => !controller.signal.aborted && localStorage.getItem('access_token') === token;
-      setDeleting(id);
-      setDeleteError(null);
-      try {
-        await apiRequest<{
-          message: string;
-          data: [];
-        }>(`remedio/${id}`, {
-          method: 'DELETE',
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
-        if (current()) {
-          setMedicamentos(previous => previous.filter((med) => med.id !== id));
-          setFiltroMedicamento(previous => previous === String(id) ? '' : previous);
-        }
-      } catch (err) {
-        if (current()) setDeleteError(requestErrorMessage(err));
-      } finally {
-        if (deletion.current === controller) deletion.current = null;
-        if (current()) setDeleting(null);
+    setPendingDeletion(null);
+    if (deletion.current || getSessionIdentity() !== session) return;
+    const controller = new AbortController();
+    deletion.current = controller;
+    const current = () => !controller.signal.aborted && getSessionIdentity() === session;
+    setDeleting(id);
+    setDeleteError(null);
+    try {
+      await apiRequest<{
+        message: string;
+        data: [];
+      }>(`remedio/${id}`, {
+        method: 'DELETE',
+        signal: controller.signal,
+      });
+      if (current()) {
+        setMedicamentos(previous => previous.filter((med) => med.id !== id));
+        setFiltroMedicamento(previous => previous === String(id) ? '' : previous);
+        showToast('success', 'Medicamento excluído com sucesso.');
       }
+    } catch (err) {
+      if (current()) setDeleteError(requestErrorMessage(err));
+    } finally {
+      if (deletion.current === controller) deletion.current = null;
+      if (current()) setDeleting(null);
     }
   };
 
@@ -146,6 +150,15 @@ export default function MeusMedicamentosContent() {
 
   return (
     <div className="mx-auto max-w-7xl flex-1 px-4 pb-6 pt-20 md:p-6">
+      {pendingDeletion && pendingDeletion.session === session && (
+        <ConfirmDialog
+          title="Excluir medicamento?"
+          message={`Deseja excluir “${pendingDeletion.nome}” da sua lista de medicamentos?`}
+          confirmLabel="Excluir"
+          onCancel={() => setPendingDeletion(null)}
+          onConfirm={() => void excluirMedicamento(pendingDeletion.id)}
+        />
+      )}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
@@ -320,7 +333,7 @@ export default function MeusMedicamentosContent() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => excluirMedicamento(medicamento.id)}
+                        onClick={() => setPendingDeletion({ id: medicamento.id, nome: medicamento.nome, session })}
                         disabled={deleting !== null}
                         className="med-button med-button--danger px-2"
                         title="Excluir medicamento"

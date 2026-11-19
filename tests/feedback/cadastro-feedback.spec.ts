@@ -87,7 +87,7 @@ test('REG-01 REG-03 REG-08 REG-19 formulário local confirma201 e persiste entre
     expect(logs.join('\n')).not.toContain(value);
     expect(page.url()).not.toContain(value);
   }
-  const loginResponse = page.waitForResponse(response => response.url() === `${API}/auth/login` && response.request().method() === 'POST');
+  const loginResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/auth/session/login' && response.request().method() === 'POST');
   const profileResponse = page.waitForResponse(response => response.url() === `${API}/usuario/me` && response.request().method() === 'GET');
   await page.getByLabel('E-mail').fill(account.email);
   await page.getByLabel('Senha', { exact: true }).fill(account.senha);

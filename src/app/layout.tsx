@@ -5,6 +5,7 @@ import { AuthProvider } from '../app/contexts/AuthContext';
 import { SidebarProvider } from '../app/contexts/SidebarContext';
 import { LembreteProvider } from './contexts/lembreteContext';
 import AlertaLembretes from './components/AlarmeDose/AlertaLembrete';
+import ToastProvider from './components/Feedback/ToastProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,7 +35,9 @@ export default function RootLayout({
         <AuthProvider>
           <LembreteProvider>
             <AlertaLembretes />
-            <SidebarProvider>{children}</SidebarProvider>
+            <ToastProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </ToastProvider>
           </LembreteProvider>
         </AuthProvider>
       </body>

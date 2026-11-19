@@ -75,7 +75,7 @@ class FakeApi {
   }
 
   async install(page: Page): Promise<void> {
-    await page.route(`${PRODUCTION_API_ORIGIN}/**`, async (route) => {
+    await page.route(url => url.origin === PRODUCTION_API_ORIGIN || url.pathname.startsWith('/auth/session/'), async (route) => {
       const request = route.request();
       const path = new URL(request.url()).pathname;
       if (request.method() === "OPTIONS") {
@@ -116,12 +116,7 @@ class FakeApi {
   }
 }
 
-/** Um 401 redireciona a página enquanto um alert está aberto: a aba pode sumir antes do accept. */
-function ignorarCorridaDeNavegacao(): void {}
-
-type DialogLog = { messages: string[]; confirmResult: boolean };
-
-const test = guarded.extend<{ fixedClock: void; api: FakeApi; dialogs: DialogLog }>({
+const test = guarded.extend<{ fixedClock: void; api: FakeApi; noBrowserDialogs: void }>({
   fixedClock: [async ({ page }, provide) => {
     await page.clock.setFixedTime(NOW);
     await provide();
@@ -133,18 +128,15 @@ const test = guarded.extend<{ fixedClock: void; api: FakeApi; dialogs: DialogLog
     await api.install(page);
     await provide(api);
   },
-  dialogs: async ({ page }, provide) => {
-    const log: DialogLog = { messages: [], confirmResult: true };
-    page.on("dialog", (dialog) => {
-      log.messages.push(`${dialog.type()}: ${dialog.message()}`);
-      if (dialog.type() === "confirm" && !log.confirmResult) {
-        void dialog.dismiss().catch(ignorarCorridaDeNavegacao);
-      } else {
-        void dialog.accept().catch(ignorarCorridaDeNavegacao);
-      }
+  noBrowserDialogs: [async ({ page }, provide) => {
+    const messages: string[] = [];
+    page.on("dialog", async (dialog) => {
+      messages.push(dialog.message());
+      await dialog.dismiss().catch(() => undefined);
     });
-    await provide(log);
-  },
+    await provide();
+    expect(messages).toEqual([]);
+  }, { auto: true }],
 });
 
 test.use({ timezoneId: "America/Sao_Paulo", locale: "pt-BR" });
@@ -236,7 +228,7 @@ function usarListaVazia(api: FakeApi): void {
 }
 
 function usarLogin(api: FakeApi): void {
-  api.on("POST", "/auth/login", { json: { access_token: TOKEN, message: "Login realizado" } });
+  api.on("POST", "/auth/session/login", { json: { access_token: TOKEN, message: "Login realizado" } });
   api.on("GET", "/usuario/me", { json: { message: "ok", data: USER } });
 }
 
@@ -281,8 +273,8 @@ test("FN-01 TEST-03 login mockado exibe o nome do perfil e o logout limpa o stor
   await expect(menu).toContainText("Olá, Ana");
 
   // Requests: login público (sem Authorization) e perfil com o token recebido.
-  await expect.poll(() => api.sequence()).toEqual(["POST /auth/login", "GET /usuario/me", "GET /dose/me"]);
-  const [login] = api.calls("POST", "/auth/login");
+  await expect.poll(() => api.sequence()).toEqual(["POST /auth/session/login", "GET /usuario/me", "GET /dose/me"]);
+  const [login] = api.calls("POST", "/auth/session/login");
   expect(login.body).toEqual({ email: USER.email, senha: USER_PASSWORD });
   expect(login.headers["content-type"]).toContain("application/json");
   expect(login.headers["authorization"]).toBeUndefined();
@@ -452,7 +444,6 @@ test("Cadastro permite selecionar medicamento e cor pelo teclado", async ({ page
 test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e atualiza os lembretes", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", call => respostaTratamento(call, 777));
@@ -463,7 +454,7 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   await preencherTratamento(page, { horaInicial: "08:00", intervalo: "8", duracao: "1" });
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  await expect.poll(() => dialogs.messages).toEqual(["alert: Lembrete e doses salvos com sucesso!"]);
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
 
   // Medicamento: método, URL, headers e body.
   const [criarRemedio] = api.calls("POST", "/tratamento");
@@ -496,7 +487,7 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   ]);
 
   // Perfil confirmado, tratamento atômico e depois recarga; formulário limpo.
-  expect(api.sequence()).toEqual([
+  await expect.poll(() => api.sequence()).toEqual([
     "GET /usuario/me", // restored profile
     "GET /dose/me", // provider no carregamento
     "POST /tratamento",
@@ -509,22 +500,27 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
 test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutação", async ({
   page,
   api,
-  dialogs,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   usarListaVazia(api);
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
+  await page.getByRole("button", { name: "Fechar menu" }).click();
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
-  await expect.poll(() => dialogs.messages).toEqual([
-    "alert: Por favor, corrija os erros no formulário",
-  ]);
+  const aviso = page.getByText("Por favor, corrija os erros no formulário");
+  await expect(aviso).toBeInViewport({ ratio: 1 });
+  await expect(page.locator('[data-kind="warning"]')).toHaveCSS("animation-name", "none");
+  await page.getByRole("button", { name: "Fechar notificação" }).click();
+  await expect(aviso).toHaveCount(0);
   await expect(page.getByText("Dosagem é obrigatória")).toBeVisible();
   await expect(page.getByText("Quantidade é obrigatória")).toBeVisible();
   await expect(page.getByText("Duração é obrigatória")).toBeVisible();
   await expect(page.getByText("Intervalo é obrigatório")).toBeVisible();
+  expect(api.calls("POST", "/tratamento")).toHaveLength(0);
   expect(api.calls("POST", "/remedio")).toHaveLength(0);
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
 });
@@ -532,7 +528,6 @@ test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutaç
 test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local correto", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", call => respostaTratamento(call, 778));
@@ -542,7 +537,7 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
   await preencherTratamento(page, { horaInicial: "22:00", intervalo: "8", duracao: "1" });
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
-  await expect.poll(() => dialogs.messages.length).toBeGreaterThan(0);
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
 
   // Correto: 04/11 22:00, 05/11 06:00 e 05/11 14:00 locais.
   const [criarDoses] = api.calls("POST", "/tratamento");
@@ -553,7 +548,7 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
   ]);
 });
 
-test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ page, api, dialogs }) => {
+test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ page, api }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", (call, index) => index === 0 ? { abort: true } : respostaTratamento(call, 779));
   await seedSession(page);
@@ -565,7 +560,7 @@ test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ pag
   await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(salvar).toBeEnabled();
   await salvar.click();
-  await expect.poll(() => dialogs.messages.at(-1)).toBe("alert: Lembrete e doses salvos com sucesso!");
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
   const calls = api.calls("POST", "/tratamento");
   expect(calls).toHaveLength(2);
   expect(calls[0].headers["idempotency-key"]).toMatch(/^[a-zA-Z0-9._:-]{1,128}$/);
@@ -735,7 +730,6 @@ test("o destaque de Meus medicamentos respeita o alinhamento dos links", async (
 test("FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não envia DELETE", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarAgenda(api, criarAgenda());
   await seedSession(page);
@@ -747,31 +741,37 @@ test("FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não
   const [lista] = api.calls("GET", "/remedio/me");
   expect(lista.headers["authorization"]).toBe(AUTH_HEADER);
 
-  // Cancelar a confirmação: nada é enviado e a lista permanece.
-  dialogs.confirmResult = false;
-  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByTitle("Excluir medicamento").click();
-  await expect.poll(() => dialogs.messages).toEqual([
-    "confirm: Tem certeza que deseja excluir este medicamento?",
-  ]);
+  const excluir = cartaoDeMedicamento(page, "Amoxicilina Teste").getByTitle("Excluir medicamento");
+  const confirmacao = page.getByRole("alertdialog", { name: "Excluir medicamento?" });
+  const cancelar = confirmacao.getByRole("button", { name: "Cancelar" });
+
+  await excluir.click();
+  await expect(confirmacao).toContainText("Amoxicilina Teste");
+  await expect(cancelar).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(confirmacao).toHaveCount(0);
+  await expect(excluir).toBeFocused();
+
+  await excluir.click();
+  await cancelar.click();
+  await expect(confirmacao).toHaveCount(0);
   expect(api.calls("DELETE", /^\/remedio\//)).toHaveLength(0);
   await expect(titulos).toHaveCount(3);
 
-  // Confirmar: DELETE /remedio/2 e só esse cartão sai da lista.
-  dialogs.confirmResult = true;
-  await cartaoDeMedicamento(page, "Amoxicilina Teste").getByTitle("Excluir medicamento").click();
+  await excluir.click();
+  await confirmacao.getByRole("button", { name: "Excluir", exact: true }).click();
+  await expect(page.getByText("Medicamento excluído com sucesso.")).toBeVisible();
   await expect(titulos).toHaveText(["Dipirona Teste", "Losartana Teste"]);
   const deletes = api.calls("DELETE", /^\/remedio\//);
   expect(deletes).toHaveLength(1);
   expect(deletes[0].path).toBe("/remedio/2");
   expect(deletes[0].headers["authorization"]).toBe(AUTH_HEADER);
   expect(deletes[0].body).toBeUndefined();
-  expect(dialogs.messages).toHaveLength(2);
 });
 
 test("FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento na lista", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarAgenda(api, criarAgenda());
   api.on("DELETE", "/remedio/1", { status: 500, json: { message: "Falha sintética no servidor" } });
@@ -782,9 +782,8 @@ test("FN-05 TEST-03 falha ao excluir mostra a mensagem e mantém o medicamento n
   await expect(titulos).toHaveCount(3);
   await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
 
-  await expect.poll(() => dialogs.messages).toEqual([
-    "confirm: Tem certeza que deseja excluir este medicamento?",
-  ]);
+  await page.getByRole("alertdialog", { name: "Excluir medicamento?" })
+    .getByRole("button", { name: "Excluir", exact: true }).click();
   await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
   await expect(titulos).toHaveCount(3);
   expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
@@ -823,7 +822,7 @@ for (const caso of CASOS_LOGIN) {
     page,
     api,
   }) => {
-    api.on("POST", "/auth/login", caso.reply);
+    api.on("POST", "/auth/session/login", caso.reply);
 
     await page.goto("/login");
     await page.getByLabel("E-mail").fill(USER.email);
@@ -834,7 +833,7 @@ for (const caso of CASOS_LOGIN) {
     await expect(page.getByRole("button", { name: "Entrar" })).toBeEnabled(); // loading encerrado
     await expect(page).toHaveURL(/\/login$/);
     await expectSemSessao(page);
-    expect(api.sequence()).toEqual(["POST /auth/login"]); // perfil nunca é consultado
+    expect(api.sequence()).toEqual(["POST /auth/session/login"]); // perfil nunca é consultado
   });
 }
 
@@ -842,7 +841,7 @@ test("FN-07 FN-01 TEST-03 login com token mas perfil 500 mostra a falha do perfi
   page,
   api,
 }) => {
-  api.on("POST", "/auth/login", { json: { access_token: TOKEN, message: "Login realizado" } });
+  api.on("POST", "/auth/session/login", { json: { access_token: TOKEN, message: "Login realizado" } });
   api.on("GET", "/usuario/me", { status: 500 });
 
   await page.goto("/login");
@@ -952,7 +951,6 @@ for (const status of STATUS_DE_ERRO) {
   test(`FN-07 FN-05 TEST-03 excluir medicamento com ${status} avisa a falha e mantém o item`, async ({
     page,
     api,
-    dialogs,
   }) => {
     usarAgenda(api, criarAgenda());
     api.on("DELETE", "/remedio/1", { status });
@@ -963,9 +961,8 @@ for (const status of STATUS_DE_ERRO) {
     await expect(titulos).toHaveCount(3);
     await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
 
-    await expect.poll(() => dialogs.messages).toEqual([
-      "confirm: Tem certeza que deseja excluir este medicamento?",
-    ]);
+    await page.getByRole("alertdialog", { name: "Excluir medicamento?" })
+      .getByRole("button", { name: "Excluir", exact: true }).click();
     await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao excluir medicamento: ${MENSAGEM_POR_STATUS[status]}`);
     await expect(titulos).toHaveCount(3);
     expect(api.calls("DELETE", "/remedio/1")).toHaveLength(1);
@@ -975,7 +972,6 @@ for (const status of STATUS_DE_ERRO) {
 test("FN-07 FN-05 TEST-03 excluir medicamento com rede interrompida avisa a falha e mantém o item", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarAgenda(api, criarAgenda());
   api.on("DELETE", "/remedio/1", { abort: true });
@@ -986,7 +982,8 @@ test("FN-07 FN-05 TEST-03 excluir medicamento com rede interrompida avisa a falh
   await expect(titulos).toHaveCount(3);
   await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
 
-  await expect.poll(() => dialogs.messages).toEqual(["confirm: Tem certeza que deseja excluir este medicamento?"]);
+  await page.getByRole("alertdialog", { name: "Excluir medicamento?" })
+    .getByRole("button", { name: "Excluir", exact: true }).click();
   await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao excluir medicamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(titulos).toHaveCount(3);
 });
@@ -1000,9 +997,9 @@ test("FN-07 FN-05 TEST-03 excluir medicamento com 401 remove a sessão e leva ao
   await seedSession(page);
   await page.goto("/meus-medicamentos");
   await expect(page.locator("h3").filter({ hasText: "Teste" })).toHaveCount(3);
-  page.on("dialog", (dialog) => void dialog.accept().catch(ignorarCorridaDeNavegacao));
-
   await cartaoDeMedicamento(page, "Dipirona Teste").getByTitle("Excluir medicamento").click();
+  await page.getByRole("alertdialog", { name: "Excluir medicamento?" })
+    .getByRole("button", { name: "Excluir", exact: true }).click();
 
   await expect(page).toHaveURL(/\/login$/);
   await expectSemSessao(page);
@@ -1033,7 +1030,6 @@ for (const status of STATUS_DE_ERRO) {
   test(`FN-07 FN-03 TEST-03 criar medicamento com ${status} avisa a falha, não cria doses e libera o botão`, async ({
     page,
     api,
-    dialogs,
   }) => {
     usarListaVazia(api);
     api.on("POST", "/tratamento", { status });
@@ -1047,10 +1043,10 @@ for (const status of STATUS_DE_ERRO) {
     const mensagem = MENSAGEM_POR_STATUS[status];
     // Uma falha da operação atômica produz um aviso.
     await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText(`Ao salvar tratamento: ${mensagem}`);
-    expect(dialogs.messages).toEqual([]);
+    await expect(page.getByRole("button", { name: "Fechar notificação" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
     expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
-    expect(dialogs.messages.join("\n")).not.toContain("sucesso");
+    await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toHaveCount(0);
     // Formulário preservado para nova tentativa.
     await expect(page.getByPlaceholder("500")).toHaveValue("500");
   });
@@ -1059,7 +1055,6 @@ for (const status of STATUS_DE_ERRO) {
 test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria doses nem anuncia sucesso", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", { abort: true });
@@ -1073,13 +1068,12 @@ test("FN-07 FN-03 TEST-03 criar medicamento com rede interrompida não cria dose
   await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.");
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
-  expect(dialogs.messages.join("\n")).not.toContain("sucesso");
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toHaveCount(0);
 });
 
 test("FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticação e não cria doses", async ({
   page,
   api,
-  dialogs,
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", { status: 401, json: { message: "Token expirado" } });
@@ -1093,13 +1087,12 @@ test("FN-07 FN-03 TEST-03 criar medicamento com 401 avisa a falha de autenticaç
   await expect(page).toHaveURL(/\/login$/);
   await expectSemSessao(page);
   expect(api.calls("POST", "/dose/doses")).toHaveLength(0);
-  expect(dialogs.messages.join(" | ")).not.toContain("sucesso");
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toHaveCount(0);
 });
 
 test("FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso", async ({
   page,
   api,
-  dialogs,
 }) => {
   // Resposta 500 da operação única: sem sucesso ou recarga.
   usarListaVazia(api);
@@ -1112,9 +1105,9 @@ test("FN-07 FN-03 TEST-03 BEAPI-07 tratamento 500 não anuncia sucesso", async (
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
   await expect(page.getByRole("alert").and(page.locator(":not(#__next-route-announcer__)"))).toHaveText("Ao salvar tratamento: O serviço está temporariamente indisponível. Tente novamente mais tarde.");
-  expect(dialogs.messages).toEqual([]);
+  await expect(page.getByRole("button", { name: "Fechar notificação" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
-  expect(dialogs.messages.join("\n")).not.toContain("sucesso");
+  await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toHaveCount(0);
   // Sem sucesso: nenhuma reconsulta de lembretes além da carga inicial.
   expect(api.calls("GET", "/dose/me")).toHaveLength(1);
 });

@@ -135,6 +135,7 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
     expect(confirmation.status()).toBe(200);
     const list = await request.get(`${api}/dose/me`, { headers: headers(tokenA) });
     expect((await list.json()).data.find((dose: { id: number }) => dose.id === doseId).tomado).toBe(true);
+    await page.clock.setFixedTime(new Date('2030-01-03T12:00:00Z'));
     await page.addInitScript((token) => localStorage.setItem('access_token', token), tokenA);
     await page.goto('/historico');
     await expect(page.getByRole('heading', { name: treatment.remedio.nome })).toBeVisible();
@@ -143,15 +144,30 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
     await expect(page.locator('span').filter({ hasText: /^Tomado$/ })).toBeVisible();
   });
 
-  test('E2E-01 E2E-05 login e perfil pela interface persistem após reload e logout', async ({ page, request }) => {
+  test('E2E-01 E2E-05 login, renovação automática do perfil e logout pelo navegador', async ({ page, request }) => {
     await page.goto('/login');
     await page.getByLabel('E-mail', { exact: true }).fill(emailA);
     await page.getByLabel('Senha', { exact: true }).fill(nextPassword);
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
+    const initialCookie = (await page.context().cookies()).find(cookie => cookie.name === 'medreminder_refresh');
+    expect(initialCookie).toMatchObject({ httpOnly: true, sameSite: 'Lax', path: '/auth/session' });
+    // The API receives a rejected bearer with the same session ID as the valid cookie.
+    const rejected = await page.evaluate(() => {
+      const token = localStorage.getItem('access_token')!;
+      const rejected = token.replace(/\.[^.]+$/, '.invalid-test-signature');
+      localStorage.setItem('access_token', rejected);
+      return rejected;
+    });
+    const refresh = page.waitForResponse(response => new URL(response.url()).pathname === '/auth/session/refresh');
     await page.goto('/Configuracoes');
     const name = page.getByPlaceholder('Digite seu nome completo');
     await expect(name).toHaveValue('Conta Atualizada');
+    expect((await refresh).status()).toBe(200);
+    expect(await page.evaluate(() => localStorage.getItem('access_token'))).not.toBe(rejected);
+    const rotatedCookie = (await page.context().cookies()).find(cookie => cookie.name === 'medreminder_refresh');
+    expect(rotatedCookie).toBeDefined();
+    expect(rotatedCookie?.value).not.toBe(initialCookie?.value);
     await name.fill('Conta Alterada Pela Interface');
     await page.getByRole('button', { name: 'Salvar Alterações', exact: true }).click();
     await expect(page.getByText('Dados atualizados com sucesso!')).toBeVisible();
@@ -159,9 +175,12 @@ test.describe.serial('BEAPI-12 contratos reais e persistência isolada', () => {
     await expect(name).toHaveValue('Conta Alterada Pela Interface');
     const persisted = await request.get(`${api}/usuario/me`, { headers: headers(tokenA) });
     expect((await persisted.json()).data.nome).toBe('Conta Alterada Pela Interface');
+    const logout = page.waitForResponse(response => new URL(response.url()).pathname === '/auth/session/logout');
     await page.getByRole('button', { name: /Sair/i }).click();
+    expect((await logout).status()).toBe(204);
     await expect(page).toHaveURL(/\/login$/);
     expect(await page.evaluate(() => localStorage.getItem('access_token'))).toBeNull();
+    expect((await page.context().cookies()).some(cookie => cookie.name === 'medreminder_refresh')).toBe(false);
     await page.goto('/Configuracoes');
     await expect(page).toHaveURL(/\/login$/);
   });

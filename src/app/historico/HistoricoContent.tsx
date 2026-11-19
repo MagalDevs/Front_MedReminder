@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest, ApiError } from '../utils/api';
+import { getSessionIdentity } from '../utils/session-storage';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { filtroDePeriodo, type Periodo } from '../utils/date-filters';
@@ -32,13 +33,13 @@ type DoseHistorico = {
 export default function HistoricoContent() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const identity = !authLoading && isAuthenticated ? String(user?.id ?? user?.email ?? '') : '';
-  const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
-  const [snapshot, setSnapshot] = useState<{ identity: string; token: string | null; registros: RegistroHistorico[]; medicamentos: Medicamento[] }>({ identity: '', token: null, registros: [], medicamentos: [] });
-  const registros = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.registros : [];
-  const medicamentos = identity && snapshot.identity === identity && snapshot.token === token ? snapshot.medicamentos : [];
+  const session = getSessionIdentity();
+  const [snapshot, setSnapshot] = useState<{ identity: string; session: string | null; registros: RegistroHistorico[]; medicamentos: Medicamento[] }>({ identity: '', session: null, registros: [], medicamentos: [] });
+  const registros = identity && snapshot.identity === identity && snapshot.session === session ? snapshot.registros : [];
+  const medicamentos = identity && snapshot.identity === identity && snapshot.session === session ? snapshot.medicamentos : [];
   const [loading, setLoading] = useState(true);
-  const [failure, setFailure] = useState({ identity: '', token: null as string | null, message: '' });
-  const error = failure.identity === identity && failure.token === token ? failure.message : '';
+  const [failure, setFailure] = useState({ identity: '', session: null as string | null, message: '' });
+  const error = failure.identity === identity && failure.session === session ? failure.message : '';
   const [filtroMedicamento, setFiltroMedicamento] = useState<string>('');
   const [filtroStatus, setFiltroStatus] = useState<string>('');
   const [filtroPeriodo, setFiltroPeriodo] = useState<Periodo>('todos');
@@ -47,16 +48,16 @@ export default function HistoricoContent() {
     let active = true;
     const controller = new AbortController();
     async function fetchDados() {
-      if (!identity || !token) {
+      if (!identity || !session) {
         setLoading(authLoading);
         return;
       }
-      setFailure({ identity, token, message: '' });
+      setFailure({ identity, session, message: '' });
       setLoading(true);
       try {
         // Sem query: o contrato legado devolve a lista completa, sem paginação.
         const response = await apiRequest<{ data: DoseHistorico[] }>('dose/me', { signal: controller.signal });
-        if (!active || localStorage.getItem('access_token') !== token) return;
+        if (!active || getSessionIdentity() !== session) return;
         if (!response || !Array.isArray(response.data)) throw new RequestContractError();
         const rows = response.data.map((dose): RegistroHistorico => {
           if (!dose || !['string', 'number'].includes(typeof dose.id) || typeof dose.tomado !== 'boolean' || typeof dose.data_dose !== 'string' || !Number.isFinite(Date.parse(dose.data_dose)) || !dose.remedio || !['string', 'number'].includes(typeof dose.remedio.id) || typeof dose.remedio.nome !== 'string') {
@@ -73,19 +74,19 @@ export default function HistoricoContent() {
         const meds = Array.from(new Map(response.data.map((dose) => [String(dose.remedio.id), {
           id: String(dose.remedio.id), nome: dose.remedio.nome, cor: dose.remedio.cor || '#037F8C',
         }])).values());
-        setSnapshot({ identity, token, registros: rows, medicamentos: meds });
+        setSnapshot({ identity, session, registros: rows, medicamentos: meds });
       } catch (err) {
-        const currentToken = localStorage.getItem('access_token');
-        const expired = err instanceof ApiError && err.status === 401 && currentToken === null;
-        if (!active || controller.signal.aborted || (currentToken !== token && !expired)) return;
-        setFailure({ identity, token: currentToken, message: requestErrorMessage(err, expired ? 'session' : 'operation') ?? '' });
+        const currentSession = getSessionIdentity();
+        const expired = err instanceof ApiError && err.status === 401 && currentSession === null;
+        if (!active || controller.signal.aborted || (currentSession !== session && !expired)) return;
+        setFailure({ identity, session: currentSession, message: requestErrorMessage(err, expired ? 'session' : 'operation') ?? '' });
       } finally {
         if (active) setLoading(false);
       }
     }
     void fetchDados();
     return () => { active = false; controller.abort(); };
-  }, [authLoading, identity, token]);
+  }, [authLoading, identity, session]);
 
   const periodoSelecionado = filtroDePeriodo(filtroPeriodo, new Date(), 'historico');
   const registrosFiltrados = registros.filter((registro) =>
