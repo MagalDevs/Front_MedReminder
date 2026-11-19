@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest"
 import ConfigurarLembrete from "@/app/components/CardCadastrar/cardCadastrar";
 import { AuthProvider, useAuth } from "@/app/contexts/AuthContext";
 import { LembreteContext, LembreteProvider } from "@/app/contexts/lembreteContext";
+import { SidebarProvider } from "@/app/contexts/SidebarContext";
 import Pagina from "@/app/novo-medicamento/page";
 import { API_URL } from "@/app/utils/api";
 import { treatmentResponseFixture, getProfileFixture, type TreatmentRequest } from "../fixtures/backend-contracts";
@@ -25,7 +26,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => parametrosBusca.atual,
 }));
 
-// A barra lateral não participa do cadastro; evita next/image e SidebarContext.
+// A barra lateral não participa do cadastro; evita renderizar next/image.
 vi.mock("@/app/components/Sidebar/sidebar", () => ({ default: () => null }));
 
 const RELOGIO_FIXO = "2026-11-04T12:00:00-03:00";
@@ -232,18 +233,13 @@ function preencher(container: HTMLElement, campos: Campos) {
   if (campos.motivo !== undefined) mudar(screen.getByPlaceholderText("Dor de cabeça"), campos.motivo);
   if (campos.observacoes !== undefined) mudar(screen.getByPlaceholderText("Tomar após as refeições"), campos.observacoes);
   if (campos.corHex !== undefined) {
-    const rgb = hexParaRgb(campos.corHex);
-    const alvo = Array.from(container.querySelectorAll<HTMLElement>("div[style]")).find(
-      (d) => d.style.backgroundColor === rgb,
+    const cores = screen.getByRole("group", { name: "Cor identificadora" });
+    const alvo = within(cores).getAllByRole("radio").find(
+      (opcao) => opcao.getAttribute("value") === campos.corHex,
     );
     if (!alvo) throw new Error(`Cor não encontrada: ${campos.corHex}`);
     fireEvent.click(alvo);
   }
-}
-
-function hexParaRgb(hex: string) {
-  const n = (i: number) => parseInt(hex.slice(i, i + 2), 16);
-  return `rgb(${n(1)}, ${n(3)}, ${n(5)})`;
 }
 
 const aguardarSessao = () => waitFor(() => expect(screen.getByTestId("sessao-pronta")).toHaveTextContent("pronta"));
@@ -643,7 +639,9 @@ describe("IT-05 TEST-02 criação do tratamento (formulário + contextos + clien
       <AuthProvider>
       <EstadoSessao />
         <LembreteProvider>
-          <Pagina />
+          <SidebarProvider>
+            <Pagina />
+          </SidebarProvider>
         </LembreteProvider>
       </AuthProvider>,
     );

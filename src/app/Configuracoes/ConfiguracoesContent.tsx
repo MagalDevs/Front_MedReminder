@@ -7,6 +7,8 @@ import { apiRequest, ApiError } from '../utils/api';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 
+const inputClass = 'block min-h-11 w-full rounded-md border border-[#037F8C] bg-white px-3 py-2 text-gray-700 KantumruyMedium placeholder:text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]';
+
 function validUser(value: unknown): value is Usuario {
   if (!value || typeof value !== 'object') return false;
   const data = value as Usuario;
@@ -279,25 +281,26 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
 
   if (loading && !usuario) {
     return (
-      <div className="flex-1 p-6">
-        <div className="animate-pulse">
+      <>
+        <p className="sr-only" role="status">Carregando configurações...</p>
+        <div aria-hidden="true" className="max-w-lg motion-safe:animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
           <div className="h-32 bg-gray-200 rounded w-full mb-6"></div>
           <div className="h-32 bg-gray-200 rounded w-full"></div>
         </div>
-      </div>
+      </>
     );
   }
   return (
-    <div className="flex-1 p-6">
-      <div className="mb-8">
+    <div className="max-w-lg @min-[45rem]:max-w-[51.5rem]">
+      <header className="mb-8">
         <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
           Configurações
         </h1>
         <p className="text-gray-600 KantumruyRegular">
           Gerencie suas informações pessoais
         </p>
-      </div>
+      </header>
       {readError?.identity === identity && readError.message && <RequestFeedback context="Ao carregar perfil" message={readError.message} />}
       {profileError && <RequestFeedback context="Ao salvar perfil" message={profileError} />}
       {passwordError && <RequestFeedback context="Ao alterar senha" message={passwordError} />}
@@ -316,54 +319,62 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
         >
           {message}
         </div>
-      )}{' '}
-      <div className="grid md:grid-cols-2 gap-8">
+      )}
+      <div className="grid items-start gap-6 @min-[45rem]:grid-cols-[minmax(0,30rem)_minmax(0,20rem)]">
         {/* Formulário unificado para alteração de dados */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-[#037F8C] mb-4 KantumruySemiBold">
+        <section aria-labelledby="perfil-dados" className="min-w-0 rounded-lg bg-white p-4 shadow-sm sm:p-6">
+          <h2 id="perfil-dados" className="mb-4 text-xl font-semibold text-[#037F8C] KantumruySemiBold">
             Alterar Informações Pessoais
           </h2>
           <form onSubmit={handleUpdateProfile} className="space-y-4">
             {/* Nome */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="perfil-nome" className="mb-2 block text-sm font-medium text-gray-700">
                 Nome
               </label>
               <input
+                id="perfil-nome"
                 type="text"
+                autoComplete="name"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Digite seu nome completo"
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                className={inputClass}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="perfil-email" className="mb-2 block text-sm font-medium text-gray-700">
                 E-mail
               </label>
               <input
+                id="perfil-email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu e-mail"
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                className={inputClass}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="perfil-cep" className="mb-2 block text-sm font-medium text-gray-700">
                 CEP
               </label>
               <input
+                id="perfil-cep"
                 type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                aria-describedby="perfil-cep-ajuda"
                 value={cep}
                 onChange={handleCepChange}
                 placeholder="00000-000"
-                className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                className={`${inputClass} max-w-44`}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p id="perfil-cep-ajuda" className="mt-1 text-xs text-gray-600">
                 Digite apenas números, a formatação será aplicada
                 automaticamente.
               </p>
@@ -380,41 +391,47 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
 
               {/* Senha Atual */}
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="perfil-senha-atual" className="mb-2 block text-sm font-medium text-gray-700">
                   Senha Atual
                 </label>
                 <input
+                  id="perfil-senha-atual"
                   type="password"
+                  autoComplete="current-password"
                   value={senhaAtual}
                   onChange={(e) => setSenhaAtual(e.target.value)}
                   placeholder="Digite sua senha atual"
-                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                  className={inputClass}
                 />
               </div>
 
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="perfil-nova-senha" className="mb-2 block text-sm font-medium text-gray-700">
                   Nova Senha
                 </label>
                 <input
+                  id="perfil-nova-senha"
                   type="password"
+                  autoComplete="new-password"
                   value={novaSenha}
                   onChange={(e) => setNovaSenha(e.target.value)}
                   placeholder="Digite sua nova senha"
-                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="perfil-confirmar-senha" className="mb-2 block text-sm font-medium text-gray-700">
                   Confirmar Nova Senha
                 </label>
                 <input
+                  id="perfil-confirmar-senha"
                   type="password"
+                  autoComplete="new-password"
                   value={confirmarSenha}
                   onChange={(e) => setConfirmarSenha(e.target.value)}
                   placeholder="Confirme sua nova senha"
-                  className="w-full px-3 py-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium focus:ring-2 focus:ring-[#037F8C]"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -423,56 +440,54 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
               <button
                 type="submit"
                 disabled={loading || photoSaving}
-                className="w-full bg-[#037F8C] text-white py-3 px-4 rounded-md hover:bg-opacity-90 hover:scale-102 hover:bg-[#044D55] hover:shadow-md transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="med-button med-button--primary w-full sm:w-auto"
               >
                 {loading ? 'Atualizando...' : 'Salvar Alterações'}
               </button>
             </div>
           </form>
-        </div>{' '}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-[#037F8C] mb-6 KantumruySemiBold text-center">
+        </section>
+        <section aria-labelledby="perfil-foto" className="min-w-0 rounded-lg bg-white p-4 shadow-sm sm:p-6">
+          <h2 id="perfil-foto" className="mb-4 text-xl font-semibold text-[#037F8C] KantumruySemiBold">
             Alterar foto de perfil
           </h2>
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-8 py-8">
-              <div className="w-48 h-48 rounded-full border-4 border-[#037F8C] border-opacity-20 overflow-hidden bg-gray-50 flex items-center justify-center shadow-lg">
-                {foto ? (
-                  <Image
-                    src={foto}
-                    alt="Foto de perfil atual"
-                    className="w-full h-full object-cover"
-                    width={192}
-                    height={192}
-                  />
-                ) : (
-                  <span className="text-gray-400 text-lg KantumruyMedium">
-                    Sem foto
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={openFileSelector}
-                disabled={loading || photoSaving}
-                className="bg-[#037F8C] text-white py-4 px-8 rounded-lg text-lg hover:bg-opacity-90 hover:scale-105 hover:bg-[#044D55] hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer KantumruySemiBold disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
-              >
-                {photoSaving ? 'Enviando...' : 'Alterar Foto'}
-              </button>
-              <p className="text-sm text-gray-500 text-center max-w-xs KantumruyRegular">
-                Selecione uma imagem de até 5MB para atualizar sua foto de
-                perfil
-              </p>
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex aspect-square w-36 max-w-full items-center justify-center overflow-hidden rounded-full border border-[#037F8C] bg-gray-50">
+              {foto ? (
+                <Image
+                  src={foto}
+                  alt="Foto de perfil atual"
+                  className="w-full h-full object-cover"
+                  width={144}
+                  height={144}
+                />
+              ) : (
+                <span className="text-gray-600 KantumruyMedium">
+                  Sem foto
+                </span>
+              )}
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handlePhotoChange}
-              accept="image/*"
-              className="hidden"
-            />
+            <button
+              type="button"
+              onClick={openFileSelector}
+              disabled={loading || photoSaving}
+              aria-describedby="perfil-foto-ajuda"
+              className="med-button med-button--primary"
+            >
+              {photoSaving ? 'Enviando...' : 'Alterar Foto'}
+            </button>
+            <p id="perfil-foto-ajuda" className="max-w-xs text-sm text-gray-600 KantumruyRegular">
+              Selecione uma imagem de até 5MB para atualizar sua foto de perfil
+            </p>
           </div>
-        </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handlePhotoChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </section>
       </div>
     </div>
   );

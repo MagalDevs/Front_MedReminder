@@ -14,6 +14,8 @@ describe('BEAPI-09 histórico persistido', () => {
   beforeEach(() => {
     Object.assign(auth, { user: { id: 7 }, isAuthenticated: true, loading: false });
     localStorage.setItem('access_token', 'token-sintetico');
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-04T12:00:00-03:00'));
   });
   it('consulta dose/me com Bearer e representa tomado booleano sem inventar adiamento', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(json({ data: rows }));
@@ -33,6 +35,31 @@ describe('BEAPI-09 histórico persistido', () => {
     expect(screen.queryByRole('heading', { name: 'Medicamento B' })).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'nao_tomado' } });
     expect(screen.getByText('Nenhum histórico encontrado')).toBeInTheDocument();
+  });
+  it('combina períodos por dia local e limita todos os resultados ao instante atual', async () => {
+    vi.setSystemTime(new Date('2026-03-31T12:00:00-03:00'));
+    const doses = [
+      ['Início de 30 dias', '2026-03-02T03:00:00Z'],
+      ['Antes de 30 dias', '2026-03-02T02:59:59.999Z'],
+      ['Início de 7 dias', '2026-03-25T03:00:00Z'],
+      ['Antes de 7 dias', '2026-03-25T02:59:59.999Z'],
+      ['Início de hoje', '2026-03-31T03:00:00Z'],
+      ['Agora', '2026-03-31T15:00:00Z'],
+      ['Futura', '2026-03-31T15:00:00.001Z'],
+    ].map(([nome, data_dose], id) => ({ id, data_dose, tomado: id % 2 === 0, remedio: { id, nome } }));
+    vi.mocked(fetch).mockResolvedValueOnce(json({ data: doses }));
+    render(<HistoricoContent />);
+    await screen.findByRole('heading', { name: 'Agora' });
+
+    const periodo = screen.getByLabelText('Período');
+    const nomes = () => screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent);
+    expect(nomes()).toEqual(['Agora', 'Início de hoje', 'Início de 7 dias', 'Antes de 7 dias', 'Início de 30 dias', 'Antes de 30 dias']);
+    fireEvent.change(periodo, { target: { value: 'mes' } });
+    expect(nomes()).toEqual(['Agora', 'Início de hoje', 'Início de 7 dias', 'Antes de 7 dias', 'Início de 30 dias']);
+    fireEvent.change(periodo, { target: { value: 'semana' } });
+    expect(nomes()).toEqual(['Agora', 'Início de hoje', 'Início de 7 dias']);
+    fireEvent.change(periodo, { target: { value: 'hoje' } });
+    expect(nomes()).toEqual(['Agora', 'Início de hoje']);
   });
   it('lista vazia não produz dados sintéticos', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(json({ data: [] }));

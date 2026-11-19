@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../utils/api';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
+import { dataDeValidade, diasAteValidade } from '../utils/date-filters';
+
+type FiltroValidade = '' | 'vencidos' | 'proximos' | 'validos' | 'sem-data';
 
 type Medicamento = {
   id: number;
@@ -40,6 +43,8 @@ export default function MeusMedicamentosContent() {
   const [error, setError] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [medicamentoSelecionado, setFiltroMedicamento] = useState('');
+  const [filtroValidade, setFiltroValidade] = useState<FiltroValidade>('');
   const deletion = useRef<AbortController | null>(null);
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const router = useRouter();
@@ -81,28 +86,13 @@ export default function MeusMedicamentosContent() {
     return () => { active = false; controller.abort(); deletion.current?.abort(); deletion.current = null; };
   }, [token]);
 
-  const formatarData = (dataString: string) => {
-    if (!dataString) return 'Sem data';
-
-    const data = new Date(dataString);
-    return data.toLocaleDateString('pt-BR');
-  };
-
-  const calcularDiasRestantes = (dataString: string) => {
-    if (!dataString) return 0;
-
-    const data = new Date(dataString);
-    const hoje = new Date();
-    const diferencaEmMs = data.getTime() - hoje.getTime();
-    const diferencaEmDias = Math.ceil(diferencaEmMs / (1000 * 60 * 60 * 24));
-
-    return Math.max(0, diferencaEmDias);
+  const formatarClassificacao = (texto: string) => {
+    if (!texto || texto !== texto.toLocaleUpperCase('pt-BR')) return texto;
+    return texto.charAt(0) + texto.slice(1).toLocaleLowerCase('pt-BR');
   };
 
   const navegarParaLembrete = (medicamento: Medicamento) => {
-    router.push(
-      `/meus-lembretes?medicamento=${encodeURIComponent(medicamento.nome)}`,
-    );
+    router.push(`/meus-lembretes?medicamentoId=${medicamento.id}`);
   };
 
   const excluirMedicamento = async (id: number) => {
@@ -124,7 +114,10 @@ export default function MeusMedicamentosContent() {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
-        if (current()) setMedicamentos(previous => previous.filter((med) => med.id !== id));
+        if (current()) {
+          setMedicamentos(previous => previous.filter((med) => med.id !== id));
+          setFiltroMedicamento(previous => previous === String(id) ? '' : previous);
+        }
       } catch (err) {
         if (current()) setDeleteError(requestErrorMessage(err));
       } finally {
@@ -134,8 +127,25 @@ export default function MeusMedicamentosContent() {
     }
   };
 
+  const hoje = new Date();
+  const medicamentosFiltrados = medicamentos
+    .filter((medicamento) => !medicamentoSelecionado || String(medicamento.id) === medicamentoSelecionado)
+    .map((medicamento) => {
+      const validade = dataDeValidade(medicamento.dataValidade);
+      return { medicamento, validade, dias: validade ? diasAteValidade(validade, hoje) : null };
+    })
+    .filter(({ dias }) => {
+      switch (filtroValidade) {
+        case 'vencidos': return dias !== null && dias < 0;
+        case 'proximos': return dias !== null && dias >= 0 && dias <= 30;
+        case 'validos': return dias !== null && dias > 30;
+        case 'sem-data': return dias === null;
+        default: return true;
+      }
+    });
+
   return (
-    <div className="flex-1 p-6">
+    <div className="mx-auto max-w-7xl flex-1 px-4 pb-6 pt-20 md:p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
@@ -148,7 +158,7 @@ export default function MeusMedicamentosContent() {
         { medicamentos.length != 0 && (
           <button
             onClick={() => router.push('/novo-medicamento')}
-            className="cursor-pointer mt-4 md:mt-0 bg-[#037F8C] text-white px-4 py-2 rounded-md hover:bg-[#044D55] transition-colors flex items-center KantumruyMedium"
+            className="med-button med-button--primary mt-4 md:mt-0"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -188,7 +198,7 @@ export default function MeusMedicamentosContent() {
           </p>
           <button
             onClick={() => router.push('/novo-medicamento')}
-            className="cursor-pointer bg-[#037F8C] text-white px-6 py-3 rounded-md hover:bg-[#025e6a] transition-colors flex items-center justify-center w-full KantumruyMedium"
+            className="med-button med-button--primary w-full"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -212,16 +222,17 @@ export default function MeusMedicamentosContent() {
           {/* Filtros */}
           <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
             <h2 className="text-lg font-semibold text-[#037F8C] mb-3">Filtros</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-wrap gap-4">
               {/* Filtro por medicamento */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="w-full sm:w-80 sm:max-w-full">
+                <label htmlFor="filtro-medicamento" className="block text-sm font-medium text-gray-700 mb-1">
                   Medicamento
                 </label>{' '}
                 <select
-                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
-                  // value={filtroMedicamento}
-                  // onChange={(e) => setFiltroMedicamento(e.target.value)}
+                  id="filtro-medicamento"
+                  className="w-full min-h-11 p-2 border border-[#037F8C] rounded-md bg-white text-gray-700 KantumruyMedium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]"
+                  value={medicamentoSelecionado}
+                  onChange={(e) => setFiltroMedicamento(e.target.value)}
                 >
                   <option value="">Todos os medicamentos</option>
                   {medicamentos.map((med) => (
@@ -231,48 +242,66 @@ export default function MeusMedicamentosContent() {
                   ))}
                 </select>
               </div>
-              {/* Filtro por período */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Período
+              <div className="w-full sm:w-60 sm:max-w-full">
+                <label htmlFor="filtro-validade" className="block text-sm font-medium text-gray-700 mb-1">
+                  Validade
                 </label>{' '}
                 <select
-                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
-                  // value={filtroPeriodo}
-                  // onChange={(e) => setFiltroPeriodo(e.target.value)}
+                  id="filtro-validade"
+                  className="w-full min-h-11 p-2 border border-[#037F8C] rounded-md bg-white text-gray-700 KantumruyMedium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]"
+                  value={filtroValidade}
+                  onChange={(e) => setFiltroValidade(e.target.value as FiltroValidade)}
                 >
-                  <option value="todos">Todo o histórico</option>
-                  <option value="hoje">Hoje</option>
-                  <option value="semana">Últimos 7 dias</option>
-                  <option value="mes">Últimos 30 dias</option>
+                  <option value="">Todas as validades</option>
+                  <option value="vencidos">Vencidos</option>
+                  <option value="proximos">Vencem nos próximos 30 dias</option>
+                  <option value="validos">Vencem após 30 dias</option>
+                  <option value="sem-data">Sem data</option>
                 </select>
               </div>
+              {(medicamentoSelecionado || filtroValidade) && (
+                <button
+                  type="button"
+                  className="med-button med-button--ghost self-end"
+                  onClick={() => {
+                    setFiltroMedicamento('');
+                    setFiltroValidade('');
+                  }}
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {medicamentos.map((medicamento) => (
+          {medicamentosFiltrados.length === 0 && (
+            <p role="status" className="py-8 text-center text-gray-600">
+              Nenhum medicamento corresponde aos filtros.
+            </p>
+          )}
+          <div className={`grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] items-start gap-6 ${medicamentosFiltrados.length === 1 ? 'mx-auto max-w-xl' : ''}`}>
+            {medicamentosFiltrados.map(({ medicamento, validade, dias }) => (
               <div
                 key={medicamento.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="min-w-0 bg-white rounded-lg shadow-md overflow-hidden"
               >
                 <div
                   className="h-3 w-full"
                   style={{ backgroundColor: medicamento.cor || '#037F8C' }}
                 ></div>
                 <div className="p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-xl font-semibold text-[#037F8C] mb-1 KantumruySemiBold">
+                  <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
+                    <div className="min-w-0 flex-1 basis-44">
+                      <h3 className="text-xl font-semibold text-[#037F8C] mb-1 KantumruySemiBold break-words">
                         {medicamento.nome}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {medicamento.classificacao}
+                        {formatarClassificacao(medicamento.classificacao)}
                       </p>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex shrink-0 gap-1">
                       <button
                         onClick={() => navegarParaLembrete(medicamento)}
-                        className="text-[#037F8C] bg-[#F2F2F2] p-1.5 rounded-full hover:bg-[#E0E0E0] transition-colors"
+                        className="med-button med-button--ghost px-2"
                         title="Editar medicamento"
                       >
                         <svg
@@ -293,7 +322,7 @@ export default function MeusMedicamentosContent() {
                       <button
                         onClick={() => excluirMedicamento(medicamento.id)}
                         disabled={deleting !== null}
-                        className="text-red-500 bg-[#F2F2F2] p-1.5 rounded-full hover:bg-[#E0E0E0] transition-colors"
+                        className="med-button med-button--danger px-2"
                         title="Excluir medicamento"
                       >
                         <svg
@@ -316,7 +345,7 @@ export default function MeusMedicamentosContent() {
 
                   {/* Ícone de medicamento e informações de dose */}
                   <div className="flex items-center mb-4">
-                    <div className="flex justify-center items-center w-12 h-12 bg-[#f0f9fa] rounded-full mr-3">
+                    <div className="flex shrink-0 justify-center items-center w-10 h-10 bg-[#f0f9fa] rounded-full mr-3">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-7 w-7 text-[#037F8C]"
@@ -336,7 +365,7 @@ export default function MeusMedicamentosContent() {
                       <p className="text-xs text-gray-500 KantumruyRegular">
                         Dose diária
                       </p>
-                      <p className="font-medium KantumruyMedium text-[#037F8C]">
+                      <p className="text-sm text-gray-700 KantumruyRegular">
                         {medicamento.quantidadeDiaria}x ao dia •{' '}
                         {medicamento.quantidadeDose || 'Não especificado'}
                       </p>
@@ -344,27 +373,27 @@ export default function MeusMedicamentosContent() {
                   </div>
 
                   {/* Informações sobre quantidade e duração */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 KantumruyRegular">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div className="flex flex-col gap-1 bg-gray-50 px-3 py-2 rounded-lg">
+                      <dt className="text-xs text-gray-600 KantumruyRegular">
                         Quantidade na caixa
-                      </p>
-                      <p className="font-medium KantumruyMedium">
+                      </dt>
+                      <dd className="text-sm KantumruyMedium">
                         {medicamento.quantidadeCaixa} {medicamento.unidadeMedida}
-                      </p>
+                      </dd>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-500 KantumruyRegular">
+                    <div className="flex flex-col gap-1 bg-gray-50 px-3 py-2 rounded-lg">
+                      <dt className="text-xs text-gray-600 KantumruyRegular">
                         Duração do tratamento
-                      </p>
-                      <p className="font-medium KantumruyMedium">
+                      </dt>
+                      <dd className="text-sm KantumruyMedium">
                         {medicamento.quantidadeDias} dias
-                      </p>
+                      </dd>
                     </div>
-                  </div>
+                  </dl>
 
                   {/* Informações de validade */}
-                  {medicamento.dataValidade && (
+                  {validade && dias !== null && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center">
                         <div>
@@ -372,7 +401,7 @@ export default function MeusMedicamentosContent() {
                             Validade
                           </p>
                           <p className="font-medium KantumruyMedium">
-                            {formatarData(medicamento.dataValidade)}
+                            {validade.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                           </p>
                         </div>
                         <div className="text-right">
@@ -381,12 +410,12 @@ export default function MeusMedicamentosContent() {
                           </p>
                           <p
                             className={`font-medium KantumruyMedium ${
-                              calcularDiasRestantes(medicamento.dataValidade) < 30
+                              dias <= 30
                                 ? 'text-red-500'
                                 : 'text-green-500'
                             }`}
                           >
-                            {calcularDiasRestantes(medicamento.dataValidade)} dias
+                            {Math.max(0, dias)} dias
                           </p>
                         </div>
                       </div>
@@ -419,7 +448,7 @@ export default function MeusMedicamentosContent() {
                   <div className="mt-4 pt-4 border-t border-gray-100 flex justify-center">
                     <button
                       onClick={() => navegarParaLembrete(medicamento)}
-                      className="text-[#037F8C] text-sm font-medium hover:text-[#025e6a] flex items-center KantumruyMedium"
+                      className="med-button med-button--primary w-full"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

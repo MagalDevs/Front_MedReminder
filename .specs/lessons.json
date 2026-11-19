@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 3,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "weak_test::prove metadata allowlists with a one field browser edit and an exact sparse payload",
+      "text": "Prove metadata allowlists with a one-field browser edit and an exact sparse payload.",
+      "signal": "weak_test",
+      "scope": "frontend-edits",
+      "status": "candidate",
+      "features": [
+        "web-ux-consistency"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C23 (frontend-edits)"
+      ],
+      "created": "2026-11-15T16:22:34Z",
+      "last_seen": "2026-11-15T16:22:34Z"
+    },
+    {
+      "id": "L-002",
+      "key": "weak_test::exercise every form stage at required viewport sizes and effective text zoom including native control bounds",
+      "text": "Exercise every form stage at required viewport sizes and effective text zoom, including native control bounds.",
+      "signal": "weak_test",
+      "scope": "frontend-forms",
+      "status": "candidate",
+      "features": [
+        "web-ux-consistency"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C78/C79 (frontend-forms)"
+      ],
+      "created": "2026-11-15T16:22:37Z",
+      "last_seen": "2026-11-15T16:22:37Z"
+    }
+  ]
+}

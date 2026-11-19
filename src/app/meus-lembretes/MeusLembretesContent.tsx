@@ -6,6 +6,7 @@ import { apiRequest } from '../utils/api';
 import { LembreteContext } from '../contexts/lembreteContext';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
+import { filtroDePeriodo, type Periodo } from '../utils/date-filters';
 
 type Medicamento = {
   id: number;
@@ -25,7 +26,7 @@ type Medicamento = {
   usuarioId: number;
 };
 
-export default function MeusLembretesContent() {
+export default function MeusLembretesContent({ medicamentoId, nomeMedicamento }: { medicamentoId?: string; nomeMedicamento?: string } = {}) {
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,9 +37,9 @@ export default function MeusLembretesContent() {
   const mutation = useRef<AbortController | null>(null);
   const token = typeof window === 'undefined' ? null : localStorage.getItem('access_token');
   const confirmedIds = confirmedSnapshot.token === token ? confirmedSnapshot.ids : new Set<number>();
-  const [filtroMedicamento, setFiltroMedicamento] = useState('');
+  const [medicamentoSelecionado, setFiltroMedicamento] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState('');
-  const [filtroPeriodo, setFiltroPeriodo] = useState('hoje');
+  const [filtroPeriodo, setFiltroPeriodo] = useState<Periodo>(medicamentoId || nomeMedicamento ? 'todos' : 'hoje');
   const router = useRouter();
   const lembreteContext = useContext(LembreteContext);
   const getLembretes = lembreteContext?.getLembretes;
@@ -129,49 +130,27 @@ export default function MeusLembretesContent() {
     }
   };
 
-  const lembreteFiltrados = lembretes.filter((lembrete) => {
-    if (
-      filtroMedicamento &&
-      lembrete.remedioId &&
-      lembrete.remedioId.toString() !== filtroMedicamento
-    ) {
-      return false;
-    }
-    if (filtroStatus && lembrete.tomado.toString() !== filtroStatus) {
-      return false;
-    }
-
-    const dataLembrete = new Date(lembrete.data_dose);
-    const hoje = new Date();
-
-    switch (filtroPeriodo) {
-      case 'hoje':
-        return dataLembrete.toDateString() === hoje.toDateString();
-      case 'semana':
-        const semanaAtras = new Date();
-        semanaAtras.setDate(hoje.getDate() - 7);
-        return dataLembrete >= semanaAtras;
-      case 'mes':
-        const mesAtras = new Date();
-        mesAtras.setDate(hoje.getDate() - 30);
-        return dataLembrete >= mesAtras;
-      default:
-        return true;
-    }
-  });
+  const filtroInicial = medicamentos.find((med) =>
+    medicamentoId ? String(med.id) === medicamentoId : med.nome === nomeMedicamento,
+  )?.id.toString() ?? '';
+  const filtroMedicamento = medicamentoSelecionado ?? filtroInicial;
+  const periodoSelecionado = filtroDePeriodo(filtroPeriodo, new Date(), 'lembretes');
+  const lembreteFiltrados = lembretes.filter((lembrete) =>
+    (!filtroMedicamento || String(lembrete.remedioId ?? lembrete.remedio.id) === filtroMedicamento) &&
+    (!filtroStatus || String(lembrete.tomado) === filtroStatus) &&
+    periodoSelecionado(lembrete.data_dose),
+  );
 
   return (
-    <div className="flex-1 p-6 bg-[#e8e6e6]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
-            Meus lembretes
-          </h1>
-          <p className="text-gray-600 KantumruyRegular">
-            Visualize seus lembretes
-          </p>
-        </div>
-      </div>
+    <>
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold text-[#037F8C] KantumruySemiBold mb-2">
+          Meus lembretes
+        </h1>
+        <p className="text-gray-600 KantumruyRegular">
+          Visualize seus lembretes
+        </p>
+      </header>
 
       {confirmationError && <RequestFeedback context="Ao confirmar dose" message={confirmationError} />}
       {confirmationStatus && <RequestFeedback kind="success" message={confirmationStatus} />}
@@ -217,18 +196,19 @@ export default function MeusLembretesContent() {
       ) : (
         <>
           {/* Filtros */}
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="@container mb-6 rounded-lg bg-white p-4 shadow-sm">
             <h2 className="text-lg font-semibold text-[#037F8C] mb-3">
               Filtros
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid max-w-[39rem] grid-cols-1 gap-4 @min-[24rem]:grid-cols-[10rem_11rem] @min-[39rem]:grid-cols-[16rem_10rem_11rem]">
               {/* Filtro por medicamento */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="min-w-0 @min-[24rem]:col-span-2 @min-[24rem]:max-w-64 @min-[39rem]:col-span-1">
+                <label htmlFor="filtro-medicamento" className="mb-2 block text-sm font-medium text-gray-700">
                   Medicamento
                 </label>
                 <select
-                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
+                  id="filtro-medicamento"
+                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white text-gray-700 KantumruyMedium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]"
                   value={filtroMedicamento}
                   onChange={(e) => setFiltroMedicamento(e.target.value)}
                 >
@@ -243,11 +223,12 @@ export default function MeusLembretesContent() {
 
               {/* Filtro por status */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="filtro-status" className="mb-2 block text-sm font-medium text-gray-700">
                   Status
                 </label>
                 <select
-                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
+                  id="filtro-status"
+                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white text-gray-700 KantumruyMedium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]"
                   value={filtroStatus}
                   onChange={(e) => setFiltroStatus(e.target.value)}
                 >
@@ -259,18 +240,19 @@ export default function MeusLembretesContent() {
 
               {/* Filtro por período */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="filtro-periodo" className="mb-2 block text-sm font-medium text-gray-700">
                   Período
                 </label>
                 <select
-                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
+                  id="filtro-periodo"
+                  className="w-full p-2 border border-[#037F8C] rounded-md bg-white text-gray-700 KantumruyMedium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]"
                   value={filtroPeriodo}
-                  onChange={(e) => setFiltroPeriodo(e.target.value)}
+                  onChange={(e) => setFiltroPeriodo(e.target.value as Periodo)}
                 >
                   <option value="hoje">Hoje</option>
                   <option value="semana">Últimos 7 dias</option>
                   <option value="mes">Últimos 30 dias</option>
-                  <option value="todos">Todo o histórico</option>
+                  <option value="todos">Todos os dias</option>
                 </select>
               </div>
             </div>
@@ -283,9 +265,9 @@ export default function MeusLembretesContent() {
                 key={lembrete.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
               >
-                <div className="flex items-center p-4">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-3 p-4 @min-[32rem]:grid-cols-[auto_minmax(0,1fr)_auto]">
                   {/* Checkbox e status */}
-                  <div className="flex items-center mr-4">
+                  <div className="flex items-center">
                     {lembrete.tomado === true ? (
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg
@@ -324,9 +306,9 @@ export default function MeusLembretesContent() {
                   </div>
 
                   {/* Informações do medicamento */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center mb-1">
-                      <h3 className="text-lg font-semibold text-[#037F8C] KantumruySemiBold mr-2">
+                  <div className="min-w-0">
+                    <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <h3 className="text-lg font-semibold wrap-anywhere text-[#037F8C] KantumruySemiBold">
                         {lembrete.remedio.nome}
                       </h3>
                       <span
@@ -339,7 +321,7 @@ export default function MeusLembretesContent() {
                         {lembrete.tomado === true ? 'Tomado' : 'Pendente'}
                       </span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600 space-x-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                       <span>{formatarData(lembrete.data_dose)}</span>
                       <span>{lembrete.remedio.quantidadeDose}</span>
                     </div>
@@ -348,7 +330,7 @@ export default function MeusLembretesContent() {
                   {/* Botão marcar como tomado */}
                   {lembrete.tomado === false &&
                     new Date(lembrete.data_dose) <= new Date() && (
-                      <div className="ml-4">
+                      <div className="col-span-2 @min-[32rem]:col-span-1">
                         <button
                           onClick={() => marcarComoTomado(lembrete.id)}
                           disabled={savingId !== null}
@@ -376,6 +358,6 @@ export default function MeusLembretesContent() {
           )}
         </>
       )}
-    </div>
+    </>
   );
 }

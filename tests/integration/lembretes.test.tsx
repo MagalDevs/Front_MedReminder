@@ -437,9 +437,29 @@ describe("IT-07 TEST-01 TEST-02: lista, filtros e marcar como tomado", () => {
 
     expect(visiveis()).toEqual(["dose-1", "dose-2", "dose-3", "dose-4"]);
 
-    // Período "Todo o histórico" inclui o dia anterior.
+    // Período "Todos os dias" inclui o dia anterior.
     await userEvent.setup().selectOptions(combo(2), "todos");
     expect(visiveis()).toEqual(["dose-1", "dose-2", "dose-3", "dose-4", "dose-5"]);
+  });
+
+  it('corta os últimos 7 dias à meia-noite local e mantém as doses futuras acessíveis', async () => {
+    useFixedDate();
+    const doses = [
+      "2026-10-29T02:59:59.999Z",
+      "2026-10-29T03:00:00Z",
+      "2026-11-05T02:59:59.999Z",
+      "2026-11-05T03:00:00Z",
+    ].map((data_dose, index) => makeDose({ id: index + 1, remedioId: 1, nome: "Alfa", data_dose, tomado: false }));
+    installApi(doses);
+    renderLista();
+    await esperarLista();
+    const user = userEvent.setup();
+
+    expect(visiveis()).toEqual(["dose-3"]);
+    await user.selectOptions(combo(2), "semana");
+    expect(visiveis()).toEqual(["dose-2", "dose-3"]);
+    await user.selectOptions(combo(2), "todos");
+    expect(visiveis()).toEqual(["dose-1", "dose-2", "dose-3", "dose-4"]);
   });
 
   it("IT-07 TEST-01: filtro de medicamento mantém só as doses do medicamento escolhido", async () => {
