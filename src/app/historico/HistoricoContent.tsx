@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiRequest, ApiError } from '../utils/api';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
+import { filtroDePeriodo, type Periodo } from '../utils/date-filters';
 
 type RegistroHistorico = {
   id: string;
@@ -40,7 +41,7 @@ export default function HistoricoContent() {
   const error = failure.identity === identity && failure.token === token ? failure.message : '';
   const [filtroMedicamento, setFiltroMedicamento] = useState<string>('');
   const [filtroStatus, setFiltroStatus] = useState<string>('');
-  const [filtroPeriodo, setFiltroPeriodo] = useState<string>('todos');
+  const [filtroPeriodo, setFiltroPeriodo] = useState<Periodo>('todos');
 
   useEffect(() => {
     let active = true;
@@ -86,46 +87,12 @@ export default function HistoricoContent() {
     return () => { active = false; controller.abort(); };
   }, [authLoading, identity, token]);
 
-  // Filtrar registros com base nos filtros selecionados
-  const registrosFiltrados = registros.filter((registro) => {
-    // Filtro por medicamento
-    if (filtroMedicamento && registro.medicamentoId !== filtroMedicamento) {
-      return false;
-    }
-
-    // Filtro por status
-    if (filtroStatus && registro.status !== filtroStatus) {
-      return false;
-    }
-
-    // Filtro por período
-    if (filtroPeriodo !== 'todos') {
-      const dataRegistro = new Date(registro.dataHora);
-      const dataAtual = new Date();
-
-      switch (filtroPeriodo) {
-        case 'hoje':
-          const hoje = new Date();
-          return (
-            dataRegistro.getDate() === hoje.getDate() &&
-            dataRegistro.getMonth() === hoje.getMonth() &&
-            dataRegistro.getFullYear() === hoje.getFullYear()
-          );
-
-        case 'semana':
-          const umaSemanaAtras = new Date();
-          umaSemanaAtras.setDate(umaSemanaAtras.getDate() - 7);
-          return dataRegistro >= umaSemanaAtras && dataRegistro <= dataAtual;
-
-        case 'mes':
-          const umMesAtras = new Date();
-          umMesAtras.setMonth(umMesAtras.getMonth() - 1);
-          return dataRegistro >= umMesAtras && dataRegistro <= dataAtual;
-      }
-    }
-
-    return true;
-  });
+  const periodoSelecionado = filtroDePeriodo(filtroPeriodo, new Date(), 'historico');
+  const registrosFiltrados = registros.filter((registro) =>
+    (!filtroMedicamento || registro.medicamentoId === filtroMedicamento) &&
+    (!filtroStatus || registro.status === filtroStatus) &&
+    periodoSelecionado(registro.dataHora),
+  );
 
   // Agrupar registros por data
   const registrosAgrupados = registrosFiltrados.reduce(
@@ -233,7 +200,7 @@ export default function HistoricoContent() {
             <select aria-label="Período"
               className="w-full p-2 border border-[#037F8C] rounded-md bg-white outline-none text-gray-700 KantumruyMedium"
               value={filtroPeriodo}
-              onChange={(e) => setFiltroPeriodo(e.target.value)}
+              onChange={(e) => setFiltroPeriodo(e.target.value as Periodo)}
             >
               <option value="todos">Todo o histórico</option>
               <option value="hoje">Hoje</option>

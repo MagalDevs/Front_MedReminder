@@ -420,6 +420,35 @@ function respostaTratamento(call: ApiCall, id = 777): Reply {
 
 const URL_NOVO_TRATAMENTO = "/novo-medicamento?medicamento=FUNED%20LORATADINA";
 
+test("Cadastro permite selecionar medicamento e cor pelo teclado", async ({ page, api }) => {
+  usarListaVazia(api);
+  await seedSession(page);
+  await page.goto("/novo-medicamento");
+
+  const busca = page.getByRole("textbox", { name: "Buscar medicamento" });
+  const selecao = page.getByRole("status", { name: "Medicamento selecionado" });
+  await expect(selecao).toBeEmpty();
+  await busca.fill("funed lor");
+  const resultado = page.getByRole("button", { name: /^FUNED LORATADINA/ });
+  await expect(resultado).toBeVisible();
+  await busca.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(resultado).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(selecao).toHaveText("Selecionado: FUNED LORATADINA");
+  await expect(busca).toBeFocused();
+
+  const cores = page.getByRole("group", { name: "Cor identificadora" });
+  const vermelho = cores.getByRole("radio", { name: "Vermelho", exact: true });
+  const azul = cores.getByRole("radio", { name: "Azul", exact: true });
+  await expect(vermelho).toBeChecked();
+  await vermelho.press("ArrowRight");
+  await expect(vermelho).not.toBeChecked();
+  await expect(azul).toBeChecked();
+  await expect(azul).toBeFocused();
+  await expect(azul.locator("..").locator("span[aria-hidden]")).toHaveCSS("outline-width", "2px");
+});
+
 test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e atualiza os lembretes", async ({
   page,
   api,
@@ -571,9 +600,10 @@ test("FN-04 TEST-03 lembretes: filtros de período, status e medicamento mostram
   await page.goto("/meus-lembretes");
 
   const titulos = page.locator("h3").filter({ hasText: "Teste" });
-  const medicamento = page.locator("select").nth(0);
-  const status = page.locator("select").nth(1);
-  const periodo = page.locator("select").nth(2);
+  const medicamento = page.getByRole("combobox", { name: "Medicamento", exact: true });
+  const status = page.getByRole("combobox", { name: "Status", exact: true });
+  const periodo = page.getByRole("combobox", { name: "Período", exact: true });
+  await expect(page.getByRole("link", { name: "Meus lembretes", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(titulos).toHaveCount(4); // "Hoje": 101, 102, 103, 104
 
   // Status.
@@ -601,6 +631,30 @@ test("FN-04 TEST-03 lembretes: filtros de período, status e medicamento mostram
 
   // Filtros são locais: nenhuma consulta nova além das de carregamento (somente GET).
   expect(api.requests.every((call) => call.method === "GET")).toBe(true);
+});
+
+test("medicamentos: filtra por validade e abre os lembretes pelo ID", async ({ page, api }) => {
+  const antigo = remedio(21, "Mesmo nome", { dataValidade: "2026-11-03" });
+  const atual = remedio(22, "Mesmo nome", { dataValidade: "2026-12-04" });
+  usarAgenda(api, {
+    remedios: [antigo, atual],
+    doses: [
+      dose(211, antigo, "2026-11-04T09:00:00-03:00", false),
+      dose(221, atual, "2026-11-05T09:00:00-03:00", false),
+    ],
+  });
+  await seedSession(page);
+  await page.goto("/meus-medicamentos");
+  await expect(page.getByRole("heading", { name: "Mesmo nome" })).toHaveCount(2);
+
+  await page.getByRole("combobox", { name: "Validade" }).selectOption("proximos");
+  await expect(page.getByRole("heading", { name: "Mesmo nome" })).toHaveCount(1);
+  await page.getByRole("button", { name: "Ver horários das doses" }).click();
+  await expect(page).toHaveURL(/\/meus-lembretes\?medicamentoId=22$/);
+  await expect(page.getByRole("combobox", { name: "Medicamento", exact: true })).toHaveValue("22");
+  await expect(page.getByRole("heading", { name: "Mesmo nome" })).toHaveCount(1);
+  await expect(page.getByText("05/11/2026", { exact: true })).toBeVisible();
+  await expect(page.getByText("04/11/2026", { exact: true })).toHaveCount(0);
 });
 
 test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o estado após a nova consulta", async ({
@@ -648,6 +702,35 @@ test("FN-04 TEST-03 marcar dose como tomada envia PUT {tomado:true} e reflete o 
 function cartaoDeMedicamento(page: Page, nome: string) {
   return page.locator("div.p-5", { has: page.getByRole("heading", { name: nome }) });
 }
+
+test("o destaque de Meus medicamentos respeita o alinhamento dos links", async ({ page, api }) => {
+  usarAgenda(api, criarAgenda());
+  await seedSession(page);
+  await page.goto("/meus-medicamentos");
+
+  const navegacao = page.getByRole("navigation", { name: "Navegação principal" });
+  const ativo = navegacao.getByRole("link", { name: "Meus medicamentos" });
+  await expect(ativo).toHaveAttribute("aria-current", "page");
+  await page.evaluate(() => document.fonts.ready);
+
+  const links = await navegacao.getByRole("link").evaluateAll(elements => elements.map(link => {
+    const range = document.createRange();
+    range.selectNodeContents(link);
+    const texto = range.getBoundingClientRect();
+    const destaque = link.getBoundingClientRect();
+    return {
+      eixo: texto.left,
+      esquerda: texto.left - destaque.left,
+      direita: destaque.right - texto.right,
+      linhas: range.getClientRects().length,
+    };
+  }));
+  const [medicamentos] = links;
+  expect(medicamentos.linhas).toBe(1);
+  expect(medicamentos.direita).toBeGreaterThanOrEqual(8);
+  expect(Math.abs(medicamentos.esquerda - medicamentos.direita)).toBeLessThanOrEqual(8);
+  expect(links.every(link => link.eixo === medicamentos.eixo)).toBe(true);
+});
 
 test("FN-05 TEST-03 lista medicamentos e exclui com confirmação; cancelar não envia DELETE", async ({
   page,
@@ -1047,6 +1130,50 @@ const VIEWPORTS = [
 ] as const;
 
 for (const viewport of VIEWPORTS) {
+  test(`Configurações mantém cabeçalho e formulário utilizáveis em ${viewport.width}px`, async ({ page, api }) => {
+    await page.setViewportSize(viewport);
+    api.on("GET", "/usuario/me", { json: { data: { ...USER, cep: "12345-678" } } });
+    await seedSession(page);
+    await page.goto("/Configuracoes");
+
+    const fecharMenu = page.getByRole("button", { name: "Fechar menu" });
+    if (viewport.width < 768) {
+      await expect(page.getByRole("dialog", { name: "Menu principal" })).toBeVisible();
+      await fecharMenu.press("Escape");
+    } else {
+      await fecharMenu.click();
+    }
+    await expect(page.getByRole("button", { name: "Abrir menu" })).toBeFocused();
+    await expect.poll(() => page.locator("#menu-lateral").evaluate(menu => menu.getBoundingClientRect().width)).toBe(0);
+
+    const main = page.getByRole("main");
+    const nome = main.getByRole("textbox", { name: "Nome" });
+    const email = main.getByRole("textbox", { name: "E-mail" });
+    const cep = main.getByRole("textbox", { name: "CEP" });
+    await expect(cep).toHaveValue("12345-678");
+    await expect(cep).toHaveAccessibleDescription(/Digite apenas números/);
+    await expect(main.getByLabel("Senha Atual", { exact: true })).toHaveAttribute("type", "password");
+
+    const recuo = viewport.width < 640 ? 16 : 40;
+    await expect.poll(() => main.evaluate((element, recuoEsperado) => {
+      const titulo = element.querySelector("h1")!.getBoundingClientRect();
+      const [dados, foto] = [...element.querySelectorAll("section")].map(card => card.getBoundingClientRect());
+      const menu = document.querySelector('button[aria-expanded="false"][aria-controls="menu-lateral"]')!.getBoundingClientRect();
+      return {
+        alinhado: Math.abs(titulo.left - dados.left) < 1 && Math.abs(titulo.left - recuoEsperado) < 1,
+        tituloLivre: titulo.top >= menu.bottom + 12,
+        fotoAoLado: Math.abs(dados.top - foto.top) < 1,
+        semRolagemHorizontal: document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      };
+    }, recuo)).toEqual({ alinhado: true, tituloLivre: true, fotoAoLado: viewport.width === 1440, semRolagemHorizontal: true });
+
+    await nome.press("Tab");
+    await expect(email).toBeFocused();
+    await expect(email).toHaveCSS("outline-width", "2px");
+  });
+}
+
+for (const viewport of VIEWPORTS) {
   test.describe(`FN-06 TEST-03 snapshots ${viewport.width}px`, () => {
     test.use({ viewport });
 
@@ -1074,10 +1201,51 @@ for (const viewport of VIEWPORTS) {
       await capturar(page, "home-busca");
     });
 
-    test(`FN-06 TEST-03 novo-medicamento ${viewport.width}px`, async ({ page }) => {
+    test(`FN-06 TEST-03 novo-medicamento ${viewport.width}px`, async ({ page, api }) => {
+      usarListaVazia(api);
+      await seedSession(page);
       await page.goto(URL_NOVO_TRATAMENTO);
+      await page.getByRole("button", { name: "Fechar menu" }).click();
+      await expect(page.getByRole("button", { name: "Abrir menu" })).toBeFocused();
+      await expect(page.locator("#menu-lateral")).toHaveCSS("width", "0px");
       await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
       await expect(page.getByPlaceholder("Dipirona")).toHaveValue("FUNED LORATADINA");
+
+      const main = page.getByRole("main");
+      await expect.poll(() => main.evaluate((element) => {
+        const caixa = (selector: string) => element.querySelector(selector)!.getBoundingClientRect();
+        const titulo = caixa("h1");
+        const menu = document.querySelector('button[aria-label="Abrir menu"]')!.getBoundingClientRect();
+        const busca = caixa('input[placeholder="Buscar medicamento..."]');
+        const bordaBusca = element.querySelector('input[placeholder="Buscar medicamento..."]')!.parentElement!.getBoundingClientRect();
+        const selecao = caixa('[role="status"][aria-label="Medicamento selecionado"] p');
+        const cartao = element.querySelector("h2")!.parentElement!.getBoundingClientRect();
+        const nome = caixa('input[placeholder="Dipirona"]');
+        const tipo = caixa('input[placeholder="Analgésico"]');
+        const validade = caixa('input[aria-label="Data de validade"]');
+        const intervalo = caixa('input[placeholder="6 (horas)"]');
+        const duracao = element.querySelector('input[placeholder="7"]')!.parentElement!.getBoundingClientRect();
+        return {
+          tituloLivre: titulo.top >= menu.bottom + 12,
+          tituloAlinhado: titulo.left === nome.left,
+          gridAlinhado: tipo.left === validade.left && tipo.left === intervalo.left && nome.left === duracao.left,
+          duasColunas: nome.left < tipo.left,
+          intervaloCompacto: intervalo.width <= 128,
+          confirmacaoAlinhada: selecao.left === bordaBusca.left && selecao.right === bordaBusca.right
+            && selecao.left === cartao.left && selecao.right === cartao.right,
+          semRolagemHorizontal: busca.right <= bordaBusca.right
+            && document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+        };
+      })).toEqual({
+        tituloLivre: true,
+        tituloAlinhado: true,
+        gridAlinhado: true,
+        duasColunas: viewport.width >= 768,
+        intervaloCompacto: true,
+        confirmacaoAlinhada: true,
+        semRolagemHorizontal: true,
+      });
+
       const datas = page.locator('input[type="date"]');
       const hora = page.locator('input[type="time"]');
       await expect(datas).toHaveCount(2);
@@ -1096,7 +1264,39 @@ for (const viewport of VIEWPORTS) {
       await seedSession(page);
       await page.goto("/meus-lembretes");
       await expect(page.locator("h3").filter({ hasText: "Teste" })).toHaveCount(4);
-      await capturar(page, "meus-lembretes");
+
+      const desktop = viewport.width >= 768;
+      if (desktop) await capturar(page, "meus-lembretes");
+
+      const fecharMenu = page.getByRole("button", { name: "Fechar menu" });
+      if (desktop) {
+        await fecharMenu.click();
+      } else {
+        await fecharMenu.press("Escape");
+      }
+      const abrirMenu = page.getByRole("button", { name: "Abrir menu" });
+      await expect(abrirMenu).toBeFocused();
+      await expect.poll(() => page.getByRole("main").evaluate(main => {
+        const titulo = main.querySelector("h1")!.getBoundingClientRect();
+        const filtros = main.querySelector("h2")!.parentElement!.getBoundingClientRect();
+        const menu = document.querySelector('button[aria-controls="menu-lateral"]')!.getBoundingClientRect();
+        return {
+          recuoAlinhado: Math.abs(titulo.left - filtros.left) < 1,
+          livreDoBotao: titulo.top >= menu.bottom + 12,
+          semRolagemHorizontal: document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+        };
+      })).toEqual({ recuoAlinhado: true, livreDoBotao: true, semRolagemHorizontal: true });
+
+      if (desktop) {
+        const medicamento = page.getByRole("combobox", { name: "Medicamento" });
+        const status = page.getByRole("combobox", { name: "Status" });
+        const periodo = page.getByRole("combobox", { name: "Período" });
+        await expect.poll(() => medicamento.evaluate(select => select.getBoundingClientRect().width)).toBeLessThanOrEqual(256);
+        await expect.poll(() => status.evaluate(select => select.getBoundingClientRect().width)).toBeLessThanOrEqual(160);
+        await expect.poll(() => periodo.evaluate(select => select.getBoundingClientRect().width)).toBeLessThanOrEqual(176);
+      } else {
+        await capturar(page, "meus-lembretes");
+      }
     });
   });
 }
@@ -1121,7 +1321,8 @@ alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET'
     : { json: { data: [{ ...row, tomado: confirmed }] } });
   api.on('PUT', '/dose/901', () => { confirmed = true; return { json: { data: { id: 901, tomado: true } } }; });
   await page.goto('/historico');
-  await expect(page.getByRole('heading', { name: 'Alarme Sintético' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nenhum histórico encontrado' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Alarme Sintético' })).toHaveCount(0);
   await page.clock.runFor(2000);
   await expect(page.getByText('Hora do Medicamento!')).toBeVisible();
   await page.getByRole('button', { name: 'Medicamento Tomado' }).click();

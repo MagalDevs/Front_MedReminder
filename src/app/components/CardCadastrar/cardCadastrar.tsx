@@ -1,25 +1,25 @@
 "use client";
 
-import { useState, useLayoutEffect, useContext, useRef } from "react";
+import { useState, useLayoutEffect, useContext, useRef, useId } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiRequest } from "../../utils/api";
 import { RequestContractError, requestErrorMessage } from "../../utils/request-errors";
 import RequestFeedback from "../RequestFeedback/RequestFeedback";
 import { LembreteContext } from "@/app/contexts/lembreteContext";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
-const Cores = [
-  "#FF0000",
-  "#4B00FF",
-  "#FFFF00",
-  "#FFA500",
-  "#00CFFF",
-  "#FFFFFF",
-  "#00FF7F",
-  "#006400",
-  "#000000",
-  "#DA70D6",
-];
+const nomeCores: Record<string, string> = {
+  "#FF0000": "Vermelho",
+  "#4B00FF": "Azul",
+  "#FFFF00": "Amarelo",
+  "#FFA500": "Laranja",
+  "#00CFFF": "Azul claro",
+  "#FFFFFF": "Branco",
+  "#00FF7F": "Verde claro",
+  "#006400": "Verde escuro",
+  "#000000": "Preto",
+  "#DA70D6": "Orquídea",
+};
 
 type Props = {
   medicamentoSelecionado: {
@@ -91,6 +91,8 @@ function calcularDoses(inicio: Date, intervaloHoras: number, duracaoDias: number
 export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
+  const intervaloId = useId();
+  const grupoCoresId = useId();
   const scope = JSON.stringify([isAuthenticated, user?.id, user?.email]);
   const intencao = useRef<{ identidade: string; chave: string } | null>(null);
   const enviando = useRef(false);
@@ -230,19 +232,6 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
     setRequestFailure(null);
     setRefreshResult(null);
     try {
-      const nomeCores: Record<string, string> = {
-        "#FF0000": "Vermelho",
-        "#4B00FF": "Azul",
-        "#FFFF00": "Amarelo",
-        "#FFA500": "Laranja",
-        "#00CFFF": "Azul claro",
-        "#FFFFFF": "Branco",
-        "#00FF7F": "Verde claro",
-        "#006400": "Verde escuro",
-        "#000000": "Preto",
-        "#DA70D6": "Orquídea",
-      };
-
       const dadosMedicamento = {
         nome: nome,
         quantidadeCaixa: parseInt(quantidade) || 0,
@@ -330,7 +319,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
   };
 
   return (
-    <div className="bg-[#D9D9D9] p-6 rounded-xl shadow-lg m-6 ">
+    <div className="bg-[#D9D9D9] p-4 sm:p-6 rounded-xl shadow-lg">
       {requestError && <RequestFeedback context={refreshStatus ? 'Ao atualizar lembretes após salvar tratamento' : 'Ao salvar tratamento'} message={requestError} />}
       {refreshStatus && <RequestFeedback kind="success" message={refreshStatus} />}
       <h2 className="text-xl font-bold text-[#0B6E71] mb-5">
@@ -363,7 +352,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="text-m text-[#0B6E71] mb-1 block">
             Quantidade da caixa
@@ -411,25 +400,33 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           />
           {erros.validade && <p className="text-red-500 text-sm mt-1">{erros.validade}</p>}
         </div>
-        <div>
-          <label className="text-m text-[#0B6E71] mb-1 block">
-            Cor identificadora
-          </label>
-          <div className="flex flex-wrap gap-2 my-2">
-            {Cores.map((cor, i) => (
-              <div
-                key={i}
-                className={`w-5 h-8 rounded cursor-pointer border hover:border-black ${
-                  corSelecionada === cor
-                    ? "border-black border-2"
-                    : "border-transparent"
-                }`}
-                style={{ backgroundColor: cor }}
-                onClick={() => setCorSelecionada(cor)}
-              ></div>
+        <fieldset className="min-w-0 md:col-span-2">
+          <legend className="text-m text-[#0B6E71] mb-1">Cor identificadora</legend>
+          <div className="flex flex-wrap gap-2 rounded border border-[#037F8C] bg-white p-2">
+            {Object.entries(nomeCores).map(([cor, nomeCor]) => (
+              <label key={cor} className="relative cursor-pointer">
+                <input
+                  className="peer sr-only"
+                  type="radio"
+                  name={grupoCoresId}
+                  value={cor}
+                  checked={corSelecionada === cor}
+                  onChange={() => setCorSelecionada(cor)}
+                />
+                <span className="sr-only">{nomeCor}</span>
+                <span
+                  aria-hidden="true"
+                  className="grid size-11 place-items-center rounded border border-gray-600 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#0B6E71]"
+                  style={{ backgroundColor: cor }}
+                >
+                  {corSelecionada === cor && (
+                    <Check className="size-5 rounded bg-white p-0.5 text-black" />
+                  )}
+                </span>
+              </label>
             ))}
           </div>
-        </div>
+        </fieldset>
       </div>
 
       <h2 className="text-xl font-bold text-[#0B6E71] mb-5 mt-5">
@@ -453,7 +450,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
             Primeira dose
           </label>
           {horarios.map((h, index) => (
-            <div key={index} className="flex gap-2 items-center mb-2">
+            <div key={index} className="flex flex-wrap gap-2 items-center mb-2">
               <input
                 type="date"
                 value={h.data}
@@ -482,7 +479,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="text-m text-[#0B6E71] mb-1 block">Dosagem</label>
           {/* Input de dosagem com select de unidade */}
@@ -518,21 +515,26 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
           )}
         </div>
         <div>
-          <label className="text-m text-[#0B6E71] mb-1 block">
+          <label htmlFor={intervaloId} className="text-m text-[#0B6E71] mb-1 block">
             De quantas em quantas horas?
           </label>
           <input
+            id={intervaloId}
             type="number"
             min="0"
             placeholder="6 (horas)"
             value={intervalo}
             onChange={(e) => setIntervalo(e.target.value)}
-            className={`w-full p-2 border rounded bg-white outline-none text-gray-700 KantumruyMedium mb-1 ${
+            aria-invalid={Boolean(erros.intervalo)}
+            aria-describedby={erros.intervalo ? `${intervaloId}-erro` : undefined}
+            className={`w-full max-w-32 p-2 border rounded bg-white text-gray-700 KantumruyMedium mb-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B6E71] ${
               erros.intervalo ? "border-red-500" : "border-[#037F8C]"
             }`}
           />
           {erros.intervalo && (
-            <p className="text-red-500 text-sm mb-2">{erros.intervalo}</p>
+            <p id={`${intervaloId}-erro`} className="text-red-500 text-sm mb-2">
+              {erros.intervalo}
+            </p>
           )}
         </div>
         <div>

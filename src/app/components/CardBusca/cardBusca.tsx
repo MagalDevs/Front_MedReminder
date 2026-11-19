@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { ApiError, parseRetryAfter } from '../../utils/api';
 import { RequestContractError, requestErrorMessage } from '../../utils/request-errors';
@@ -23,6 +23,7 @@ export default function BuscaMedicamento({
   const [searchTerm, setSearchTerm] = useState(medicamentoInicial || '');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selection, setSelection] = useState<{
@@ -109,7 +110,7 @@ export default function BuscaMedicamento({
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const handleResultClick = (med: Medicamento) => {
+  const handleResultClick = (med: Medicamento, resultButton: HTMLButtonElement) => {
     // Atualiza o campo de busca com novo valor
     const nextTerm = med.NOME_PRODUTO.trim();
     setSelectedResult(nextTerm === searchTerm ? { medicamento: med, catalog: medicamentos } : null);
@@ -120,6 +121,9 @@ export default function BuscaMedicamento({
 
     // Fecha o dropdown e atualiza os resultados
     setIsDropdownOpen(false);
+    if (document.activeElement === resultButton) {
+      searchInputRef.current?.focus();
+    }
 
     // Garante que sempre chamamos o onSelect com o novo medicamento
     // Usando setTimeout para garantir que a execução ocorra após o ciclo de renderização atual
@@ -129,83 +133,88 @@ export default function BuscaMedicamento({
   };
 
   return (
-    <div className="m-6">
-      <div className="relative">
-        <div className="bg-white rounded-lg p-4 flex items-center border border-[#037F8C]">
-          <span className="text-gray-500 mr-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-              />
-            </svg>
-          </span>{' '}
-          <input
-            type="text"
-            className="flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
-            placeholder="Buscar medicamento..."
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            onClick={() => setIsDropdownOpen(true)}
-          />
-          <button className="text-[#037F8C] ml-2" onClick={toggleDropdown}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d={
-                  isDropdownOpen
-                    ? 'M4.5 15.75l7.5-7.5 7.5 7.5'
-                    : 'M19.5 8.25l-7.5 7.5-7.5-7.5'
-                }
-              />
-            </svg>
-          </button>
-        </div>
+    <div className="relative">
+      <div className="bg-white rounded-lg p-4 flex items-center border border-[#037F8C] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#0B6E71]">
+        <span className="text-gray-500 mr-2" aria-hidden="true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+            />
+          </svg>
+        </span>{' '}
+        <input
+          ref={searchInputRef}
+          type="text"
+          aria-label="Buscar medicamento"
+          className="min-w-0 flex-1 outline-none text-gray-700 KantumruyMedium bg-white"
+          placeholder="Buscar medicamento..."
+          value={searchTerm}
+          onChange={(e) => handleSearch(e.target.value)}
+          onClick={() => setIsDropdownOpen(true)}
+        />
+        <button
+          type="button"
+          aria-label={isDropdownOpen ? 'Ocultar resultados da busca' : 'Mostrar resultados da busca'}
+          aria-expanded={isDropdownOpen}
+          className="text-[#037F8C] ml-2"
+          onClick={toggleDropdown}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d={
+                isDropdownOpen
+                  ? 'M4.5 15.75l7.5-7.5 7.5 7.5'
+                  : 'M19.5 8.25l-7.5 7.5-7.5-7.5'
+              }
+            />
+          </svg>
+        </button>
       </div>
 
-      {selectedMedicamento && !isDropdownOpen && (
-        <div className="mt-2 px-4 py-2 bg-[#F2F2F2] rounded-md">
-          <span className="text-sm text-[#037F8C] font-semibold">
+      <div role="status" aria-label="Medicamento selecionado">
+        {selectedMedicamento && !isDropdownOpen && (
+          <p className="mt-2 px-4 py-1 bg-[#F2F2F2] rounded-md text-sm text-[#0B6E71] font-semibold [overflow-wrap:anywhere]">
             Selecionado: {selectedMedicamento.NOME_PRODUTO}
-          </span>
-        </div>
-      )}
+          </p>
+        )}
+      </div>
 
       {loading && <p role="status">Carregando catálogo...</p>}
       {error && <RequestFeedback context="Ao carregar catálogo de medicamentos" message={error} />}
       {isDropdownOpen && !loading && !error && (
-        <div className="absolute mt-1 min-w-7/10 max-w-9/10 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
+        <div className="absolute inset-x-0 top-full mt-1 rounded-md bg-white border border-[#037F8C] shadow-lg z-10">
           <div className="py-2 flex flex-col gap-1">
             {searchTerm && filtered.length > 0 ? (
               filtered.slice(0, 10).map((med, idx) => (
-                <div
+                <button
                   key={`${med.NOME_PRODUTO}-${idx}`}
-                  className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#F2F2F2] cursor-pointer KantumruyRegular"
-                  onClick={() => handleResultClick(med)}
+                  type="button"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#F2F2F2] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#0B6E71] cursor-pointer KantumruyRegular [overflow-wrap:anywhere]"
+                  onClick={(event) => handleResultClick(med, event.currentTarget)}
                 >
-                  <div>
-                    <span className="font-semibold text-[#037F8C]">
-                      {med.NOME_PRODUTO.trim()}
-                    </span>
-                    <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
-                  </div>
-                </div>
+                  <span className="font-semibold text-[#037F8C]">
+                    {med.NOME_PRODUTO.trim()}
+                  </span>
+                  <span className="ml-2 text-gray-500">{med.DESCRIÇÃO}</span>
+                </button>
               ))
             ) : (
               <div className="px-4 py-2 text-sm text-gray-500 KantumruyRegular">

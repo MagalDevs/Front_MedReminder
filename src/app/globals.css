@@ -68,3 +68,39 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+@layer components {
+  .med-button {
+    @apply inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-sm;
+    font-family: 'KantumruyProMedium', sans-serif;
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .med-button:focus-visible {
+    outline: 2px solid #044d55;
+    outline-offset: 3px;
+  }
+
+  .med-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .med-button--primary {
+    @apply bg-[#037F8C] text-white hover:bg-[#044D55];
+  }
+
+  .med-button--ghost {
+    @apply text-[#044D55] hover:bg-[#E0E0E0];
+  }
+
+  .med-button--danger {
+    @apply text-red-700 hover:bg-red-50;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .med-button {
+      transition: none;
+    }
+  }
+}
