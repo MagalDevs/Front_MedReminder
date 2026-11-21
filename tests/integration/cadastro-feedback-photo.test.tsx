@@ -4,6 +4,7 @@ import ConfiguracoesContent from '@/app/Configuracoes/ConfiguracoesContent';
 
 const state = vi.hoisted(() => ({
   user: { id: 7, nome: 'Ana', email: 'ana@example.test' },
+  updateProfilePhoto: vi.fn(),
 }));
 vi.mock('@/app/contexts/AuthContext', () => ({ useAuth: () => state }));
 const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jHYQAAAAASUVORK5CYII=';
@@ -28,6 +29,7 @@ function upload(
 
 describe('NET-11 upload configurado', () => {
   beforeEach(() => {
+    state.updateProfilePhoto.mockClear();
     localStorage.setItem('access_token', 'a');
     vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:3001');
   });
@@ -83,6 +85,7 @@ describe('NET-11 upload configurado', () => {
     );
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByAltText('Foto de perfil atual')).toHaveAttribute('src', png);
+    expect(state.updateProfilePhoto).toHaveBeenCalledExactlyOnceWith(png, 'a');
   });
 
   it('exibe a foto armazenada ao abrir Configurações', async () => {

@@ -25,6 +25,7 @@ interface User {
   cuidador?: boolean;
   dataNasc?: Date;
   senha?: string;
+  foto?: string | null;
 }
 
 interface AuthContextType {
@@ -34,7 +35,14 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   getUserDisplayName: () => string;
+  profilePhoto: string | null;
+  updateProfilePhoto: (photo: string, session: string | null) => void;
 }
+
+const photoOrNull = (photo: User['foto']) =>
+  typeof photo === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(photo)
+    ? photo
+    : null;
 
 // Utility function to format user name consistently
 const formatUserDisplayName = (user: User | null): string => {
@@ -56,6 +64,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [restorationError, setRestorationError] = useState<string | null>(null);
@@ -65,12 +74,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Each explicit login/logout revokes outstanding restoration responses.
   const generation = useRef(0);
   const activeSession = useRef<string | null>(null);
+  const rememberProfile = useCallback((profile?: User) => {
+    const { foto, ...account } = profile ?? {};
+    setUser(profile ? account : null);
+    setProfilePhoto(photoOrNull(foto));
+    if (profile) localStorage.setItem('user_data', JSON.stringify(account));
+    else localStorage.removeItem('user_data');
+  }, []);
+
+  const updateProfilePhoto = useCallback((photo: string, session: string | null) => {
+    if (session && activeSession.current === session && getSessionIdentity() === session) {
+      setProfilePhoto(photoOrNull(photo));
+    }
+  }, []);
 
   useEffect(() => {
     const invalidate = () => {
       generation.current++;
       activeSession.current = null;
       setUser(null);
+      setProfilePhoto(null);
       setIsAuthenticated(false);
       setLoading(false);
       setRestorationError(null);
@@ -105,13 +128,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         if (!current()) return;
         if (!response?.data || !response.data.id) throw new RequestContractError();
-        setUser(response.data);
-        localStorage.setItem('user_data', JSON.stringify(response.data));
+        rememberProfile(response.data);
         setIsAuthenticated(true);
       } catch (error) {
         if (!current()) return;
         setIsAuthenticated(false);
         setUser(null);
+        setProfilePhoto(null);
         // Network/server failures leave the credential available for a later attempt.
         if (error instanceof ApiError && error.status === 401) {
           activeSession.current = null;
@@ -127,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
     void checkAuth();
     return () => { active = false; controller.abort(); };
-  }, []);
+  }, [rememberProfile]);
 
   const login = useCallback((token: string, userData?: User) => {
     generation.current++;
@@ -135,12 +158,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearNavigationFeedback();
     activeSession.current = getSessionIdentity(token);
     saveAccessToken(token);
-    if (userData) localStorage.setItem('user_data', JSON.stringify(userData));
-    else localStorage.removeItem('user_data');
+    rememberProfile(userData);
     setIsAuthenticated(true);
-    setUser(userData || null);
     setLoading(false);
-  }, []);
+  }, [rememberProfile]);
 
   const logout = useCallback(() => {
     generation.current++;
@@ -155,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearNavigationFeedback();
     setIsAuthenticated(false);
     setUser(null);
+    setProfilePhoto(null);
     setLoading(false);
     routerRef.current.push('/login');
   }, []);
@@ -170,6 +192,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         loading,
         getUserDisplayName,
+        profilePhoto,
+        updateProfilePhoto,
       }}
     >
       {restorationError && <RequestFeedback context="Restaurar sessão" message={restorationError} />}
