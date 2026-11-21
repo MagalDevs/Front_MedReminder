@@ -412,7 +412,7 @@ function respostaTratamento(call: ApiCall, id = 777): Reply {
 
 const URL_NOVO_TRATAMENTO = "/novo-medicamento?medicamento=FUNED%20LORATADINA";
 
-test("Configurações converte uma foto grande em Base64 e a exibe após recarregar", async ({ page, api }) => {
+test("Configurações converte a foto em Base64 e atualiza os avatares da conta", async ({ page, api }) => {
   await seedSession(page);
   let foto: string | undefined;
   api.on("GET", "/usuario/me", () => ({ json: { data: { ...USER, foto } } }));
@@ -422,6 +422,9 @@ test("Configurações converte uma foto grande em Base64 e a exibe após recarre
   });
   await page.goto("/Configuracoes");
   await expect(page.getByRole("button", { name: "Alterar Foto" })).toBeEnabled();
+  const sidebar = page.getByRole("complementary", { name: "Menu principal" });
+  const sidebarPhoto = sidebar.locator('img[alt=""]');
+  await expect(sidebarPhoto).toHaveCount(0);
   const bytes = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 384;
@@ -453,8 +456,15 @@ test("Configurações converte uma foto grande em Base64 e a exibe após recarre
   expect(Buffer.from(foto!.split(",")[1], "base64").length).toBeLessThanOrEqual(64 * 1024);
   await expect.poll(() => avatar.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(256);
   expect(api.calls("POST", "/usuario/foto")).toHaveLength(1);
+  await expect(sidebarPhoto).toHaveAttribute("src", foto!);
   await page.reload();
   await expect(avatar).toHaveAttribute("src", foto!);
+  await expect(sidebarPhoto).toHaveAttribute("src", foto!);
+  const browserCache = await page.evaluate(() => localStorage.getItem("user_data"));
+  expect(JSON.parse(browserCache ?? "{}")).not.toHaveProperty("foto");
+  await sidebar.getByRole("link", { name: "MedReminder Logo" }).click();
+  const userMenu = page.getByRole("button", { name: "User menu" });
+  await expect(userMenu.locator('img[alt=""]')).toHaveAttribute("src", foto!);
 });
 
 test("Cadastro permite selecionar medicamento e cor pelo teclado", async ({ page, api }) => {

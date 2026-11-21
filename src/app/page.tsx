@@ -2,6 +2,7 @@
 
 import SearchBar from './components/SearchBar/SearchBar';
 import Logo from './components/Logo/Logo';
+import ProfileAvatar from './components/ProfileAvatar';
 import Link from 'next/link';
 import { User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
@@ -12,7 +13,7 @@ const clientHydrated = () => true;
 const serverHydrated = () => false;
 
 export default function Home() {
-  const { isAuthenticated, logout, getUserDisplayName } = useAuth();
+  const { isAuthenticated, logout, getUserDisplayName, profilePhoto } = useAuth();
   const mounted = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -72,9 +73,7 @@ export default function Home() {
                   : 'hover:shadow-md'
               }`}
             >
-              <div className="bg-white text-[#4A90A4] rounded-full p-1">
-                <User size={16} />
-              </div>
+              <ProfileAvatar photo={profilePhoto} size={24} className="bg-white text-[#4A90A4]" />
               <span className="hidden sm:inline">
                 Olá, {getUserDisplayName()}
               </span>

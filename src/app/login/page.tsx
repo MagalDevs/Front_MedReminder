@@ -73,6 +73,7 @@ export default function Login() {
                 cuidador: boolean;
                 dataNasc: Date;
                 senha: string;
+                foto?: string | null;
               };
             }>('usuario/me', {
               method: 'GET',

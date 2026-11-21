@@ -33,11 +33,14 @@ type Usuario = {
 };
 
 export default function ConfiguracoesContent() {
-  const { user } = useAuth();
-  return <ConfiguracoesForm key={String(user?.id ?? user?.email ?? '')} user={user} />;
+  const { user, updateProfilePhoto } = useAuth();
+  return <ConfiguracoesForm key={String(user?.id ?? user?.email ?? '')} user={user} onPhotoSaved={updateProfilePhoto} />;
 }
 
-function ConfiguracoesForm({ user }: { user: Usuario | null }) {
+function ConfiguracoesForm({ user, onPhotoSaved }: {
+  user: Usuario | null;
+  onPhotoSaved: (photo: string, session: string | null) => void;
+}) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [cep, setCep] = useState('');
@@ -250,6 +253,7 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
       });
       if (!current()) return;
       setFoto(image);
+      onPhotoSaved(image, originalSession);
       setPhotoMessage('Foto atualizada com sucesso!');
     } catch (error) {
       if (current()) setPhotoError(requestErrorMessage(error));

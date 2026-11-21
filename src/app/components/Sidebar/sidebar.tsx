@@ -4,7 +4,8 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
+import ProfileAvatar from '../ProfileAvatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSidebar } from '../../contexts/SidebarContext';
 
@@ -24,7 +25,7 @@ const subscribeToViewport = (onChange: () => void) => {
 };
 
 export default function Sidebar() {
-  const { logout, getUserDisplayName } = useAuth();
+  const { logout, getUserDisplayName, profilePhoto } = useAuth();
   const { isOpen, toggleSidebar, setIsOpen } = useSidebar();
   const isMobile = useSyncExternalStore(subscribeToViewport, mobileSnapshot, serverSnapshot);
   const panelRef = useRef<HTMLElement>(null);
@@ -164,9 +165,7 @@ export default function Sidebar() {
           {/* Conta */}
           <div className="mx-4 mt-6 flex flex-col gap-2 border-t border-[#B8C5C6] pt-4 pb-8">
             <div className="flex items-center gap-2">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#037F8C]">
-                <User size={16} aria-hidden="true" className="text-white" />
-              </div>
+              <ProfileAvatar photo={profilePhoto} size={32} className="bg-[#037F8C] text-white" />
               <p className="min-w-0 break-words KantumruySemiBold text-[#044D55]">
                 {getUserDisplayName()}
               </p>
