@@ -447,6 +447,9 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", call => respostaTratamento(call, 777));
+  api.on("GET", "/remedio/me", () => ({
+    json: { data: api.calls("POST", "/tratamento").length ? [remedio(777, "FUNED LORATADINA")] : [] },
+  }));
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
@@ -455,6 +458,8 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
 
   await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
+  await expect(page).toHaveURL(/\/meus-medicamentos$/);
+  await expect(page.getByRole("heading", { name: "FUNED LORATADINA" })).toBeVisible();
 
   // Medicamento: método, URL, headers e body.
   const [criarRemedio] = api.calls("POST", "/tratamento");
@@ -486,15 +491,10 @@ test("FN-03 TEST-03 cadastro de tratamento válido envia os payloads esperados e
       "2026-11-05T03:00:00.000Z",
   ]);
 
-  // Perfil confirmado, tratamento atômico e depois recarga; formulário limpo.
-  await expect.poll(() => api.sequence()).toEqual([
-    "GET /usuario/me", // restored profile
-    "GET /dose/me", // provider no carregamento
-    "POST /tratamento",
-    "GET /dose/me", // atualização após gravar
-  ]);
-  await expect(page.getByPlaceholder("Dipirona")).toHaveValue("");
-  await expect(page.getByRole("button", { name: "Salvar lembrete" })).toBeEnabled();
+  // Depois de gravar, a lista e os lembretes podem carregar em paralelo.
+  await expect.poll(() => api.sequence().slice(3).sort()).toEqual(["GET /dose/me", "GET /remedio/me"]);
+  expect(api.sequence().slice(0, 3)).toEqual(["GET /usuario/me", "GET /dose/me", "POST /tratamento"]);
+  await expect(page.getByRole("button", { name: "Salvar lembrete" })).toHaveCount(0);
 });
 
 test("FN-03 TEST-03 formulário vazio mostra as validações e não envia mutação", async ({
@@ -531,6 +531,7 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
 }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", call => respostaTratamento(call, 778));
+  api.on("GET", "/remedio/me", { json: { data: [remedio(778, "FUNED LORATADINA")] } });
   await seedSession(page);
 
   await page.goto(URL_NOVO_TRATAMENTO);
@@ -538,6 +539,7 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
   await preencherTratamento(page, { horaInicial: "22:00", intervalo: "8", duracao: "1" });
   await page.getByRole("button", { name: "Salvar lembrete" }).click();
   await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
+  await expect(page).toHaveURL(/\/meus-medicamentos$/);
 
   // Correto: 04/11 22:00, 05/11 06:00 e 05/11 14:00 locais.
   const [criarDoses] = api.calls("POST", "/tratamento");
@@ -551,6 +553,7 @@ test("FN-03 TEST-03 BEAPI-08 doses a partir das 21h locais mantêm o dia local c
 test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ page, api }) => {
   usarListaVazia(api);
   api.on("POST", "/tratamento", (call, index) => index === 0 ? { abort: true } : respostaTratamento(call, 779));
+  api.on("GET", "/remedio/me", { json: { data: [remedio(779, "FUNED LORATADINA")] } });
   await seedSession(page);
   await page.goto(URL_NOVO_TRATAMENTO);
   await expect(page.getByText("Selecionado: FUNED LORATADINA")).toBeVisible();
@@ -561,6 +564,7 @@ test("FN-03 FN-08 BEAPI-07 retry manual preserva chave e conteudo", async ({ pag
   await expect(salvar).toBeEnabled();
   await salvar.click();
   await expect(page.getByText("Lembrete e doses salvos com sucesso!")).toBeVisible();
+  await expect(page).toHaveURL(/\/meus-medicamentos$/);
   const calls = api.calls("POST", "/tratamento");
   expect(calls).toHaveLength(2);
   expect(calls[0].headers["idempotency-key"]).toMatch(/^[a-zA-Z0-9._:-]{1,128}$/);
@@ -1303,6 +1307,34 @@ const alarmTest = test.extend({
   },
 });
 
+alarmTest("lembrete abre um diálogo responsivo e Escape dispensa apenas o aviso", async ({ page, api }, testInfo) => {
+  await seedSession(page);
+  const name = "Medicamento sintético com nome longo para teste";
+  const rem = remedio(91, name, { cor: "Vermelho", quantidadeDose: "3 mg" });
+  const row = dose(901, rem, new Date(NOW.getTime() + 2000).toISOString(), false);
+  api.on("GET", "/dose/me", { json: { data: [row] } });
+  await page.goto("/historico");
+  await expect(page.getByRole("heading", { name: "Nenhum histórico encontrado" })).toBeVisible();
+  await page.clock.runFor(2000);
+
+  const modal = page.getByRole("dialog", { name: "Hora do Medicamento!" });
+  await expect(modal.getByText(name)).toBeVisible();
+  await expect(modal.getByText("3 mg")).toBeVisible();
+  await expect(modal.getByRole("button", { name: "Fechar lembrete" })).toBeFocused();
+  expect(await modal.evaluate((element) => element.matches(":modal"))).toBe(true);
+  await expect(modal).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await page.screenshot({ path: testInfo.outputPath("lembrete-desktop.png") });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(modal).toBeInViewport({ ratio: 1 });
+  await expect(modal.getByRole("button", { name: "Medicamento Tomado" })).toBeInViewport({ ratio: 1 });
+  await page.screenshot({ path: testInfo.outputPath("lembrete-mobile.png") });
+
+  await page.keyboard.press("Escape");
+  await expect(modal).toHaveCount(0);
+  expect(api.calls("PUT", "/dose/901")).toHaveLength(0);
+});
+
 alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET', async ({ page, api }, testInfo) => {
   await seedSession(page);
   const rem = remedio(91, 'Alarme Sintético', { cor: 'Branco' });
@@ -1319,7 +1351,7 @@ alarmTest('ERR-01 NET-18 alarme mostra refresh503 visível e repete somente GET'
   await page.clock.runFor(2000);
   await expect(page.getByText('Hora do Medicamento!')).toBeVisible();
   await page.getByRole('button', { name: 'Medicamento Tomado' }).click();
-  const surface = page.locator('.fixed.inset-0').filter({ hasText: 'Hora do Medicamento!' });
+  const surface = page.getByRole('dialog', { name: 'Hora do Medicamento!' });
   const alert = surface.getByRole('alert');
   await expect(alert).toBeVisible();
   await expect(alert).toHaveText('Ao carregar lembretes: O serviço está temporariamente indisponível. Tente novamente mais tarde.');

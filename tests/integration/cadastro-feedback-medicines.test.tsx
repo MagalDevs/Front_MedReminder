@@ -5,7 +5,7 @@ import {
   screen,
   within,
 } from '@testing-library/react';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MeusMedicamentosContent from '@/app/meus-medicamentos/MeusMedicamentosContent';
 import ToastProvider from '@/app/components/Feedback/ToastProvider';
 
@@ -30,21 +30,6 @@ async function mountList() {
 }
 
 describe('NET-13 NET-14 medicamentos', () => {
-  beforeAll(() => {
-    // JSDOM doesn't implement the HTML dialog methods. Focus and Escape
-    // are tested in Chromium.
-    const prototype = HTMLDialogElement.prototype;
-    if (typeof prototype.showModal === 'function') return;
-    Object.defineProperties(prototype, {
-      showModal: { configurable: true, value(this: HTMLDialogElement) { this.open = true; } },
-      close: { configurable: true, value(this: HTMLDialogElement) { this.open = false; } },
-    });
-    return () => {
-      Reflect.deleteProperty(prototype, 'showModal');
-      Reflect.deleteProperty(prototype, 'close');
-    };
-  });
-
   beforeEach(() => {
     localStorage.setItem('access_token', 'a');
   });

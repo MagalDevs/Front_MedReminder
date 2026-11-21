@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar/sidebar';
 import BuscaMedicamento from '../components/CardBusca/cardBusca';
 import ConfigurarLembrete from '../components/CardCadastrar/cardCadastrar';
@@ -13,6 +13,7 @@ type Medicamento = {
 };
 
 function NovoMedicamentoContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const medicamentoInicial = searchParams.get('medicamento');
   const [previousQuery, setPreviousQuery] = useState(medicamentoInicial);
@@ -50,6 +51,7 @@ function NovoMedicamentoContent() {
       />
       {medicamentoSelecionado && (
         <ConfigurarLembrete
+          onSaved={() => router.replace('/meus-medicamentos')}
           medicamentoSelecionado={{
             nome: medicamentoSelecionado.NOME_PRODUTO,
             tipo: medicamentoSelecionado.DESCRIÇÃO,

@@ -1,6 +1,21 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach, beforeEach, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, vi } from "vitest";
+
+beforeAll(() => {
+  if (typeof HTMLDialogElement === "undefined") return;
+  const prototype = HTMLDialogElement.prototype;
+  if (typeof prototype.showModal === "function") return;
+  // Focus and top-layer behavior are covered in the browser suite.
+  Object.defineProperties(prototype, {
+    showModal: { configurable: true, value(this: HTMLDialogElement) { this.open = true; } },
+    close: { configurable: true, value(this: HTMLDialogElement) { this.open = false; } },
+  });
+  return () => {
+    Reflect.deleteProperty(prototype, "showModal");
+    Reflect.deleteProperty(prototype, "close");
+  };
+});
 
 // Isolamento entre testes (test-plan.md, "Fixtures and Isolation"):
 // nenhuma chamada de rede real, nenhum estado de storage, timer ou mock

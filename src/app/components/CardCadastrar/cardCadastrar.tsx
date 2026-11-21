@@ -28,6 +28,7 @@ type Props = {
     nome: string;
     tipo: string;
   };
+  onSaved?: () => void;
 };
 
 type Horario = {
@@ -90,7 +91,7 @@ function calcularDoses(inicio: Date, intervaloHoras: number, duracaoDias: number
   return doses;
 }
 
-export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
+export default function ConfigurarLembrete({ medicamentoSelecionado, onSaved }: Props) {
   const context = useContext(LembreteContext);
   const { user, isAuthenticated } = useAuth();
   const showToast = useToast();
@@ -277,6 +278,7 @@ export default function ConfigurarLembrete({ medicamentoSelecionado }: Props) {
       intencao.current = null;
       showToast("success", "Lembrete e doses salvos com sucesso!");
       limparFormulario();
+      onSaved?.();
       try {
         const refreshed = await context?.getLembretes();
         if (currentSession() && refreshed === false) setRefreshResult({ scope, message: 'Tratamento salvo. A atualização dos lembretes não foi concluída.' });
