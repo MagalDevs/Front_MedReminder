@@ -412,6 +412,51 @@ function respostaTratamento(call: ApiCall, id = 777): Reply {
 
 const URL_NOVO_TRATAMENTO = "/novo-medicamento?medicamento=FUNED%20LORATADINA";
 
+test("Configurações converte uma foto grande em Base64 e a exibe após recarregar", async ({ page, api }) => {
+  await seedSession(page);
+  let foto: string | undefined;
+  api.on("GET", "/usuario/me", () => ({ json: { data: { ...USER, foto } } }));
+  api.on("POST", "/usuario/foto", ({ body }) => {
+    foto = (body as { foto: string }).foto;
+    return { status: 204 };
+  });
+  await page.goto("/Configuracoes");
+  await expect(page.getByRole("button", { name: "Alterar Foto" })).toBeEnabled();
+  const bytes = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 384;
+    canvas.height = 384;
+    const graphics = canvas.getContext("2d")!;
+    const pixels = graphics.createImageData(canvas.width, canvas.height);
+    let seed = 123456;
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      pixels.data[i] = seed >>> 24;
+      pixels.data[i + 1] = seed >>> 16;
+      pixels.data[i + 2] = seed >>> 8;
+      pixels.data[i + 3] = 255;
+    }
+    graphics.putImageData(pixels, 0, 0);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  const input = Buffer.from(bytes, "base64");
+  expect(input.length).toBeGreaterThan(64 * 1024);
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "perfil.png",
+    mimeType: "image/png",
+    buffer: input,
+  });
+
+  await expect(page.getByText("Foto atualizada com sucesso!")).toBeVisible();
+  const avatar = page.getByRole("img", { name: "Foto de perfil atual" });
+  await expect(avatar).toHaveAttribute("src", /^data:image\/jpeg;base64,/);
+  expect(Buffer.from(foto!.split(",")[1], "base64").length).toBeLessThanOrEqual(64 * 1024);
+  await expect.poll(() => avatar.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(256);
+  expect(api.calls("POST", "/usuario/foto")).toHaveLength(1);
+  await page.reload();
+  await expect(avatar).toHaveAttribute("src", foto!);
+});
+
 test("Cadastro permite selecionar medicamento e cor pelo teclado", async ({ page, api }) => {
   usarListaVazia(api);
   await seedSession(page);
