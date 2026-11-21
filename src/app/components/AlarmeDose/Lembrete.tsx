@@ -1,8 +1,8 @@
 import { LembreteContext } from '@/app/contexts/lembreteContext';
 import { apiRequest } from '@/app/utils/api';
 import { getSessionIdentity } from '@/app/utils/session-storage';
-import { Bell, Pill, X } from 'lucide-react';
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { Bell, X } from 'lucide-react';
+import { useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import RequestFeedback from '../RequestFeedback/RequestFeedback';
 import { requestErrorMessage } from '@/app/utils/request-errors';
 
@@ -17,6 +17,9 @@ interface alarmeDoseProps {
 
 const Lembrete = (props: alarmeDoseProps) => {
   const { dataHora, medicamentoNome, quantidadeDose, cor, id, onClose } = props;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const medicineId = useId();
   const context = useContext(LembreteContext);
   const session = getSessionIdentity();
   const key = `${session}:${id}`;
@@ -30,6 +33,11 @@ const Lembrete = (props: alarmeDoseProps) => {
   const refreshFailed = refreshFailedKey === key;
   const attempt = useRef<AbortController | null>(null);
   useEffect(() => () => { attempt.current?.abort(); attempt.current = null; }, [id, session]);
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
+  }, []);
 
   const dataDose = new Date(dataHora);
 
@@ -55,7 +63,7 @@ const Lembrete = (props: alarmeDoseProps) => {
     'Orquídea': '#DA70D6'
   };
 
-  const corFundo = hashCor[cor] || '#FF0000';
+  const corMedicamento = Object.hasOwn(hashCor, cor) ? hashCor[cor] : '#037F8C';
 
   const medicamentoTomado = async () => {
     if (attempt.current) return;
@@ -92,84 +100,63 @@ const Lembrete = (props: alarmeDoseProps) => {
   }
 
   return (
-    <div
-      className={`fixed inset-0 flex flex-col items-center justify-center z-50 min-h-screen w-full ${
-        cor === 'Branco' ? 'text-gray-800' : 'text-white'
-      }`}
-      style={{
-        backgroundColor: corFundo,
-        ...(cor === 'Branco' && {
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 0 12px rgba(0,0,0,0.08)',
-        }),
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      aria-describedby={medicineId}
+      className="KantumruyRegular fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl bg-white p-5 text-[#182C2D] shadow-[0_16px_48px_#102D3040] backdrop:bg-[#0D2123]/50 sm:p-6"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
       }}
     >
-      <div className="w-full max-w-md px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className={`p-3 rounded-full ${
-              cor === 'Branco' ? 'bg-gray-200' : 'bg-white/20'
-            }`}>
-              <Bell className="w-8 h-8 animate-bounce" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
-            </div>
-            <h2 className="text-2xl font-bold">Hora do Medicamento!</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className={`p-2 h-auto rounded-full transition ${
-              cor === 'Branco' ? 'bg-gray-100 hover:bg-gray-300' : 'bg-white/20 hover:bg-white/30'
-            }`}
-          >
-            <X className="w-6 h-6" color={cor === 'Branco' ? '#4B5563' : '#FFFFFF'} />
-          </button>
+      <header className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E8F6F4] text-[#044D55]">
+          <Bell className="size-5" aria-hidden="true" />
+        </span>
+        <h2 id={titleId} className="KantumruySemiBold flex-1 text-lg leading-snug">Hora do Medicamento!</h2>
+        <button
+          type="button"
+          aria-label="Fechar lembrete"
+          className="med-button med-button--ghost shrink-0 px-2"
+          onClick={onClose}
+        >
+          <X className="size-5" aria-hidden="true" />
+        </button>
+      </header>
+
+      <p id={medicineId} className="KantumruyBold mt-5 flex items-baseline gap-2.5 text-2xl leading-tight [overflow-wrap:anywhere]">
+        <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full border border-[#182C2D]/30" style={{ backgroundColor: corMedicamento }} />
+        {medicamentoNome}
+      </p>
+      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl bg-[#EDF3F3] p-4 sm:grid-cols-3">
+        <div>
+          <dt className="text-sm text-[#425858]">Data</dt>
+          <dd className="KantumruySemiBold mt-1 tabular-nums">{dia}/{mes}/{ano}</dd>
         </div>
-
-        <div className="space-y-6 mb-8">
-          <div className="flex items-center gap-4">
-            <Pill className="w-6 h-6" color={cor === 'Branco' ? '#808080' : '#FFFFFF'} />
-            <div>
-              <p className="text-lg opacity-90">Medicamento</p>
-              <p className="text-3xl font-bold">{medicamentoNome}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <p className="text-lg opacity-90">Data</p>
-              <p className="text-2xl font-semibold">{dia}/{mes}/{ano}</p>
-            </div>
-            <div>
-              <p className="text-lg opacity-90">Horário</p>
-              <p className="text-2xl font-semibold">{horario}</p>
-            </div>
-          </div>
-
-          <div
-            className={`rounded-lg p-6 text-center ${
-              cor === 'Branco' ? 'bg-gray-100 shadow-inner' : 'bg-white/20'
-            }`}
-          >
-            <p className="text-lg opacity-90">Dosagem</p>
-            <p className="text-4xl font-bold">{quantidadeDose}</p>
-          </div>
+        <div>
+          <dt className="text-sm text-[#425858]">Horário</dt>
+          <dd className="KantumruySemiBold mt-1 tabular-nums">{horario}</dd>
         </div>
-
+        <div className="col-span-2 sm:col-span-1">
+          <dt className="text-sm text-[#425858]">Dosagem</dt>
+          <dd className="KantumruySemiBold mt-1 tabular-nums [overflow-wrap:anywhere]">{quantidadeDose}</dd>
+        </div>
+      </dl>
+      <div className="mt-5 space-y-3">
         <div ref={context?.setLembretesFeedbackHost} />
         {error && <RequestFeedback context="Ao confirmar dose" message={error} />}
         {refreshFailed && <RequestFeedback kind="success" message="Dose confirmada. A atualização dos lembretes não foi concluída." />}
         <button
+          type="button"
           onClick={medicamentoTomado}
           disabled={saving}
-          className={`w-full transition ${
-            cor === 'Branco'
-              ? 'bg-gray-100 hover:bg-gray-300 text-gray-900'
-              : 'bg-white hover:bg-gray-100 text-black'
-          } font-bold py-4 text-lg rounded-md`}
+          className="med-button med-button--primary min-h-12 w-full bg-[#044D55] text-base hover:bg-[#063B40]"
         >
           {saving ? 'Carregando...' : confirmed ? 'Atualizar lembretes' : 'Medicamento Tomado'}
         </button>
       </div>
-    </div>
+    </dialog>
   )
 }
 
