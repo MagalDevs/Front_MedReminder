@@ -6,6 +6,7 @@ const state = vi.hoisted(() => ({
   user: { id: 7, nome: 'Ana', email: 'ana@example.test' },
 }));
 vi.mock('@/app/contexts/AuthContext', () => ({ useAuth: () => state }));
+const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jHYQAAAAASUVORK5CYII=';
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
@@ -20,7 +21,7 @@ async function mount() {
 }
 function upload(
   input: Element,
-  file = new File(['synthetic'], 'perfil.png', { type: 'image/png' }),
+  file = new File([Uint8Array.from(atob(png.split(',')[1]), c => c.charCodeAt(0))], 'perfil.png', { type: 'image/png' }),
 ) {
   fireEvent.change(input, { target: { files: [file] } });
 }
@@ -62,9 +63,8 @@ describe('NET-11 upload configurado', () => {
       ).toBeEnabled();
       const [url, options] = vi.mocked(fetch).mock.calls[1];
       expect(url).toBe('http://localhost:3001/usuario/foto');
-      expect(options?.body).toBeInstanceOf(FormData);
-      expect((options?.body as FormData).get('foto')).toBeInstanceOf(File);
-      expect(new Headers(options?.headers).get('Content-Type')).toBeNull();
+      expect(options?.body).toBe(JSON.stringify({ foto: png }));
+      expect(new Headers(options?.headers).get('Content-Type')).toBe('application/json');
       expect(new Headers(options?.headers).get('Authorization')).toBe(
         'Bearer a',
       );
@@ -82,7 +82,14 @@ describe('NET-11 upload configurado', () => {
       'Foto atualizada com sucesso!',
     );
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByAltText('Foto de perfil atual')).toBeInTheDocument();
+    expect(screen.getByAltText('Foto de perfil atual')).toHaveAttribute('src', png);
+  });
+
+  it('exibe a foto armazenada ao abrir Configurações', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(json({ data: { ...state.user, foto: png } }));
+    render(<ConfiguracoesContent />);
+    expect(await screen.findByAltText('Foto de perfil atual')).toHaveAttribute('src', png);
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe('http://localhost:3001/usuario/me?foto=1');
   });
 
   it.each(['text/plain', 'oversize'])(
@@ -97,8 +104,8 @@ describe('NET-11 upload configurado', () => {
       upload(input, file);
       expect(await screen.findByRole('alert')).toHaveTextContent(
         mode === 'oversize'
-          ? 'A imagem deve ter no máximo 5MB.'
-          : 'Por favor, selecione apenas arquivos de imagem.',
+          ? 'A imagem deve ter no máximo 5 MB.'
+          : 'Selecione uma imagem JPEG, PNG ou WebP.',
       );
       expect(fetch).toHaveBeenCalledTimes(1);
     },

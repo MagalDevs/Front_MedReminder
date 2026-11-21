@@ -7,6 +7,7 @@ import { apiRequest, ApiError } from '../utils/api';
 import { getAccessToken, getSessionIdentity } from '../utils/session-storage';
 import RequestFeedback from '../components/RequestFeedback/RequestFeedback';
 import { RequestContractError, requestErrorMessage } from '../utils/request-errors';
+import { acceptedProfilePhoto, maxPhotoFileBytes, profilePhotoAccept, profilePhotoToBase64 } from '../utils/profile-photo';
 
 const inputClass = 'block min-h-11 w-full rounded-md border border-[#037F8C] bg-white px-3 py-2 text-gray-700 KantumruyMedium placeholder:text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#044D55]';
 
@@ -26,7 +27,7 @@ type Usuario = {
   cpf?: string;
   cuidador?: boolean;
   dataNasc?: Date;
-  foto?: string;
+  foto?: string | null;
   cep?: string;
   senha?: string;
 };
@@ -75,7 +76,7 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
         const response = await apiRequest<{
           message: string;
           data: Usuario;
-        }>('usuario/me', {
+        }>('usuario/me?foto=1', {
           method: 'GET',
           signal: controller.signal,
         });
@@ -214,45 +215,47 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
   const handlePhotoChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (photoRequest.current) return;
-      setPhotoMessage('');
-      if (file.size > 5 * 1024 * 1024) {
-        setPhotoError('A imagem deve ter no máximo 5MB.');
-        return;
-      }
-      if (!file.type.startsWith('image/')) {
-        setPhotoError('Por favor, selecione apenas arquivos de imagem.');
-        return;
-      }
-      const controller = new AbortController();
-      photoRequest.current = controller;
-      const originalSession = getSessionIdentity();
-      const current = () => !controller.signal.aborted && getSessionIdentity() === originalSession;
-      setPhotoSaving(true);
-      setPhotoError(null);
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file || photoRequest.current) return;
+    setPhotoMessage('');
+    if (file.size > maxPhotoFileBytes) {
+      setPhotoError('A imagem deve ter no máximo 5 MB.');
+      return;
+    }
+    if (!file.size || !acceptedProfilePhoto(file)) {
+      setPhotoError('Selecione uma imagem JPEG, PNG ou WebP.');
+      return;
+    }
+    const controller = new AbortController();
+    photoRequest.current = controller;
+    const originalSession = getSessionIdentity();
+    const current = () => !controller.signal.aborted && getSessionIdentity() === originalSession;
+    setPhotoSaving(true);
+    setPhotoError(null);
+    try {
+      let image: string;
       try {
-        const formData = new FormData();
-        formData.append('foto', file);
-
-        await apiRequest('usuario/foto', { method: 'POST', body: formData, signal: controller.signal });
-        if (!current()) return;
-        const image = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new RequestContractError());
-          reader.onerror = () => reject(new RequestContractError());
-          reader.readAsDataURL(file);
-        });
-        if (!current()) return;
-        setFoto(image);
-        setPhotoMessage('Foto atualizada com sucesso!');
-      } catch (error) {
-        if (current()) setPhotoError(requestErrorMessage(error));
-      } finally {
-        if (photoRequest.current === controller) photoRequest.current = null;
-        if (current()) setPhotoSaving(false);
+        image = await profilePhotoToBase64(file);
+      } catch {
+        if (current()) setPhotoError('Não foi possível abrir a imagem. Selecione outro arquivo.');
+        return;
       }
+      if (!current()) return;
+      await apiRequest('usuario/foto', {
+        method: 'POST',
+        body: JSON.stringify({ foto: image }),
+        signal: controller.signal,
+        expectedStatus: 204,
+      });
+      if (!current()) return;
+      setFoto(image);
+      setPhotoMessage('Foto atualizada com sucesso!');
+    } catch (error) {
+      if (current()) setPhotoError(requestErrorMessage(error));
+    } finally {
+      if (photoRequest.current === controller) photoRequest.current = null;
+      if (current()) setPhotoSaving(false);
     }
   };
 
@@ -461,6 +464,7 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
                   className="w-full h-full object-cover"
                   width={144}
                   height={144}
+                  unoptimized
                 />
               ) : (
                 <span className="text-gray-600 KantumruyMedium">
@@ -478,14 +482,14 @@ function ConfiguracoesForm({ user }: { user: Usuario | null }) {
               {photoSaving ? 'Enviando...' : 'Alterar Foto'}
             </button>
             <p id="perfil-foto-ajuda" className="max-w-xs text-sm text-gray-600 KantumruyRegular">
-              Selecione uma imagem de até 5MB para atualizar sua foto de perfil
+              Selecione uma imagem JPEG, PNG ou WebP de até 5 MB.
             </p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
             onChange={handlePhotoChange}
-            accept="image/*"
+            accept={profilePhotoAccept}
             className="hidden"
           />
         </section>
