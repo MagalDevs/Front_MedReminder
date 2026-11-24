@@ -149,13 +149,13 @@ O arquivo é disponibilizado pelo frontend em `/assets/DADOS_ABERTOS_MEDICAMENTO
 
 ## Integração com a API
 
-A origem da API é resolvida pelo cliente HTTP em `src/app/utils/api.ts`:
+A origem da API é resolvida em `src/app/utils/api-url.ts` e usada por `src/app/utils/api.ts` e pelo servidor Next.js. O ambiente publicado está descrito no [guia de nuvem da Vercel](docs/CLOUD.md).
 
-| Ambiente | Origem padrão sem `NEXT_PUBLIC_API_URL` |
+| Ambiente | Origem da API |
 | --- | --- |
-| Desenvolvimento (`npm run dev`) | `http://localhost:3001` |
-| Produção (`npm run build` e `npm run start`) | `https://medreminder-backend.onrender.com` |
-| Testes | Marcador `.invalid`, sem acesso à produção |
+| Desenvolvimento (`npm run dev`) | `http://localhost:3001` sem configuração explícita |
+| Produção na Vercel | `NEXT_PUBLIC_API_URL=https://medreminder-backend-m1f4.onrender.com` |
+| Testes | Marcador `.invalid` sem configuração explícita |
 
 `NEXT_PUBLIC_API_URL` permite configurar outra origem e tem prioridade em todos
 os ambientes. Em modo `NEXT_PUBLIC_API_ENV=isolated`, essa variável é obrigatória.
@@ -163,12 +163,12 @@ O cliente adiciona o token Bearer às requisições autenticadas e trata respost
 
 | Recurso | Operações utilizadas |
 | --- | --- |
-| Autenticação | `POST /auth/login` |
-| Usuário | `POST /usuario`, `GET /usuario/me`, `PATCH /usuario/me` |
-| Medicamentos | `POST /remedio`, `GET /remedio/me`, `DELETE /remedio/:id` |
-| Doses | `POST /dose/doses`, `GET /dose/me`, `PUT /dose/:id` |
+| Sessão web | `POST /auth/session/login`, `POST /auth/session/refresh` e `POST /auth/session/logout`, via Next.js |
+| Usuário | `POST /usuario`, `GET /usuario/me`, `PATCH /usuario/me` e `POST /usuario/foto` |
+| Medicamentos | `POST /tratamento`, `GET /remedio/me` e `DELETE /remedio/:id` |
+| Doses | `GET /dose/me` e `PUT /dose/:id` |
 
-O token da sessão é armazenado no `localStorage` com a chave `access_token`, e os dados do perfil com a chave `user_data`.
+O token de acesso fica no `localStorage` com a chave `access_token`, e os dados do perfil sem a imagem ficam em `user_data`. O token de renovação fica em cookie `HttpOnly`. A foto fica em memória no frontend e é recarregada da API com o perfil autenticado.
 
 Para substituir a origem local, defina `NEXT_PUBLIC_API_URL` em `.env.development.local`.
 Essa configuração só é carregada em desenvolvimento. Autorize também a origem do
